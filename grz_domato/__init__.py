@@ -63,6 +63,8 @@ class DomatoAdapter(Adapter):
 
     def generate(self, testcase: TestCase, server_map: ServerMap) -> None:
         """Generate a single Domato test case and add it to the testcase."""
+        if self._grammars is None or self._gen is None or self._template is None:
+            raise RuntimeError("DomatoAdapter has not been set up; call setup() first")
         html_grammar, css_grammar, js_grammar = self._grammars
         html = self._gen.generate_new_sample(
             self._template, html_grammar, css_grammar, js_grammar

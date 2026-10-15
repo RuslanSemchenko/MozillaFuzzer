@@ -20,10 +20,7 @@
 from __future__ import print_function
 
 import bisect
-try:
-    from html import escape as _escape
-except ImportError:
-    from cgi import escape as _escape
+from html import escape as _escape
 import os
 import random
 import re
@@ -267,6 +264,17 @@ class Grammar(object):
         num_lines = self._string_to_int(tag['count'])
         return self._generate_code(num_lines)
 
+    @staticmethod
+    def _clone_context(context):
+        """Fast shallow copy of generation context, avoiding copy.deepcopy overhead."""
+        return {
+            'lastvar': context['lastvar'],
+            'lines': list(context['lines']),
+            'variables': {k: list(v) for k, v in context['variables'].items()},
+            'interesting_lines': list(context['interesting_lines']),
+            'force_var_reuse': context['force_var_reuse']
+        }
+
     def _generate_code(self, num_lines, initial_variables=[], last_var=0):
         """Generates a given number of lines of code."""
 
@@ -284,7 +292,7 @@ class Grammar(object):
         self._add_variable('window', 'Window', context)
 
         while len(context['lines']) < num_lines:
-            tmp_context = copy.deepcopy(context)
+            tmp_context = self._clone_context(context)
             try:
                 if (random.random() < self._interesting_line_prob) and (len(tmp_context['interesting_lines']) > 0):
                     tmp_context['force_var_reuse'] = True

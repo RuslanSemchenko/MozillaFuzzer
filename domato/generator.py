@@ -46,28 +46,25 @@ def generate_html_elements(ctx, n):
         ctx['htmlvargen'] += '/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname + ' = document.createElement(\"' + tag + '\"); //' + tagtype + '\n'
 
 
+_ALL_TAG_TYPES = {}
+for tag, tagtype in _HTML_TYPES.items():
+    _ALL_TAG_TYPES[tag] = (tagtype, 'htmlvar', 'htmlvarctr')
+for tag, tagtype in _SVG_TYPES.items():
+    _ALL_TAG_TYPES[tag] = (tagtype, 'svgvar', 'svgvarctr')
+for tag, tagtype in _MATHML_TYPES.items():
+    _ALL_TAG_TYPES[tag] = (tagtype, 'mathmlvar', 'mathmlvarctr')
+
 def add_html_ids(matchobj, ctx):
     tagname = matchobj.group(0)[1:-1]
-    if tagname in _HTML_TYPES:
-        ctx['htmlvarctr'] += 1
-        varname = 'htmlvar%05d' % ctx['htmlvarctr']
-        ctx['htmlvars'].append({'name': varname, 'type': _HTML_TYPES[tagname]})
-        ctx['htmlvargen'] += '/* newvar{' + varname + ':' + _HTML_TYPES[tagname] + '} */ var ' + varname + ' = document.getElementById(\"' + varname + '\"); //' + _HTML_TYPES[tagname] + '\n'
+    tag_info = _ALL_TAG_TYPES.get(tagname)
+    if tag_info is not None:
+        tagtype, prefix, ctr_key = tag_info
+        ctx[ctr_key] += 1
+        varname = '%s%05d' % (prefix, ctx[ctr_key])
+        ctx['htmlvars'].append({'name': varname, 'type': tagtype})
+        ctx['htmlvargen'] += '/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname + ' = document.getElementById(\"' + varname + '\"); //' + tagtype + '\n'
         return matchobj.group(0) + 'id=\"' + varname + '\" '
-    elif tagname in _SVG_TYPES:
-        ctx['svgvarctr'] += 1
-        varname = 'svgvar%05d' % ctx['svgvarctr']
-        ctx['htmlvars'].append({'name': varname, 'type': _SVG_TYPES[tagname]})
-        ctx['htmlvargen'] += '/* newvar{' + varname + ':' + _SVG_TYPES[tagname] + '} */ var ' + varname + ' = document.getElementById(\"' + varname + '\"); //' + _SVG_TYPES[tagname] + '\n'
-        return matchobj.group(0) + 'id=\"' + varname + '\" '
-    elif tagname in _MATHML_TYPES:
-        ctx['mathmlvarctr'] += 1
-        varname = 'mathmlvar%05d' % ctx['mathmlvarctr']
-        ctx['htmlvars'].append({'name': varname, 'type': _MATHML_TYPES[tagname]})
-        ctx['htmlvargen'] += '/* newvar{' + varname + ':' + _MATHML_TYPES[tagname] + '} */ var ' + varname + ' = document.getElementById(\"' + varname + '\"); //' + _MATHML_TYPES[tagname] + '\n'
-        return matchobj.group(0) + 'id=\"' + varname + '\" '
-    else:
-        return matchobj.group(0)
+    return matchobj.group(0)
 
 
 def generate_function_body(jsgrammar, htmlctx, num_lines):
