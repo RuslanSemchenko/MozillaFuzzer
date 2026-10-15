@@ -1,0 +1,716 @@
+!include webgpuhelpers.txt
+
+<GPUShaderModule> = Shader0
+<GPUShaderModule> = Shader1
+<GPUShaderModule> = Shader2
+<GPUShaderModule> = Shader3
+<GPUShaderModule> = Shader4
+<GPUShaderModule> = Shader5
+<GPUShaderModule> = Shader6
+<GPUShaderModule> = Shader7
+<GPUShaderModule> = Shader8
+<GPUShaderModule> = Shader9
+
+<OverridableConstantName> = 1234
+<OverridableConstantName> = o
+<OverridableConstantName> = wgsize
+
+<PredefinedColorSpace> = "srgb"
+<PredefinedColorSpace> = "display-p3"
+
+<GPUBindingType> = "uniform-buffer"
+<GPUBindingType> = "storage-buffer"
+<GPUBindingType> = "readonly-storage-buffer"
+<GPUBindingType> = "sampler"
+<GPUBindingType> = "comparison-sampler"
+<GPUBindingType> = "sampled-texture"
+<GPUBindingType> = "multisampled-texture"
+<GPUBindingType> = "writeonly-storage-texture"
+
+<GPUTextureComponentType> = "float"
+<GPUTextureComponentType> = "sint"
+<GPUTextureComponentType> = "uint"
+<GPUTextureComponentType> = "depth-comparison"
+
+<GPUBlendFactor> = "zero"
+<GPUBlendFactor> = "one"
+<GPUBlendFactor> = "src"
+<GPUBlendFactor> = "one-minus-src"
+<GPUBlendFactor> = "src-alpha"
+<GPUBlendFactor> = "one-minus-src-alpha"
+<GPUBlendFactor> = "dst"
+<GPUBlendFactor> = "one-minus-dst"
+<GPUBlendFactor> = "dst-alpha"
+<GPUBlendFactor> = "one-minus-dst-alpha"
+<GPUBlendFactor> = "src-alpha-saturated"
+<GPUBlendFactor> = "constant"
+<GPUBlendFactor> = "one-minus-constant"
+
+<GPUBlendOperation> = "add"
+<GPUBlendOperation> = "subtract"
+<GPUBlendOperation> = "reverse-subtract"
+<GPUBlendOperation> = "min"
+<GPUBlendOperation> = "max"
+
+<GPUBufferMapState> = "unmapped"
+<GPUBufferMapState> = "pending"
+<GPUBufferMapState> = "mapped"
+
+<GPUBufferBindingType> = "uniform"
+<GPUBufferBindingType> = "storage"
+<GPUBufferBindingType> = "read-only-storage"
+
+<GPUCanvasAlphaMode> = "opaque"
+<GPUCanvasAlphaMode> = "premultiplied"
+
+<GPUCompilationMessageType> = "error"
+<GPUCompilationMessageType> = "warning"
+<GPUCompilationMessageType> = "info"
+
+<GPUComputePassTimestampLocation> = "beginning"
+<GPUComputePassTimestampLocation> = "end"
+
+<GPUErrorFilter> = "out-of-memory"
+<GPUErrorFilter> = "validation"
+<GPUErrorFilter> = "internal"
+
+<GPUDeviceLostReason> = "destroyed"
+
+<GPUAutoLayoutMode> = "auto"
+
+<GPUIndexFormat> = "uint16"
+<GPUIndexFormat> = "uint32"
+
+<GPUQueryType> = "occlusion"
+<GPUQueryType> = "pipeline-statistics"
+<GPUQueryType> = "timestamp"
+
+<GPUPipelineStatisticName> = "vertex-shader-invocations"
+<GPUPipelineStatisticName> = "clipper-invocations"
+<GPUPipelineStatisticName> = "clipper-primitives-out"
+<GPUPipelineStatisticName> = "fragment-shader-invocations"
+<GPUPipelineStatisticName> = "compute-shader-invocations"
+
+<GPUFrontFace> = "ccw"
+<GPUFrontFace> = "cw"
+
+<GPUCullMode> = "none"
+<GPUCullMode> = "front"
+<GPUCullMode> = "back"
+
+<GPULoadOp> = "load"
+<GPULoadOp> = "clear"
+
+<GPUStoreOp> = "store"
+<GPUStoreOp> = "discard"
+
+<GPURenderPassTimestampLocation> = "beginning"
+<GPURenderPassTimestampLocation> = "end"
+
+<GPUPrimitiveTopology> = "point-list"
+<GPUPrimitiveTopology> = "line-list"
+<GPUPrimitiveTopology> = "line-strip"
+<GPUPrimitiveTopology> = "triangle-list"
+<GPUPrimitiveTopology> = "triangle-strip"
+
+<GPUPowerPreference> = "low-power"
+<GPUPowerPreference> = "high-performance"
+
+<GPUSamplerBindingType> = "filtering"
+<GPUSamplerBindingType> = "non-filtering"
+<GPUSamplerBindingType> = "comparison"
+
+<GPUAddressMode> = "clamp-to-edge"
+<GPUAddressMode> = "repeat"
+<GPUAddressMode> = "mirror-repeat"
+
+<GPUFilterMode> = "nearest"
+<GPUFilterMode> = "linear"
+
+<GPUCompareFunction> = "never"
+<GPUCompareFunction> = "less"
+<GPUCompareFunction> = "equal"
+<GPUCompareFunction> = "less-equal"
+<GPUCompareFunction> = "greater"
+<GPUCompareFunction> = "not-equal"
+<GPUCompareFunction> = "greater-equal"
+<GPUCompareFunction> = "always"
+
+<GPUStencilOperation> = "keep"
+<GPUStencilOperation> = "zero"
+<GPUStencilOperation> = "replace"
+<GPUStencilOperation> = "invert"
+<GPUStencilOperation> = "increment-clamp"
+<GPUStencilOperation> = "decrement-clamp"
+<GPUStencilOperation> = "increment-wrap"
+<GPUStencilOperation> = "decrement-wrap"
+
+<GPUStorageTextureAccess> = "write-only"
+
+<GPUFeatureName> = "pipeline-statistics-query"
+<GPUFeatureName> = "texture-compression-bc"
+<GPUFeatureName> = "texture-compression-etc2"
+<GPUFeatureName> = "texture-compression-astc"
+<GPUFeatureName> = "timestamp-query"
+<GPUFeatureName> = "timestamp-query-inside-passes"
+<GPUFeatureName> = "shader-float16"
+<GPUFeatureName> = "depth-clip-control"
+<GPUFeatureName> = "depth32float-stencil8"
+<GPUFeatureName> = "indirect-first-instance"
+<GPUFeatureName> = "chromium-experimental-dp4a"
+<GPUFeatureName> = "rg11b10ufloat-renderable"
+
+<GPUTextureSampleType> = "float"
+<GPUTextureSampleType> = "unfilterable-float"
+<GPUTextureSampleType> = "depth"
+<GPUTextureSampleType> = "sint"
+<GPUTextureSampleType> = "uint"
+
+<GPUTextureDimension> = "1d"
+<GPUTextureDimension> = "2d"
+<GPUTextureDimension> = "3d"
+
+<GPUTextureFormat> = "r8unorm"
+<GPUTextureFormat> = "r8snorm"
+<GPUTextureFormat> = "r8uint"
+<GPUTextureFormat> = "r8sint"
+<GPUTextureFormat> = "r16uint"
+<GPUTextureFormat> = "r16sint"
+<GPUTextureFormat> = "r16float"
+<GPUTextureFormat> = "rg8unorm"
+<GPUTextureFormat> = "rg8snorm"
+<GPUTextureFormat> = "rg8uint"
+<GPUTextureFormat> = "rg8sint"
+<GPUTextureFormat> = "r32uint"
+<GPUTextureFormat> = "r32sint"
+<GPUTextureFormat> = "r32float"
+<GPUTextureFormat> = "rg16uint"
+<GPUTextureFormat> = "rg16sint"
+<GPUTextureFormat> = "rg16float"
+<GPUTextureFormat> = "rgba8unorm"
+<GPUTextureFormat> = "rgba8unorm-srgb"
+<GPUTextureFormat> = "rgba8snorm"
+<GPUTextureFormat> = "rgba8uint"
+<GPUTextureFormat> = "rgba8sint"
+<GPUTextureFormat> = "bgra8unorm"
+<GPUTextureFormat> = "bgra8unorm-srgb"
+<GPUTextureFormat> = "rgb9e5ufloat"
+<GPUTextureFormat> = "rgb10a2unorm"
+<GPUTextureFormat> = "rg11b10ufloat"
+<GPUTextureFormat> = "rg32uint"
+<GPUTextureFormat> = "rg32sint"
+<GPUTextureFormat> = "rg32float"
+<GPUTextureFormat> = "rgba16uint"
+<GPUTextureFormat> = "rgba16sint"
+<GPUTextureFormat> = "rgba16float"
+<GPUTextureFormat> = "rgba32uint"
+<GPUTextureFormat> = "rgba32sint"
+<GPUTextureFormat> = "rgba32float"
+<GPUTextureFormat> = "depth32float"
+<GPUTextureFormat> = "depth32float-stencil8"
+<GPUTextureFormat> = "depth24plus"
+<GPUTextureFormat> = "depth24plus-stencil8"
+<GPUTextureFormat> = "depth16unorm"
+<GPUTextureFormat> = "stencil8"
+<GPUTextureFormat> = "bc1-rgba-unorm"
+<GPUTextureFormat> = "bc1-rgba-unorm-srgb"
+<GPUTextureFormat> = "bc2-rgba-unorm"
+<GPUTextureFormat> = "bc2-rgba-unorm-srgb"
+<GPUTextureFormat> = "bc3-rgba-unorm"
+<GPUTextureFormat> = "bc3-rgba-unorm-srgb"
+<GPUTextureFormat> = "bc4-r-unorm"
+<GPUTextureFormat> = "bc4-r-snorm"
+<GPUTextureFormat> = "bc5-rg-unorm"
+<GPUTextureFormat> = "bc5-rg-snorm"
+<GPUTextureFormat> = "bc6h-rgb-ufloat"
+<GPUTextureFormat> = "bc6h-rgb-float"
+<GPUTextureFormat> = "bc7-rgba-unorm"
+<GPUTextureFormat> = "bc7-rgba-unorm-srgb"
+<GPUTextureFormat> = "etc2-rgb8unorm"
+<GPUTextureFormat> = "etc2-rgb8unorm-srgb"
+<GPUTextureFormat> = "etc2-rgb8a1unorm"
+<GPUTextureFormat> = "etc2-rgb8a1unorm-srgb"
+<GPUTextureFormat> = "etc2-rgba8unorm"
+<GPUTextureFormat> = "etc2-rgba8unorm-srgb"
+<GPUTextureFormat> = "eac-r11unorm"
+<GPUTextureFormat> = "eac-r11snorm"
+<GPUTextureFormat> = "eac-rg11unorm"
+<GPUTextureFormat> = "eac-rg11snorm"
+<GPUTextureFormat> = "astc-4x4-unorm"
+<GPUTextureFormat> = "astc-4x4-unorm-srgb"
+<GPUTextureFormat> = "astc-5x4-unorm"
+<GPUTextureFormat> = "astc-5x4-unorm-srgb"
+<GPUTextureFormat> = "astc-5x5-unorm"
+<GPUTextureFormat> = "astc-5x5-unorm-srgb"
+<GPUTextureFormat> = "astc-6x5-unorm"
+<GPUTextureFormat> = "astc-6x5-unorm-srgb"
+<GPUTextureFormat> = "astc-6x6-unorm"
+<GPUTextureFormat> = "astc-6x6-unorm-srgb"
+<GPUTextureFormat> = "astc-8x5-unorm"
+<GPUTextureFormat> = "astc-8x5-unorm-srgb"
+<GPUTextureFormat> = "astc-8x6-unorm"
+<GPUTextureFormat> = "astc-8x6-unorm-srgb"
+<GPUTextureFormat> = "astc-8x8-unorm"
+<GPUTextureFormat> = "astc-8x8-unorm-srgb"
+<GPUTextureFormat> = "astc-10x5-unorm"
+<GPUTextureFormat> = "astc-10x5-unorm-srgb"
+<GPUTextureFormat> = "astc-10x6-unorm"
+<GPUTextureFormat> = "astc-10x6-unorm-srgb"
+<GPUTextureFormat> = "astc-10x8-unorm"
+<GPUTextureFormat> = "astc-10x8-unorm-srgb"
+<GPUTextureFormat> = "astc-10x10-unorm"
+<GPUTextureFormat> = "astc-10x10-unorm-srgb"
+<GPUTextureFormat> = "astc-12x10-unorm"
+<GPUTextureFormat> = "astc-12x10-unorm-srgb"
+<GPUTextureFormat> = "astc-12x12-unorm"
+<GPUTextureFormat> = "astc-12x12-unorm-srgb"
+
+<GPUTextureViewDimension> = "1d"
+<GPUTextureViewDimension> = "2d"
+<GPUTextureViewDimension> = "2d-array"
+<GPUTextureViewDimension> = "cube"
+<GPUTextureViewDimension> = "cube-array"
+<GPUTextureViewDimension> = "3d"
+
+<GPUTextureAspect> = "all"
+<GPUTextureAspect> = "stencil-only"
+<GPUTextureAspect> = "depth-only"
+
+<GPUVertexFormat> = "uint8x2"
+<GPUVertexFormat> = "uint8x4"
+<GPUVertexFormat> = "sint8x2"
+<GPUVertexFormat> = "sint8x4"
+<GPUVertexFormat> = "unorm8x2"
+<GPUVertexFormat> = "unorm8x4"
+<GPUVertexFormat> = "snorm8x2"
+<GPUVertexFormat> = "snorm8x4"
+<GPUVertexFormat> = "uint16x2"
+<GPUVertexFormat> = "uint16x4"
+<GPUVertexFormat> = "sint16x2"
+<GPUVertexFormat> = "sint16x4"
+<GPUVertexFormat> = "unorm16x2"
+<GPUVertexFormat> = "unorm16x4"
+<GPUVertexFormat> = "snorm16x2"
+<GPUVertexFormat> = "snorm16x4"
+<GPUVertexFormat> = "float16x2"
+<GPUVertexFormat> = "float16x4"
+<GPUVertexFormat> = "float32"
+<GPUVertexFormat> = "float32x2"
+<GPUVertexFormat> = "float32x3"
+<GPUVertexFormat> = "float32x4"
+<GPUVertexFormat> = "uint32"
+<GPUVertexFormat> = "uint32x2"
+<GPUVertexFormat> = "uint32x3"
+<GPUVertexFormat> = "uint32x4"
+<GPUVertexFormat> = "sint32"
+<GPUVertexFormat> = "sint32x2"
+<GPUVertexFormat> = "sint32x3"
+<GPUVertexFormat> = "sint32x4"
+
+<GPUVertexStepMode> = "vertex"
+<GPUVertexStepMode> = "instance"
+
+# Namespaces
+<GPUBufferUsage> = GPUBufferUsage.MAP_READ
+<GPUBufferUsage> = GPUBufferUsage.MAP_WRITE
+<GPUBufferUsage> = GPUBufferUsage.COPY_SRC
+<GPUBufferUsage> = GPUBufferUsage.COPY_DST
+<GPUBufferUsage> = GPUBufferUsage.INDEX
+<GPUBufferUsage> = GPUBufferUsage.VERTEX
+<GPUBufferUsage> = GPUBufferUsage.UNIFORM
+<GPUBufferUsage> = GPUBufferUsage.STORAGE
+<GPUBufferUsage> = GPUBufferUsage.INDIRECT
+<GPUBufferUsage> = GPUBufferUsage.QUERY_RESOLVE
+
+<GPUColorWrite> = GPUColorWrite.RED
+<GPUColorWrite> = GPUColorWrite.GREEN
+<GPUColorWrite> = GPUColorWrite.BLUE
+<GPUColorWrite> = GPUColorWrite.ALPHA
+<GPUColorWrite> = GPUColorWrite.ALL
+
+<GPUMapMode> = GPUMapMode.READ
+<GPUMapMode> = GPUMapMode.WRITE
+
+<GPUShaderStage> = GPUShaderStage.VERTEX
+<GPUShaderStage> = GPUShaderStage.FRAGMENT
+<GPUShaderStage> = GPUShaderStage.COMPUTE
+
+<GPUTextureUsage> = GPUTextureUsage.COPY_SRC
+<GPUTextureUsage> = GPUTextureUsage.COPY_DST
+<GPUTextureUsage> = GPUTextureUsage.TEXTURE_BINDING
+<GPUTextureUsage> = GPUTextureUsage.STORAGE_BINDING
+<GPUTextureUsage> = GPUTextureUsage.RENDER_ATTACHMENT
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~DICTIONARIES~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+<GPUBindGroupDescriptor> = { label: <USVString>, entries: <GPUBindGroupEntrySequence>, layout: <GPUBindGroupLayout> }
+<GPUBindGroupEntry> = { binding: <BindInt>, resource: <GPUBufferBinding> }
+<GPUBindGroupEntry> = { binding: <BindInt>, resource: <GPUExternalTexture> }
+<GPUBindGroupEntry> = { binding: <BindInt>, resource: <GPUSampler> }
+<GPUBindGroupEntry> = { binding: <BindInt>, resource: <GPUTextureView> }
+<GPUBindGroupLayoutDescriptor> = { label: <USVString>, entries: <GPUBindGroupLayoutEntrySequence> }
+<GPUBindGroupLayoutEntry> = { binding: <BindInt>, buffer: <GPUBufferBindingLayout>, visibility: <GPUShaderStage> }
+<GPUBindGroupLayoutEntry> = { binding: <BindInt>, externalTexture: <GPUExternalTextureBindingLayout>, visibility: <GPUShaderStage> }
+<GPUBindGroupLayoutEntry> = { binding: <BindInt>, sampler: <GPUSamplerBindingLayout>, visibility: <GPUShaderStage> }
+<GPUBindGroupLayoutEntry> = { binding: <BindInt>, texture: <GPUTextureBindingLayout>, visibility: <GPUShaderStage> }
+<GPUBlendComponent> = { dstFactor: <GPUBlendFactor>, operation: <GPUBlendOperation>, srcFactor: <GPUBlendFactor> }
+
+<GPUBlendState> = { alpha: <GPUBlendComponent>, color: <GPUBlendComponent> }
+<GPUBufferBinding> = { buffer: <GPUBuffer>, offset: <UnsignedLongLongEnforceRange>, size: <UnsignedLongLongEnforceRange> }
+<GPUBufferBindingLayout> = { hasDynamicOffset: <Boolean>, minBindingSize: <UnsignedLongLongEnforceRange>, type: <GPUBufferBindingType> }
+<GPUBufferDescriptor> = { label: <USVString>, mappedAtCreation: <Boolean>, size: <babyint>, usage: <GPUBufferUsage> }
+<GPUCanvasConfiguration> = { alphaMode: <GPUCanvasAlphaMode>, colorSpace: <PredefinedColorSpace>, device: <GPUDevice>, format: <GPUTextureFormat>, usage: <UnsignedLongEnforceRange>, viewFormats: <GPUTextureFormatSequence> }
+<GPUColorDict> = { a: <Double>, b: <Double>, g: <Double>, r: <Double> }
+<GPUColorStateDescriptor> = { alphaBlend: <GPUBlendComponent>, colorBlend: <GPUBlendComponent>, format: <GPUTextureFormat>, writeMask: <UnsignedLongEnforceRange> }
+<GPUColorTargetState> = { blend: <GPUBlendState>, format: <GPUTextureFormat>, writeMask: <UnsignedLongEnforceRange> }
+<GPUCommandBufferDescriptor> = { label: <USVString> }
+<GPUCommandEncoderDescriptor> = { label: <USVString> }
+<GPUComputePassDescriptor> = { label: <USVString>, timestampWrites: <GPUComputePassTimestampWriteSequence> }
+<GPUComputePassTimestampWrite> = { location: <GPUComputePassTimestampLocation>, queryIndex: <UnsignedLongEnforceRange>, querySet: <GPUQuerySet> }
+<GPUComputePipelineDescriptor> = { label: <USVString>, layout: <GPUAutoLayoutMode>, compute: <GPUProgrammableStage> }
+<GPUComputePipelineDescriptor> = { label: <USVString>, layout: <GPUPipelineLayout>, compute: <GPUProgrammableStage> }
+<GPUDepthStencilState> = { depthBias: <LongEnforceRange>, depthBiasClamp: <Float>, depthBiasSlopeScale: <Float>, depthCompare: <GPUCompareFunction>, depthWriteEnabled: <Boolean>, format: <GPUTextureFormat>, stencilBack: <GPUStencilFaceState>, stencilFront: <GPUStencilFaceState>, stencilReadMask: <UnsignedLongEnforceRange>, stencilWriteMask: <UnsignedLongEnforceRange> }
+<GPUDepthStencilStateDescriptor> = { depthCompare: <GPUCompareFunction>, depthWriteEnabled: <Boolean>, format: <GPUTextureFormat>, stencilBack: <GPUStencilFaceState>, stencilFront: <GPUStencilFaceState>, stencilReadMask: <UnsignedLongEnforceRange>, stencilWriteMask: <UnsignedLongEnforceRange> }
+<GPUDeviceDescriptor> = { label: <USVString>, defaultQueue: <GPUQueueDescriptor>, requiredFeatures: <GPUFeatureNameSequence>, requiredLimits: <StringUnsignedLongLongEnforceRangeRecord> }
+<GPUExtent3DDict> = { depthOrArrayLayers: <UnsignedLongEnforceRange>, height: <UnsignedLongEnforceRange>, width: <UnsignedLongEnforceRange> }
+<GPUExternalTextureBindingLayout> = {  }
+<GPUExternalTextureDescriptor> = { label: <USVString>, colorSpace: <PredefinedColorSpace>, source: <VideoFrame> }
+<GPUExternalTextureDescriptor> = { label: <USVString>, colorSpace: <PredefinedColorSpace>, source: <HTMLVideoElement> }
+<GPUFragmentState> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule>, targets: <GPUColorTargetStateSequence> }
+<GPUFragmentState> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule>, targets: <GPUColorTargetStateSequence> }
+<GPUImageCopyBuffer> = { bytesPerRow: <UnsignedLongEnforceRange>, offset: <UnsignedLongLongEnforceRange>, rowsPerImage: <UnsignedLongEnforceRange>, buffer: <GPUBuffer> }
+<GPUImageCopyExternalImage> = { flipY: <Boolean>, origin: <GPUOrigin2DDict>, source: <HTMLCanvasElement> }
+<GPUImageCopyExternalImage> = { flipY: <Boolean>, origin: <GPUOrigin2DDict>, source: <HTMLVideoElement> }
+<GPUImageCopyExternalImage> = { flipY: <Boolean>, origin: <GPUOrigin2DDict>, source: <ImageBitmap> }
+<GPUImageCopyExternalImage> = { flipY: <Boolean>, origin: <GPUOrigin2DDict>, source: <OffscreenCanvas> }
+<GPUImageCopyImageBitmap> = { imageBitmap: <ImageBitmap>, origin: <GPUOrigin2DDict> }
+<GPUImageCopyTexture> = { aspect: <GPUTextureAspect>, mipLevel: <UnsignedLongEnforceRange>, origin: <GPUOrigin3DDict>, texture: <GPUTexture> }
+<GPUImageCopyTextureTagged> = { aspect: <GPUTextureAspect>, mipLevel: <UnsignedLongEnforceRange>, origin: <GPUOrigin3DDict>, texture: <GPUTexture>, colorSpace: <PredefinedColorSpace>, premultipliedAlpha: <Boolean> }
+<GPUImageDataLayout> = { bytesPerRow: <UnsignedLongEnforceRange>, offset: <UnsignedLongLongEnforceRange>, rowsPerImage: <UnsignedLongEnforceRange> }
+<GPUMultisampleState> = { alphaToCoverageEnabled: <Boolean>, count: <UnsignedLongEnforceRange>, mask: <UnsignedLongEnforceRange> }
+<GPUObjectDescriptorBase> = { label: <USVString> }
+<GPUOrigin2DDict> = { x: <UnsignedLongEnforceRange>, y: <UnsignedLongEnforceRange> }
+<GPUOrigin3DDict> = { x: <UnsignedLongEnforceRange>, y: <UnsignedLongEnforceRange>, z: <UnsignedLongEnforceRange> }
+<GPUPipelineDescriptorBase> = { label: <USVString>, layout: <GPUAutoLayoutMode> }
+<GPUPipelineDescriptorBase> = { label: <USVString>, layout: <GPUPipelineLayout> }
+<GPUPipelineLayoutDescriptor> = { label: <USVString>, bindGroupLayouts: <GPUBindGroupLayoutSequence> }
+<GPUPrimitiveState> = { cullMode: <GPUCullMode>, frontFace: <GPUFrontFace>, stripIndexFormat: <GPUIndexFormat>, topology: <GPUPrimitiveTopology>, unclippedDepth: <Boolean> }
+<GPUProgrammableStage> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule> }
+<GPUQuerySetDescriptor> = { label: <USVString>, count: <UnsignedLongEnforceRange>, pipelineStatistics: <GPUPipelineStatisticNameSequence>, type: <GPUQueryType> }
+<GPUQueueDescriptor> = { label: <USVString> }
+<GPURasterizationStateDescriptor> = { cullMode: <GPUCullMode>, depthBias: <LongEnforceRange>, depthBiasClamp: <Float>, depthBiasSlopeScale: <Float>, frontFace: <GPUFrontFace> }
+<GPURenderBundleDescriptor> = { label: <USVString> }
+<GPURenderBundleEncoderDescriptor> = { label: <USVString>, colorFormats: <GPUTextureFormatSequence>, depthStencilFormat: <GPUTextureFormat>, sampleCount: <UnsignedLongEnforceRange>, depthReadOnly: <Boolean>, stencilReadOnly: <Boolean> }
+<GPURenderPassColorAttachment> = { clearValue: <GPUColorDict>, loadOp: <GPULoadOp>, resolveTarget: <GPUTextureView>, storeOp: <GPUStoreOp>, view: <GPUTextureView> }
+<GPURenderPassDepthStencilAttachment> = { depthClearValue: <Float>, depthLoadOp: <GPULoadOp>, depthReadOnly: <Boolean>, depthStoreOp: <GPUStoreOp>, stencilClearValue: <UnsignedLongEnforceRange>, stencilLoadOp: <GPULoadOp>, stencilReadOnly: <Boolean>, stencilStoreOp: <GPUStoreOp>, view: <GPUTextureView> }
+<GPURenderPassDescriptor> = { label: <USVString>, colorAttachments: <GPURenderPassColorAttachmentSequence>, depthStencilAttachment: <GPURenderPassDepthStencilAttachment>, maxDrawCount: <UnsignedLongLongEnforceRange>, occlusionQuerySet: <GPUQuerySet>, timestampWrites: <GPURenderPassTimestampWriteSequence> }
+<GPURenderPassLayout> = { label: <USVString>, colorFormats: <GPUTextureFormatSequence>, depthStencilFormat: <GPUTextureFormat>, sampleCount: <UnsignedLongEnforceRange> }
+<GPURenderPassTimestampWrite> = { location: <GPURenderPassTimestampLocation>, queryIndex: <UnsignedLongEnforceRange>, querySet: <GPUQuerySet> }
+<GPURenderPipelineDescriptor> = { label: <USVString>, layout: <GPUAutoLayoutMode>, depthStencil: <GPUDepthStencilState>, fragment: <GPUFragmentState>, multisample: <GPUMultisampleState>, primitive: <GPUPrimitiveState>, vertex: <GPUVertexState> }
+<GPURenderPipelineDescriptor> = { label: <USVString>, layout: <GPUPipelineLayout>, depthStencil: <GPUDepthStencilState>, fragment: <GPUFragmentState>, multisample: <GPUMultisampleState>, primitive: <GPUPrimitiveState>, vertex: <GPUVertexState> }
+<GPURequestAdapterOptions> = { powerPreference: <GPUPowerPreference> }
+<GPUSamplerBindingLayout> = { type: <GPUSamplerBindingType> }
+<GPUSamplerDescriptor> = { label: <USVString>, addressModeU: <GPUAddressMode>, addressModeV: <GPUAddressMode>, addressModeW: <GPUAddressMode>, compare: <GPUCompareFunction>, lodMaxClamp: <Float>, lodMinClamp: <Float>, magFilter: <GPUFilterMode>, maxAnisotropy: <UnsignedShortClamp>, minFilter: <GPUFilterMode>, mipmapFilter: <GPUFilterMode> }
+<GPUShaderModuleCompilationHint> = { layout: <GPUAutoLayoutMode> }
+<GPUShaderModuleCompilationHint> = { layout: <GPUPipelineLayout> }
+<GPUStencilFaceState> = { compare: <GPUCompareFunction>, depthFailOp: <GPUStencilOperation>, failOp: <GPUStencilOperation>, passOp: <GPUStencilOperation> }
+<GPUStorageTextureBindingLayout> = { access: <GPUStorageTextureAccess>, format: <GPUTextureFormat>, viewDimension: <GPUTextureViewDimension> }
+<GPUTextureBindingLayout> = { multisampled: <Boolean>, sampleType: <GPUTextureSampleType>, viewDimension: <GPUTextureViewDimension> }
+<GPUTextureDescriptor> = { label: <USVString>, dimension: <GPUTextureDimension>, format: <GPUTextureFormat>, mipLevelCount: <UnsignedLongEnforceRange>, sampleCount: <UnsignedLongEnforceRange>, size: <GPUExtent3DDict>, usage: <UnsignedLongEnforceRange>, viewFormats: <GPUTextureFormatSequence> }
+<GPUTextureViewDescriptor> = { label: <USVString>, arrayLayerCount: <UnsignedLongEnforceRange>, aspect: <GPUTextureAspect>, baseArrayLayer: <UnsignedLongEnforceRange>, baseMipLevel: <UnsignedLongEnforceRange>, dimension: <GPUTextureViewDimension>, format: <GPUTextureFormat>, mipLevelCount: <UnsignedLongEnforceRange> }
+<GPUUncapturedErrorEventInit> = { bubbles: <Boolean>, cancelable: <Boolean>, composed: <Boolean>, error: <GPUError> }
+<GPUVertexAttribute> = { format: <GPUVertexFormat>, offset: <UnsignedLongLongEnforceRange>, shaderLocation: <UnsignedLongEnforceRange> }
+<GPUVertexBufferLayout> = { arrayStride: <UnsignedLongLongEnforceRange>, attributes: <GPUVertexAttributeSequence>, stepMode: <GPUVertexStepMode> }
+<GPUVertexState> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule>, buffers: <GPUVertexBufferLayoutSequence> }
+
+
+<GPUBindGroupEntrySequence> = [<GPUBindGroupEntry>]
+<GPUBindGroupEntrySequence> = [<GPUBindGroupEntry>, <GPUBindGroupEntry>]
+<GPUBindGroupEntrySequence> = [<GPUBindGroupEntry>, <GPUBindGroupEntry>, <GPUBindGroupEntry>]
+<GPUFeatureNameSequence> = [<GPUFeatureName>]
+<GPUFeatureNameSequence> = [<GPUFeatureName>, <GPUFeatureName>]
+<GPUFeatureNameSequence> = [<GPUFeatureName>, <GPUFeatureName>, <GPUFeatureName>]
+<GPUTextureFormatSequence> = [<GPUTextureFormat>]
+<GPUTextureFormatSequence> = [<GPUTextureFormat>, <GPUTextureFormat>]
+<GPUTextureFormatSequence> = [<GPUTextureFormat>, <GPUTextureFormat>, <GPUTextureFormat>]
+<GPUPipelineStatisticNameSequence> = [<GPUPipelineStatisticName>]
+<GPUPipelineStatisticNameSequence> = [<GPUPipelineStatisticName>, <GPUPipelineStatisticName>]
+<GPUPipelineStatisticNameSequence> = [<GPUPipelineStatisticName>, <GPUPipelineStatisticName>, <GPUPipelineStatisticName>]
+<GPURenderPassColorAttachmentSequence> = [<GPURenderPassColorAttachment>]
+<GPURenderPassColorAttachmentSequence> = [<GPURenderPassColorAttachment>, <GPURenderPassColorAttachment>]
+<GPURenderPassColorAttachmentSequence> = [<GPURenderPassColorAttachment>, <GPURenderPassColorAttachment>, <GPURenderPassColorAttachment>]
+<GPUBindGroupLayoutSequence> = [<GPUBindGroupLayout>]
+<GPUBindGroupLayoutSequence> = [<GPUBindGroupLayout>, <GPUBindGroupLayout>]
+<GPUBindGroupLayoutSequence> = [<GPUBindGroupLayout>, <GPUBindGroupLayout>, <GPUBindGroupLayout>]
+<GPUBindGroupLayoutEntrySequence> = [<GPUBindGroupLayoutEntry>]
+<GPUBindGroupLayoutEntrySequence> = [<GPUBindGroupLayoutEntry>, <GPUBindGroupLayoutEntry>]
+<GPUBindGroupLayoutEntrySequence> = [<GPUBindGroupLayoutEntry>, <GPUBindGroupLayoutEntry>, <GPUBindGroupLayoutEntry>]
+<GPUColorTargetStateSequence> = [<GPUColorTargetState>]
+<GPUColorTargetStateSequence> = [<GPUColorTargetState>, <GPUColorTargetState>]
+<GPUColorTargetStateSequence> = [<GPUColorTargetState>, <GPUColorTargetState>, <GPUColorTargetState>]
+<GPUVertexBufferLayoutSequence> = [<GPUVertexBufferLayout>]
+<GPUVertexBufferLayoutSequence> = [<GPUVertexBufferLayout>, <GPUVertexBufferLayout>]
+<GPUVertexBufferLayoutSequence> = [<GPUVertexBufferLayout>, <GPUVertexBufferLayout>, <GPUVertexBufferLayout>]
+<GPUVertexAttributeSequence> = [<GPUVertexAttribute>]
+<GPUVertexAttributeSequence> = [<GPUVertexAttribute>, <GPUVertexAttribute>]
+<GPUVertexAttributeSequence> = [<GPUVertexAttribute>, <GPUVertexAttribute>, <GPUVertexAttribute>]
+<GPUCommandBufferSequence> = [<GPUCommandBuffer>]
+<GPUCommandBufferSequence> = [<GPUCommandBuffer>, <GPUCommandBuffer>]
+<GPUCommandBufferSequence> = [<GPUCommandBuffer>, <GPUCommandBuffer>, <GPUCommandBuffer>]
+<GPUComputePassTimestampWriteSequence> = [<GPUComputePassTimestampWrite>]
+<GPUComputePassTimestampWriteSequence> = [<GPUComputePassTimestampWrite>, <GPUComputePassTimestampWrite>]
+<GPUComputePassTimestampWriteSequence> = [<GPUComputePassTimestampWrite>, <GPUComputePassTimestampWrite>, <GPUComputePassTimestampWrite>]
+<GPURenderPassTimestampWriteSequence> = [<GPURenderPassTimestampWrite>]
+<GPURenderPassTimestampWriteSequence> = [<GPURenderPassTimestampWrite>, <GPURenderPassTimestampWrite>]
+<GPURenderPassTimestampWriteSequence> = [<GPURenderPassTimestampWrite>, <GPURenderPassTimestampWrite>, <GPURenderPassTimestampWrite>]
+<UnsignedLongEnforceRangeSequence> = [<UnsignedLongEnforceRange>]
+<UnsignedLongEnforceRangeSequence> = [<UnsignedLongEnforceRange>, <UnsignedLongEnforceRange>]
+<UnsignedLongEnforceRangeSequence> = [<UnsignedLongEnforceRange>, <UnsignedLongEnforceRange>, <UnsignedLongEnforceRange>]
+<UnsignedLongEnforceRangeSequence> = [<UnsignedLongEnforceRange>, <UnsignedLongEnforceRange>, <UnsignedLongEnforceRange>, <UnsignedLongEnforceRange>]
+<GPURenderBundleSequence> = [<GPURenderBundle>]
+<GPURenderBundleSequence> = [<GPURenderBundle>, <GPURenderBundle>]
+<GPURenderBundleSequence> = [<GPURenderBundle>, <GPURenderBundle>, <GPURenderBundle>]
+
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = {}
+<USVStringDoubleRecord> = { <OverridableConstantName>: <Float> }
+<USVStringDoubleRecord> = { <OverridableConstantName>: <Boolean> }
+<USVStringDoubleRecord> = { <OverridableConstantName>: <UnsignedLongLongEnforceRange> }
+
+<GPUAdapter> = adapter
+<GPUDevice> = device
+
+!lineguard try { <line> } catch(e) {}
+!varformat fuzzvar%05d
+!begin lines
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~INTERFACES~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+
+#~~~~~~~~~~~~~~~~GPU~~~~~~~~~~~~~~~~#
+<new GPUTextureFormat> = <GPU>.getPreferredCanvasFormat();
+
+#~~~~~~~~~~~~~~~~GPUAdapter~~~~~~~~~~~~~~~~#
+
+<new GPUAdapterInfo> = await <GPUAdapter>.requestAdapterInfo();
+
+#~~~~~~~~~~~~~~~~GPUBindGroup~~~~~~~~~~~~~~~~#
+<GPUBindGroup>.label = <USVString>
+
+#~~~~~~~~~~~~~~~~GPUBindGroupLayout~~~~~~~~~~~~~~~~#
+<GPUBindGroupLayout>.label = <USVString>
+
+#~~~~~~~~~~~~~~~~GPUBuffer~~~~~~~~~~~~~~~~#
+<GPUBuffer>.label = <USVString>
+await <GPUBuffer>.mapAsync(<GPUMapMode>);
+await <GPUBuffer>.mapAsync(<GPUMapMode>,<UnsignedLongLongEnforceRange>);
+await <GPUBuffer>.mapAsync(<GPUMapMode>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<new ArrayBuffer> = <GPUBuffer>.getMappedRange();
+<new ArrayBuffer> = <GPUBuffer>.getMappedRange(<UnsignedLongLongEnforceRange>);
+<new ArrayBuffer> = <GPUBuffer>.getMappedRange(<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPUBuffer>.unmap();
+<GPUBuffer>.destroy();
+
+#~~~~~~~~~~~~~~~~GPUCanvasContext~~~~~~~~~~~~~~~~#
+<GPUCanvasContext>.configure(<GPUCanvasConfiguration>);
+<GPUCanvasContext>.unconfigure();
+<new GPUTexture> = <GPUCanvasContext>.getCurrentTexture();
+
+#~~~~~~~~~~~~~~~~GPUCommandBuffer~~~~~~~~~~~~~~~~#
+<GPUCommandBuffer>.label = <USVString>
+
+#~~~~~~~~~~~~~~~~GPUCommandEncoder~~~~~~~~~~~~~~~~#
+<GPUCommandEncoder>.label = <USVString>
+<new GPURenderPassEncoder> = <GPUCommandEncoder>.beginRenderPass(<GPURenderPassDescriptor>);
+<new GPUComputePassEncoder> = <GPUCommandEncoder>.beginComputePass();
+<new GPUComputePassEncoder> = <GPUCommandEncoder>.beginComputePass(<GPUComputePassDescriptor>);
+<GPUCommandEncoder>.copyBufferToBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<GPUBuffer>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPUCommandEncoder>.copyBufferToTexture(<GPUImageCopyBuffer>,<GPUImageCopyTexture>,<GPUExtent3DDict>);
+<GPUCommandEncoder>.copyTextureToBuffer(<GPUImageCopyTexture>,<GPUImageCopyBuffer>,<GPUExtent3DDict>);
+<GPUCommandEncoder>.copyTextureToTexture(<GPUImageCopyTexture>,<GPUImageCopyTexture>,<GPUExtent3DDict>);
+<GPUCommandEncoder>.pushDebugGroup(<USVString>);
+<GPUCommandEncoder>.popDebugGroup();
+<GPUCommandEncoder>.insertDebugMarker(<USVString>);
+<GPUCommandEncoder>.resolveQuerySet(<GPUQuerySet>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+<GPUCommandEncoder>.writeTimestamp(<GPUQuerySet>,<UnsignedLongEnforceRange>);
+<GPUCommandEncoder>.clearBuffer(<GPUBuffer>);
+<GPUCommandEncoder>.clearBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+<GPUCommandEncoder>.clearBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<new GPUCommandBuffer> = <GPUCommandEncoder>.finish();
+<new GPUCommandBuffer> = <GPUCommandEncoder>.finish(<GPUCommandBufferDescriptor>);
+
+#~~~~~~~~~~~~~~~~GPUComputePassEncoder~~~~~~~~~~~~~~~~#
+<GPUComputePassEncoder>.label = <USVString>
+<GPUComputePassEncoder>.setPipeline(<GPUComputePipeline>);
+<GPUComputePassEncoder>.dispatchWorkgroups(<UnsignedLongEnforceRange>);
+<GPUComputePassEncoder>.dispatchWorkgroups(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPUComputePassEncoder>.dispatchWorkgroups(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPUComputePassEncoder>.dispatchWorkgroupsIndirect(<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+<GPUComputePassEncoder>.writeTimestamp(<GPUQuerySet>,<UnsignedLongEnforceRange>);
+<GPUComputePassEncoder>.end();
+<GPUComputePassEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>);
+<GPUComputePassEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>,<UnsignedLongEnforceRangeSequence>);
+<GPUComputePassEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>,<Uint32Array>,<UnsignedLongLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPUComputePassEncoder>.pushDebugGroup(<USVString>);
+<GPUComputePassEncoder>.popDebugGroup();
+<GPUComputePassEncoder>.insertDebugMarker(<USVString>);
+
+#~~~~~~~~~~~~~~~~GPUComputePipeline~~~~~~~~~~~~~~~~#
+<GPUComputePipeline>.label = <USVString>
+<new GPUBindGroupLayout> = <GPUComputePipeline>.getBindGroupLayout(<BindInt>);
+
+#~~~~~~~~~~~~~~~~GPUDevice~~~~~~~~~~~~~~~~#
+<new GPUQueue> = device.queu;
+<GPUDevice>.onuncapturederror = null
+<GPUDevice>.label = <USVString>
+<GPUDevice>.destroy();
+<new GPUBuffer> = <GPUDevice>.createBuffer(<GPUBufferDescriptor>);
+<new GPUTexture> = <GPUDevice>.createTexture(<GPUTextureDescriptor>);
+<new GPUTexture> = <GPUDevice>.experimentalImportTexture(<HTMLCanvasElement>,<UnsignedLongEnforceRange>);
+<new GPUSampler> = <GPUDevice>.createSampler();
+<new GPUSampler> = <GPUDevice>.createSampler(<GPUSamplerDescriptor>);
+<new GPUExternalTexture> = <GPUDevice>.importExternalTexture(<GPUExternalTextureDescriptor>);
+<new GPUBindGroup> = <GPUDevice>.createBindGroup(<GPUBindGroupDescriptor>);
+<new GPUBindGroupLayout> = <GPUDevice>.createBindGroupLayout(<GPUBindGroupLayoutDescriptor>);
+<new GPUPipelineLayout> = <GPUDevice>.createPipelineLayout(<GPUPipelineLayoutDescriptor>);
+<new GPURenderPipeline> = <GPUDevice>.createRenderPipeline(<GPURenderPipelineDescriptor>);
+<new GPUComputePipeline> = <GPUDevice>.createComputePipeline(<GPUComputePipelineDescriptor>);
+<new GPURenderPipeline> = await <GPUDevice>.createRenderPipelineAsync(<GPURenderPipelineDescriptor>);
+<new GPUComputePipeline> = await <GPUDevice>.createComputePipelineAsync(<GPUComputePipelineDescriptor>);
+<new GPUCommandEncoder> = <GPUDevice>.createCommandEncoder();
+<new GPUCommandEncoder> = <GPUDevice>.createCommandEncoder(<GPUCommandEncoderDescriptor>);
+<new GPURenderBundleEncoder> = <GPUDevice>.createRenderBundleEncoder(<GPURenderBundleEncoderDescriptor>);
+<new GPUQuerySet> = <GPUDevice>.createQuerySet(<GPUQuerySetDescriptor>);
+<GPUDevice>.pushErrorScope(<GPUErrorFilter>);
+<new GPUError> = await <GPUDevice>.popErrorScope();
+
+#~~~~~~~~~~~~~~~~GPUExternalTexture~~~~~~~~~~~~~~~~#
+<GPUExternalTexture>.label = <USVString>
+
+#~~~~~~~~~~~~~~~~GPUInternalError~~~~~~~~~~~~~~~~#
+
+#~~~~~~~~~~~~~~~~GPUPipelineLayout~~~~~~~~~~~~~~~~#
+<GPUPipelineLayout>.label = <USVString>
+
+#~~~~~~~~~~~~~~~~GPUQuerySet~~~~~~~~~~~~~~~~#
+<GPUQuerySet>.label = <USVString>
+<GPUQuerySet>.destroy();
+
+#~~~~~~~~~~~~~~~~GPUQueue~~~~~~~~~~~~~~~~#
+<GPUQueue>.label = <USVString>
+<GPUQueue>.submit(<GPUCommandBufferSequence>);
+await <GPUQueue>.onSubmittedWorkDone();
+<GPUQueue>.writeBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<ArrayBufferViewAllowShared>);
+<GPUQueue>.writeBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<ArrayBufferViewAllowShared>,<UnsignedLongLongEnforceRange>);
+<GPUQueue>.writeBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<ArrayBufferViewAllowShared>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPUQueue>.writeBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<ArrayBuffer>);
+<GPUQueue>.writeBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<ArrayBuffer>,<UnsignedLongLongEnforceRange>);
+<GPUQueue>.writeBuffer(<GPUBuffer>,<UnsignedLongLongEnforceRange>,<ArrayBuffer>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPUQueue>.writeTexture(<GPUImageCopyTexture>,<ArrayBufferViewAllowShared>,<GPUImageDataLayout>,<GPUExtent3DDict>);
+<GPUQueue>.writeTexture(<GPUImageCopyTexture>,<ArrayBuffer>,<GPUImageDataLayout>,<GPUExtent3DDict>);
+<GPUQueue>.copyExternalImageToTexture(<GPUImageCopyExternalImage>,<GPUImageCopyTextureTagged>,<GPUExtent3DDict>);
+
+#~~~~~~~~~~~~~~~~GPURenderBundle~~~~~~~~~~~~~~~~#
+<GPURenderBundle>.label = <USVString>
+
+#~~~~~~~~~~~~~~~~GPURenderBundleEncoder~~~~~~~~~~~~~~~~#
+<GPURenderBundleEncoder>.label = <USVString>
+<new GPURenderBundle> = <GPURenderBundleEncoder>.finish();
+<new GPURenderBundle> = <GPURenderBundleEncoder>.finish(<GPURenderBundleDescriptor>);
+<GPURenderBundleEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>);
+<GPURenderBundleEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>,<UnsignedLongEnforceRangeSequence>);
+<GPURenderBundleEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>,<Uint32Array>,<UnsignedLongLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.pushDebugGroup(<USVString>);
+<GPURenderBundleEncoder>.popDebugGroup();
+<GPURenderBundleEncoder>.insertDebugMarker(<USVString>);
+<GPURenderBundleEncoder>.setPipeline(<GPURenderPipeline>);
+<GPURenderBundleEncoder>.setIndexBuffer(<GPUBuffer>,<GPUIndexFormat>);
+<GPURenderBundleEncoder>.setIndexBuffer(<GPUBuffer>,<GPUIndexFormat>,<UnsignedLongLongEnforceRange>);
+<GPURenderBundleEncoder>.setIndexBuffer(<GPUBuffer>,<GPUIndexFormat>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPURenderBundleEncoder>.setVertexBuffer(<UnsignedLongEnforceRange>,<GPUBuffer>);
+<GPURenderBundleEncoder>.setVertexBuffer(<UnsignedLongEnforceRange>,<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+<GPURenderBundleEncoder>.setVertexBuffer(<UnsignedLongEnforceRange>,<GPUBuffer>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPURenderBundleEncoder>.draw(<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.draw(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.draw(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.draw(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.drawIndexed(<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<LongEnforceRange>);
+<GPURenderBundleEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<LongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderBundleEncoder>.drawIndirect(<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+<GPURenderBundleEncoder>.drawIndexedIndirect(<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+
+#~~~~~~~~~~~~~~~~GPURenderPassEncoder~~~~~~~~~~~~~~~~#
+<GPURenderPassEncoder>.label = <USVString>
+<GPURenderPassEncoder>.setViewport(<Float>,<Float>,<Float>,<Float>,<Float>,<Float>);
+<GPURenderPassEncoder>.setScissorRect(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.setBlendConstant(<GPUColorDict>);
+<GPURenderPassEncoder>.setStencilReference(<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.executeBundles(<GPURenderBundleSequence>);
+<GPURenderPassEncoder>.beginOcclusionQuery(<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.endOcclusionQuery();
+<GPURenderPassEncoder>.writeTimestamp(<GPUQuerySet>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.end();
+<GPURenderPassEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>);
+<GPURenderPassEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>,<UnsignedLongEnforceRangeSequence>);
+<GPURenderPassEncoder>.setBindGroup(<UnsignedLongEnforceRange>,<GPUBindGroup>,<Uint32Array>,<UnsignedLongLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.pushDebugGroup(<USVString>);
+<GPURenderPassEncoder>.popDebugGroup();
+<GPURenderPassEncoder>.insertDebugMarker(<USVString>);
+<GPURenderPassEncoder>.setPipeline(<GPURenderPipeline>);
+<GPURenderPassEncoder>.setIndexBuffer(<GPUBuffer>,<GPUIndexFormat>);
+<GPURenderPassEncoder>.setIndexBuffer(<GPUBuffer>,<GPUIndexFormat>,<UnsignedLongLongEnforceRange>);
+<GPURenderPassEncoder>.setIndexBuffer(<GPUBuffer>,<GPUIndexFormat>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPURenderPassEncoder>.setVertexBuffer(<UnsignedLongEnforceRange>,<GPUBuffer>);
+<GPURenderPassEncoder>.setVertexBuffer(<UnsignedLongEnforceRange>,<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+<GPURenderPassEncoder>.setVertexBuffer(<UnsignedLongEnforceRange>,<GPUBuffer>,<UnsignedLongLongEnforceRange>,<UnsignedLongLongEnforceRange>);
+<GPURenderPassEncoder>.draw(<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.draw(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.draw(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.draw(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.drawIndexed(<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<LongEnforceRange>);
+<GPURenderPassEncoder>.drawIndexed(<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<UnsignedLongEnforceRange>,<LongEnforceRange>,<UnsignedLongEnforceRange>);
+<GPURenderPassEncoder>.drawIndirect(<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+<GPURenderPassEncoder>.drawIndexedIndirect(<GPUBuffer>,<UnsignedLongLongEnforceRange>);
+
+#~~~~~~~~~~~~~~~~GPURenderPipeline~~~~~~~~~~~~~~~~#
+<GPURenderPipeline>.label = <USVString>
+<new GPUBindGroupLayout> = <GPURenderPipeline>.getBindGroupLayout(<BindInt>);
+
+#~~~~~~~~~~~~~~~~GPUSampler~~~~~~~~~~~~~~~~#
+<GPUSampler>.label = <USVString>
+
+#~~~~~~~~~~~~~~~~GPUShaderModule~~~~~~~~~~~~~~~~#
+<GPUShaderModule>.label = <USVString>
+<new GPUCompilationInfo> = await <GPUShaderModule>.compilationInfo();
+
+#~~~~~~~~~~~~~~~~GPUTexture~~~~~~~~~~~~~~~~#
+<GPUTexture>.label = <USVString>
+<new GPUTextureView> = <GPUTexture>.createView();
+<new GPUTextureView> = <GPUTexture>.createView(<GPUTextureViewDescriptor>);
+<GPUTexture>.destroy();
+
+#~~~~~~~~~~~~~~~~GPUTextureView~~~~~~~~~~~~~~~~#
+<GPUTextureView>.label = <USVString>

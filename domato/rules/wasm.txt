@@ -1,0 +1,284 @@
+#   Additional Domato rules for the WebAssembly JavaScript API.
+#
+#   This file is included from js.txt before "!begin lines", so it can use the
+#   types defined in common.txt and jshelpers.txt. The global line guard
+#   ("try { <line> } catch(e) { }") is inherited from js.txt on purpose and is
+#   not redefined here so that every generated statement stays guarded.
+#
+#   Covered API (as of the current WebAssembly JS API / proposals):
+#     WebAssembly.Module / Instance / Memory / Table / Global / Tag / Exception
+#     WebAssembly.compile / instantiate / validate
+#     WebAssembly.compileStreaming / instantiateStreaming
+#     WebAssembly.Module.exports / imports / customSections
+#     WebAssembly.CompileError / LinkError / RuntimeError
+#     WebAssembly.JSTag / promising / Suspending
+#
+#   NOTE: generated code must not contain a bare '<' character, otherwise the
+#   Domato tag parser would mistake it for the start of a placeholder.
+
+# --- Byte sources that are accepted by WebAssembly.Module/validate/compile ---
+
+# (module) - the smallest well-formed module: magic + version only.
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00])
+# (module (func (export "f") (result i32) i32.const 42))
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x05,0x01,0x60,0x00,0x01,0x7f,0x03,0x02,0x01,0x00,0x07,0x05,0x01,0x01,0x66,0x00,0x00,0x0a,0x06,0x01,0x04,0x00,0x41,0x2a,0x0b])
+# (module (memory (export "m") 1))
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x05,0x03,0x01,0x00,0x01,0x07,0x05,0x01,0x01,0x6d,0x02,0x00])
+# (module (table (export "t") 1 funcref))
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x04,0x04,0x01,0x70,0x00,0x01,0x07,0x05,0x01,0x01,0x74,0x01,0x00])
+# (module (global (export "g") i32 (i32.const 7)))
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x06,0x07,0x01,0x7f,0x00,0x41,0x07,0x0b,0x07,0x05,0x01,0x01,0x67,0x03,0x00])
+# (module (import "env" "f" (func)) - needs an import object to instantiate.
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x04,0x01,0x60,0x00,0x00,0x02,0x0a,0x01,0x03,0x65,0x6e,0x76,0x01,0x66,0x00,0x00])
+# Random garbage, expected to trigger CompileError paths.
+<wasmbytes> = new Uint8Array(<fuzzint min=0 max=64>)
+<wasmbytes> = new ArrayBuffer(<fuzzint min=0 max=64>)
+<wasmbytes> = <Uint8Array>
+<wasmbytes> = <ArrayBuffer>
+
+# --- Value/limit types used in dictionaries and Tag/Exception parameters ----
+
+<wasmvaltype> = "i32"
+<wasmvaltype> = "i64"
+<wasmvaltype> = "f32"
+<wasmvaltype> = "f64"
+<wasmvaltype> = "v128"
+<wasmvaltype> = "i8"
+<wasmvaltype> = "i16"
+<wasmvaltype> = "funcref"
+<wasmvaltype> = "externref"
+<wasmvaltype> = "anyfunc"
+<wasmvaltype> = "any"
+<wasmvaltype> = "eqref"
+<wasmvaltype> = "i31ref"
+<wasmvaltype> = "structref"
+<wasmvaltype> = "arrayref"
+<wasmvaltype> = "nullref"
+<wasmvaltype> = "nullfuncref"
+<wasmvaltype> = "nullexternref"
+<wasmvaltype> = <DOMString>
+
+<wasmvaltypes> = [<wasmvaltype>]
+<wasmvaltypes> = [<wasmvaltype>, <wasmvaltype>]
+<wasmvaltypes> = [<wasmvaltype>, <wasmvaltype>, <wasmvaltype>]
+<wasmvaltypes> = [<wasmvaltype>, <wasmvaltype>, <wasmvaltype>, <wasmvaltype>]
+
+<wasmglobaltype> = { value: <wasmvaltype> }
+<wasmglobaltype> = { value: <wasmvaltype>, mutable: <boolean> }
+<wasmglobaltype> = { value: "i32", mutable: <boolean> }
+<wasmglobaltype> = { value: "i64", mutable: <boolean> }
+<wasmglobaltype> = { value: "f32", mutable: <boolean> }
+<wasmglobaltype> = { value: "f64", mutable: <boolean> }
+<wasmglobaltype> = { value: "externref", mutable: true }
+
+<wasmmemorytype> = { initial: <fuzzint min=0 max=16> }
+<wasmmemorytype> = { initial: <fuzzint min=0 max=16>, maximum: <fuzzint min=0 max=32> }
+<wasmmemorytype> = { initial: <fuzzint min=0 max=16>, maximum: <fuzzint min=0 max=32>, shared: <boolean> }
+
+<wasmtabletype> = { element: "anyfunc", initial: <fuzzint min=0 max=16> }
+<wasmtabletype> = { element: "funcref", initial: <fuzzint min=0 max=16>, maximum: <fuzzint min=0 max=32> }
+<wasmtabletype> = { element: "externref", initial: <fuzzint min=0 max=16>, maximum: <fuzzint min=0 max=32> }
+<wasmtabletype> = { element: <wasmvaltype>, initial: <fuzzint min=0 max=16> }
+
+<wasmimportobject> = {}
+<wasmimportobject> = { env: {} }
+<wasmimportobject> = { env: { f: function(){} } }
+<wasmimportobject> = { env: { f: <eventhandler> } }
+<wasmimportobject> = { env: { f: <Function> } }
+<wasmimportobject> = { env: { memory: <WebAssemblyMemory> } }
+<wasmimportobject> = { env: { table: <WebAssemblyTable> } }
+<wasmimportobject> = { env: { global: <WebAssemblyGlobal> } }
+<wasmimportobject> = { env: { tag: <WebAssemblyTag> } }
+<wasmimportobject> = { "env": { "f": function(){} } }
+<wasmimportobject> = { env: { f: function(){}, memory: <WebAssemblyMemory>, table: <WebAssemblyTable> } }
+<wasmimportobject> = { wasi_snapshot_preview1: { proc_exit: function(){} } }
+
+<wasmexportname> = "f"
+<wasmexportname> = "m"
+<wasmexportname> = "t"
+<wasmexportname> = "g"
+<wasmexportname> = "foo"
+<wasmexportname> = "memory"
+<wasmexportname> = "table"
+<wasmexportname> = "global"
+<wasmexportname> = "main"
+<wasmexportname> = <DOMString>
+
+<wasmexportidentifier> = f
+<wasmexportidentifier> = foo
+<wasmexportidentifier> = main
+
+# Streaming inputs. A Response with the wasm MIME type is accepted by
+# compileStreaming/instantiateStreaming.
+<wasmresponse> = new Response(<wasmbytes>)
+<wasmresponse> = new Response(<wasmbytes>, { headers: { "Content-Type": "application/wasm" } })
+<wasmresponse> = fetch("data:application/wasm;base64,AGFzbQEAAAA=")
+<wasmresponse> = fetch("data:application/octet-stream,")
+
+# --- WebAssembly statements -------------------------------------------------
+
+!begin lines
+
+#WebAssembly.Module
+<new WebAssemblyModule> = new WebAssembly.Module(<wasmbytes>);
+<new WebAssemblyModule> = new WebAssembly.Module(<wasmbytes>, {});
+<new WebAssemblyModule> = new WebAssembly.Module(new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00]));
+<new any> = WebAssembly.Module.exports(<WebAssemblyModule>);
+<new any> = WebAssembly.Module.imports(<WebAssemblyModule>);
+<new any> = WebAssembly.Module.customSections(<WebAssemblyModule>, <DOMString>);
+<new any> = WebAssembly.Module.customSections(<WebAssemblyModule>, "name");
+<new any> = WebAssembly.Module.customSections(<WebAssemblyModule>, ".debug_info");
+<new any> = WebAssembly.Module.customSections(<WebAssemblyModule>, "producers");
+<new any> = WebAssembly.Module.exports(<WebAssemblyModule>)[<fuzzint min=0 max=4>];
+<new any> = WebAssembly.Module.exports(<WebAssemblyModule>)[<fuzzint min=0 max=4>].name;
+<new any> = WebAssembly.Module.exports(<WebAssemblyModule>)[<fuzzint min=0 max=4>].kind;
+
+#WebAssembly.Instance
+<new WebAssemblyInstance> = new WebAssembly.Instance(<WebAssemblyModule>);
+<new WebAssemblyInstance> = new WebAssembly.Instance(<WebAssemblyModule>, {});
+<new WebAssemblyInstance> = new WebAssembly.Instance(<WebAssemblyModule>, <wasmimportobject>);
+<new any> = <WebAssemblyInstance>.exports;
+<new any> = <WebAssemblyInstance>.exports[<wasmexportname>];
+<new any> = <WebAssemblyInstance>.exports[<wasmexportname>]();
+<new any> = <WebAssemblyInstance>.exports[<wasmexportname>](<any>);
+<new any> = <WebAssemblyInstance>.exports[<wasmexportname>](<fuzzint>, <fuzzint>);
+<new any> = <WebAssemblyInstance>.exports[<wasmexportname>].constructor;
+<new any> = <WebAssemblyInstance>.exports[<wasmexportname>].call();
+<new any> = <WebAssemblyInstance>.exports.<wasmexportidentifier>;
+
+#WebAssembly.Memory
+<new WebAssemblyMemory> = new WebAssembly.Memory(<wasmmemorytype>);
+<new WebAssemblyMemory> = new WebAssembly.Memory({ initial: <fuzzint min=0 max=16> });
+<new WebAssemblyMemory> = new WebAssembly.Memory({ initial: 1, maximum: 2 });
+<new WebAssemblyMemory> = new WebAssembly.Memory({ initial: 1, shared: true, maximum: 2 });
+<new ArrayBuffer> = <WebAssemblyMemory>.buffer;
+<new Uint8Array> = new Uint8Array(<WebAssemblyMemory>.buffer);
+<new DataView> = new DataView(<WebAssemblyMemory>.buffer);
+<new long> = <WebAssemblyMemory>.grow(<fuzzint min=0 max=8>);
+<new long> = <WebAssemblyMemory>.grow(<fuzzint min=0 max=8>);
+<new any> = <WebAssemblyMemory>.type();
+<new any> = <WebAssemblyMemory>.type().minimum;
+<new any> = <WebAssemblyMemory>.type().maximum;
+<new any> = <WebAssemblyMemory>.type().shared;
+
+#WebAssembly.Table
+<new WebAssemblyTable> = new WebAssembly.Table(<wasmtabletype>);
+<new WebAssemblyTable> = new WebAssembly.Table({ element: "anyfunc", initial: <fuzzint min=0 max=16> });
+<new WebAssemblyTable> = new WebAssembly.Table({ element: "funcref", initial: 1, maximum: 2 });
+<new WebAssemblyTable> = new WebAssembly.Table({ element: "externref", initial: 1, maximum: 2 });
+<new long> = <WebAssemblyTable>.length;
+<new any> = <WebAssemblyTable>.get(<fuzzint min=0 max=16>);
+<new any> = <WebAssemblyTable>.get(<fuzzint min=0 max=16>).call();
+<WebAssemblyTable>.set(<fuzzint min=0 max=16>, <any>);
+<WebAssemblyTable>.set(<fuzzint min=0 max=16>, <Function>);
+<WebAssemblyTable>.set(<fuzzint min=0 max=16>, <Element>);
+<WebAssemblyTable>.set(<fuzzint min=0 max=16>, null);
+<new long> = <WebAssemblyTable>.grow(<fuzzint min=0 max=8>);
+<new long> = <WebAssemblyTable>.grow(<fuzzint min=0 max=8>, <Function>);
+<new long> = <WebAssemblyTable>.grow(<fuzzint min=0 max=8>, <Element>);
+<new long> = <WebAssemblyTable>.grow(<fuzzint min=0 max=8>, null);
+<new any> = <WebAssemblyTable>.type();
+<new any> = <WebAssemblyTable>.type().element;
+<new any> = <WebAssemblyTable>.type().minimum;
+<new any> = <WebAssemblyTable>.type().maximum;
+
+#WebAssembly.Global
+<new WebAssemblyGlobal> = new WebAssembly.Global(<wasmglobaltype>);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "i32", mutable: <boolean> }, <fuzzint>);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "i64", mutable: <boolean> }, <fuzzint>);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "f32", mutable: <boolean> }, <float>);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "f64" }, <float>);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "externref", mutable: true }, <Element>);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "externref", mutable: false }, null);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "anyfunc", mutable: true }, <Function>);
+<new any> = <WebAssemblyGlobal>.value;
+<WebAssemblyGlobal>.value = <fuzzint>;
+<WebAssemblyGlobal>.value = <float>;
+<WebAssemblyGlobal>.value = <Element>;
+<WebAssemblyGlobal>.value = <Function>;
+<WebAssemblyGlobal>.value = null;
+<new any> = <WebAssemblyGlobal>.valueOf();
+<new any> = <WebAssemblyGlobal>.type();
+<new any> = <WebAssemblyGlobal>.type().value;
+<new any> = <WebAssemblyGlobal>.type().mutable;
+
+#WebAssembly.Tag / Exception (exception handling proposal)
+<new WebAssemblyTag> = new WebAssembly.Tag({ parameters: <wasmvaltypes> });
+<new WebAssemblyTag> = new WebAssembly.Tag({ parameters: [] });
+<new WebAssemblyTag> = new WebAssembly.Tag({ parameters: ["i32"] });
+<new WebAssemblyTag> = new WebAssembly.Tag({ parameters: ["i32", "f64"] });
+<new WebAssemblyTag> = WebAssembly.JSTag;
+<new any> = <WebAssemblyTag>.type();
+<new any> = <WebAssemblyTag>.type().parameters;
+<new WebAssemblyException> = new WebAssembly.Exception(<WebAssemblyTag>, [<fuzzint>]);
+<new WebAssemblyException> = new WebAssembly.Exception(<WebAssemblyTag>, [<fuzzint>, <float>]);
+<new WebAssemblyException> = new WebAssembly.Exception(<WebAssemblyTag>, <wasmvaltypes>);
+<new WebAssemblyException> = new WebAssembly.Exception(WebAssembly.JSTag, [<DOMString>]);
+<new any> = <WebAssemblyException>.getArg(<WebAssemblyTag>, <fuzzint min=0 max=8>);
+<new boolean> = <WebAssemblyException>.is(<WebAssemblyTag>);
+<new boolean> = <WebAssemblyException>.is(WebAssembly.JSTag);
+throw new WebAssembly.Exception(<WebAssemblyTag>, [<fuzzint>]);
+try { throw new WebAssembly.Exception(<WebAssemblyTag>, [<fuzzint>]); } catch (e) { }
+
+#WebAssembly errors
+<new WebAssemblyError> = new WebAssembly.CompileError(<DOMString>);
+<new WebAssemblyError> = new WebAssembly.LinkError(<DOMString>);
+<new WebAssemblyError> = new WebAssembly.RuntimeError(<DOMString>);
+<new WebAssemblyError> = new WebAssembly.CompileError();
+<new WebAssemblyError> = new WebAssembly.RuntimeError("unreachable");
+<new Error> = new WebAssembly.CompileError(<DOMString>);
+<new Error> = new WebAssembly.LinkError(<DOMString>);
+<new Error> = new WebAssembly.RuntimeError(<DOMString>);
+<new DOMString> = <WebAssemblyError>.message;
+<new DOMString> = <WebAssemblyError>.name;
+<new DOMString> = <WebAssemblyError>.stack;
+
+#WebAssembly.compile / instantiate / validate
+<new boolean> = WebAssembly.validate(<wasmbytes>);
+<new boolean> = WebAssembly.validate(new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00]));
+<new boolean> = WebAssembly.validate(new Uint8Array([0x00,0x61,0x73,0x6d,0x02,0x00,0x00,0x00]));
+<new any> = WebAssembly.compile(<wasmbytes>);
+<new any> = WebAssembly.compile(<wasmbytes>).then(<eventhandler>);
+<new any> = WebAssembly.compile(<wasmbytes>).then(function(x){ return x; });
+<new any> = WebAssembly.compile(<wasmbytes>).catch(<eventhandler>);
+<new any> = WebAssembly.compile(<wasmbytes>).then(<eventhandler>).catch(<eventhandler>);
+<new any> = WebAssembly.compile(<wasmbytes>).then(function(m){ new WebAssembly.Instance(m); });
+<new any> = WebAssembly.compile(<wasmbytes>).then(function(m){ WebAssembly.Module.exports(m); });
+<new any> = WebAssembly.instantiate(<wasmbytes>);
+<new any> = WebAssembly.instantiate(<wasmbytes>, <wasmimportobject>);
+<new any> = WebAssembly.instantiate(<WebAssemblyModule>);
+<new any> = WebAssembly.instantiate(<WebAssemblyModule>, <wasmimportobject>);
+<new any> = WebAssembly.instantiate(<WebAssemblyModule>, <wasmimportobject>).then(<eventhandler>);
+<new any> = WebAssembly.instantiate(<wasmbytes>, <wasmimportobject>).then(<eventhandler>);
+<new any> = WebAssembly.instantiate(<wasmbytes>, <wasmimportobject>).catch(<eventhandler>);
+<new any> = WebAssembly.instantiate(<WebAssemblyModule>, <wasmimportobject>).then(function(x){ return x; });
+<new any> = WebAssembly.compile(<wasmbytes>).then(function(m){ return WebAssembly.instantiate(m, <wasmimportobject>); });
+
+#WebAssembly streaming compilation
+<new any> = WebAssembly.compileStreaming(<wasmresponse>);
+<new any> = WebAssembly.compileStreaming(<wasmresponse>).then(<eventhandler>);
+<new any> = WebAssembly.compileStreaming(<wasmresponse>).catch(<eventhandler>);
+<new any> = WebAssembly.compileStreaming(fetch("data:application/wasm;base64,AGFzbQEAAAA="));
+<new any> = WebAssembly.instantiateStreaming(<wasmresponse>);
+<new any> = WebAssembly.instantiateStreaming(<wasmresponse>, <wasmimportobject>);
+<new any> = WebAssembly.instantiateStreaming(<wasmresponse>, <wasmimportobject>).then(<eventhandler>);
+<new any> = WebAssembly.instantiateStreaming(<wasmresponse>, <wasmimportobject>).catch(<eventhandler>);
+
+#WebAssembly JS API helpers (JSPI / promising)
+<new any> = WebAssembly.promising(<Function>);
+<new any> = WebAssembly.promising(<eventhandler>);
+<new any> = WebAssembly.Suspending(<Function>);
+
+#WebAssembly constructors invoked through the namespace reflectively
+<new any> = WebAssembly.Module(<wasmbytes>);
+<new any> = WebAssembly.Instance(<WebAssemblyModule>);
+<new any> = WebAssembly.Memory({ initial: 1 });
+<new any> = WebAssembly.Table({ element: "anyfunc", initial: 1 });
+<new any> = WebAssembly.Global({ value: "i32" }, <fuzzint>);
+<new any> = WebAssembly.Tag({ parameters: ["i32"] });
+<new any> = WebAssembly.Exception(<WebAssemblyTag>, [<fuzzint>]);
+
+#Round-tripping module bytes through memory
+<new WebAssemblyModule> = new WebAssembly.Module(new Uint8Array(<ArrayBuffer>));
+<new any> = WebAssembly.Module.exports(new WebAssembly.Module(<wasmbytes>));
+<new any> = WebAssembly.Module.imports(new WebAssembly.Module(<wasmbytes>));

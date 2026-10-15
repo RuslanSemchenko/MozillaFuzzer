@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grz-domato"
+version = "0.1.0"
+description = "Thin Grizzly adapter that drives Domato"
+requires-python = ">=3.9"
+dependencies = [
+    "grizzly-framework>=1.3.0",
+]
+
+[project.entry-points."grizzly_adapters"]
+domato = "grz_domato:DomatoAdapter"
+
+[tool.setuptools.packages.find]
+include = ["grz_domato*"]

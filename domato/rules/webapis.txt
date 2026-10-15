@@ -1,0 +1,450 @@
+#   Additional Domato rules for modern web APIs that are not covered by js.txt.
+#
+#   This file is included from js.txt before "!begin lines". The global line
+#   guard ("try { <line> } catch(e) { }") set by js.txt is inherited and is not
+#   redefined here.
+#
+#   Sections:
+#     * creators for types that js.txt references but does not define
+#       (without these the generator raises "No creators for type ...")
+#     * Encoding API        (TextEncoder / TextDecoder)
+#     * WebSocket
+#     * Web Crypto          (crypto / SubtleCrypto)
+#     * Web Audio           (AudioContext / OfflineAudioContext)
+#     * Streams             (ReadableStream / WritableStream / TransformStream)
+#     * HTML Sanitizer
+#     * View Transitions
+#     * Storage Manager / misc
+#
+#   NOTE: generated code must not contain a bare '<' character, otherwise the
+#   Domato tag parser would mistake it for the start of a placeholder.
+
+# --- helper grammar ---------------------------------------------------------
+
+<websocketurl> = "ws://localhost/"
+<websocketurl> = "ws://127.0.0.1:8080/"
+<websocketurl> = "wss://example.com/"
+<websocketurl> = "ws://[::1]:80/"
+<websocketurl> = <DOMString>
+
+<websocketprotocol> = "chat"
+<websocketprotocol> = "soap"
+<websocketprotocol> = "wamp"
+<websocketprotocol> = ""
+
+<textencoding> = "utf-8"
+<textencoding> = "utf-16le"
+<textencoding> = "utf-16be"
+<textencoding> = "iso-8859-1"
+<textencoding> = "windows-1252"
+<textencoding> = "koi8-r"
+<textencoding> = "replacement"
+<textencoding> = "x-user-defined"
+<textencoding> = <DOMString>
+
+<cryptohash> = "SHA-256"
+<cryptohash> = "SHA-1"
+<cryptohash> = "SHA-384"
+<cryptohash> = "SHA-512"
+
+# --- statements -------------------------------------------------------------
+
+!begin lines
+
+#Creators for types referenced by js.txt but not defined there.
+<new AbortController> = new AbortController();
+<new AbortSignal> = new AbortController().signal;
+<new AbortSignal> = AbortSignal.abort();
+<new AbortSignal> = AbortSignal.timeout(<fuzzint min=0 max=10000>);
+<new Array> = new Array();
+<new Array> = new Array(<fuzzint min=0 max=16>);
+<new Array> = [];
+<new Array> = [<any>];
+<new Array> = [<fuzzint>, <fuzzint>, <fuzzint>];
+<new Array> = [<DOMString>, <DOMString>];
+<new Array> = Array.from(<Uint8Array>);
+<new ArrayBuffer> = new ArrayBuffer(<fuzzint min=0 max=256>);
+
+<new Request> = new Request(<url_string>);
+<new Request> = new Request(<url_string>, { method:"GET" });
+<new Request> = new Request(<url_string>, { method:"POST", body:<DOMString> });
+<new Request> = new Request(<url_string>, { method:"POST", body:<ArrayBuffer> });
+<new Request> = new Request(<url_string>, { method:"POST", body:<Uint8Array> });
+<new Request> = new Request(<url_string>, { body:<DOMString>, mode:"cors" });
+<new Request> = new Request(<url_string>, { credentials:"include" });
+<new Request> = new Request(<url_string>, { cache:"no-store" });
+<new Request> = new Request(<url_string>, { redirect:"manual" });
+<new Request> = new Request(<url_string>, { referrer:"about:client" });
+<new Request> = new Request(<url_string>, { signal:<AbortSignal> });
+<new Request> = <Request>.clone();
+
+<new Response> = new Response();
+<new Response> = new Response(<DOMString>);
+<new Response> = new Response(<ArrayBuffer>);
+<new Response> = new Response(<Uint8Array>);
+<new Response> = new Response(<DOMString>, { status:<fuzzint min=200 max=599> });
+<new Response> = new Response(<DOMString>, { status:<fuzzint min=200 max=599>, statusText:<DOMString> });
+<new Response> = new Response(<DOMString>, { headers:{ "Content-Type": <DOMString> } });
+<new Response> = <Response>.clone();
+<new Response> = Response.error();
+<new Response> = Response.redirect(<url_string>);
+<new Response> = Response.json({ key: <DOMString> });
+<new boolean> = <Response>.ok;
+<new boolean> = <Response>.redirected;
+<new long> = <Response>.status;
+<new DOMString> = <Response>.statusText;
+<new DOMString> = <Response>.type;
+<new DOMString> = <Response>.url;
+<new any> = <Response>.headers;
+<new any> = <Response>.body;
+<new boolean> = <Response>.bodyUsed;
+<new any> = <Response>.text();
+<new any> = <Response>.json();
+<new any> = <Response>.arrayBuffer();
+<new any> = <Response>.blob();
+<new any> = <Response>.formData();
+<new any> = <Response>.clone().text();
+
+<new Headers> = new Headers();
+<new Headers> = new Headers({ "Content-Type": <DOMString> });
+<new Headers> = new Headers([[<DOMString>, <DOMString>]]);
+<Headers>.append(<DOMString>, <DOMString>);
+<Headers>.delete(<DOMString>);
+<Headers>.set(<DOMString>, <DOMString>);
+<new DOMString> = <Headers>.get(<DOMString>);
+<new boolean> = <Headers>.has(<DOMString>);
+<new any> = <Headers>.entries();
+<new any> = <Headers>.keys();
+<new any> = <Headers>.values();
+
+<new any> = fetch(<url_string>);
+<new any> = fetch(<url_string>, { method:"POST", body:<DOMString> });
+<new any> = fetch(<url_string>, { mode:"no-cors" });
+<new any> = fetch(<url_string>, { credentials:"include" });
+<new any> = fetch(<url_string>, { signal:<AbortSignal> });
+<new any> = fetch(<url_string>).then(<eventhandler>);
+<new any> = fetch(<url_string>).then(function(r){ return r.text(); });
+<new any> = fetch(<url_string>).then(function(r){ return r.arrayBuffer(); }).catch(<eventhandler>);
+<new any> = fetch(<Request>);
+<new any> = fetch(<Request>).then(<eventhandler>);
+
+<new PerformanceEntry> = new PerformanceMark(<DOMString>);
+<new PerformanceEntry> = new PerformanceMeasure(<DOMString>);
+<new PerformanceEntry> = performance.getEntries()[<fuzzint min=0 max=0>];
+<new PerformanceEntry> = performance.getEntriesByType("mark")[<fuzzint min=0 max=0>];
+<new PerformanceEntry> = performance.getEntriesByType("measure")[<fuzzint min=0 max=0>];
+<new PerformanceEntry> = performance.getEntriesByName(<DOMString>)[<fuzzint min=0 max=0>];
+
+<new IntersectionObserverEntry> = new IntersectionObserver(<EventHandler>).takeRecords()[<fuzzint min=0 max=0>];
+<new ResizeObserverEntry> = new ResizeObserver(<EventHandler>).takeRecords()[<fuzzint min=0 max=0>];
+
+<new MediaDeviceInfo> = undefined;
+<new MIDIInput> = undefined;
+<new MIDIOutput> = undefined;
+<new BluetoothDevice> = undefined;
+<new BluetoothRemoteGATTServer> = <BluetoothDevice>.gatt;
+<new USBDevice> = undefined;
+<new PaymentResponse> = undefined;
+<new Lock> = undefined;
+<new NDEFRecord> = new NDEFRecord({ recordType:"text", mediaType:"text/plain", data:<DOMString> });
+<new NDEFRecord> = new NDEFRecord({ recordType:"text", data:<DOMString> });
+<new NDEFRecord> = new NDEFRecord({ recordType:"absolute-url", data:<DOMString> });
+<new RTCRtpSender> = <RTCPeerConnection>.getSenders()[<fuzzint min=0 max=0>];
+<new CSSLengthValue> = <CSSSimpleLength>;
+<new IDBFactory> = indexedDB;
+<new IDBRequest> = <IDBFactory>.open(<DOMString>);
+<new IDBRequest> = <IDBFactory>.open(<DOMString>, <fuzzint>);
+<new IDBOpenDBRequest> = <IDBFactory>.open(<DOMString>);
+<new IDBOpenDBRequest> = <IDBFactory>.deleteDatabase(<DOMString>);
+<new IDBCursor> = <IDBObjectStore>.openCursor();
+<new IDBCursor> = <IDBObjectStore>.openKeyCursor();
+<new IDBCursor> = <IDBIndex>.openCursor();
+<new IDBCursor> = <IDBIndex>.openKeyCursor();
+
+<new XRSession> = undefined;
+<new XRSpace> = undefined;
+<new XRFrame> = undefined;
+<new XRInputSource> = undefined;
+<new XRLayer> = undefined;
+
+#The generator configures "window"/"navigator" as initial variables of type
+#Window/Navigator, but js.txt also uses the lowercase <window>/<navigator>
+#symbols. Give them creators so those statements do not fail.
+<new window> = window;
+<new navigator> = navigator;
+
+#TextEncoder / TextDecoder
+<new TextEncoder> = new TextEncoder();
+<new Uint8Array> = <TextEncoder>.encode(<DOMString>);
+<new Uint8Array> = <TextEncoder>.encode();
+<new any> = <TextEncoder>.encodeInto(<DOMString>, new Uint8Array(<fuzzint min=0 max=32>));
+<new DOMString> = <TextEncoder>.encoding;
+<new TextDecoder> = new TextDecoder();
+<new TextDecoder> = new TextDecoder(<textencoding>);
+<new TextDecoder> = new TextDecoder(<textencoding>, { fatal:true });
+<new TextDecoder> = new TextDecoder(<textencoding>, { ignoreBOM:true });
+<new TextDecoder> = new TextDecoder(<textencoding>, { fatal:true, ignoreBOM:true });
+<new DOMString> = <TextDecoder>.decode();
+<new DOMString> = <TextDecoder>.decode(<Uint8Array>);
+<new DOMString> = <TextDecoder>.decode(<ArrayBuffer>);
+<new DOMString> = <TextDecoder>.decode(<Uint8Array>, { stream:true });
+<new DOMString> = <TextDecoder>.encoding;
+<new boolean> = <TextDecoder>.fatal;
+<new boolean> = <TextDecoder>.ignoreBOM;
+
+#WebSocket
+<new WebSocket> = new WebSocket(<websocketurl>);
+<new WebSocket> = new WebSocket(<websocketurl>, <websocketprotocol>);
+<new WebSocket> = new WebSocket(<websocketurl>, [<websocketprotocol>]);
+<new WebSocket> = new WebSocket(<websocketurl>, [<websocketprotocol>, <websocketprotocol>]);
+<new DOMString> = <WebSocket>.url;
+<new DOMString> = <WebSocket>.protocol;
+<new DOMString> = <WebSocket>.extensions;
+<new DOMString> = <WebSocket>.binaryType;
+<WebSocket>.binaryType = "blob";
+<WebSocket>.binaryType = "arraybuffer";
+<new long> = <WebSocket>.bufferedAmount;
+<new long> = <WebSocket>.readyState;
+<new EventHandler> = <WebSocket>.onopen;
+<WebSocket>.onopen = <EventHandler>;
+<new EventHandler> = <WebSocket>.onmessage;
+<WebSocket>.onmessage = <EventHandler>;
+<new EventHandler> = <WebSocket>.onerror;
+<WebSocket>.onerror = <EventHandler>;
+<new EventHandler> = <WebSocket>.onclose;
+<WebSocket>.onclose = <EventHandler>;
+<WebSocket>.send(<DOMString>);
+<WebSocket>.send(<ArrayBuffer>);
+<WebSocket>.send(<Uint8Array>);
+<WebSocket>.send(<TextEncoder>.encode(<DOMString>));
+<WebSocket>.close();
+<WebSocket>.close(<fuzzint min=1000 max=4999>);
+<WebSocket>.close(<fuzzint min=1000 max=4999>, <DOMString>);
+<WebSocket>.addEventListener("message", <eventhandler>);
+
+#Web Crypto
+<new any> = crypto.getRandomValues(new Uint8Array(<fuzzint min=1 max=32>));
+<new any> = crypto.getRandomValues(new Uint32Array(<fuzzint min=1 max=16>));
+<new any> = crypto.getRandomValues(new Int8Array(<fuzzint min=1 max=32>));
+<new DOMString> = crypto.randomUUID();
+<new any> = crypto.subtle;
+<new any> = crypto.subtle.digest(<cryptohash>, <ArrayBuffer>);
+<new any> = crypto.subtle.digest(<cryptohash>, <Uint8Array>);
+<new any> = crypto.subtle.digest("SHA-256", new ArrayBuffer(0));
+<new any> = crypto.subtle.generateKey({ name:"AES-GCM", length:256 }, true, ["encrypt", "decrypt"]);
+<new any> = crypto.subtle.generateKey({ name:"AES-CBC", length:128 }, true, ["encrypt", "decrypt"]);
+<new any> = crypto.subtle.generateKey({ name:"HMAC", hash:<cryptohash> }, true, ["sign", "verify"]);
+<new any> = crypto.subtle.generateKey({ name:"RSASSA-PKCS1-v1_5", modulusLength:<fuzzint min=1 max=4096>, publicExponent:new Uint8Array([1, 0, 1]), hash:<cryptohash> }, true, ["sign", "verify"]);
+<new any> = crypto.subtle.generateKey({ name:"RSA-PSS", modulusLength:<fuzzint min=1 max=4096>, publicExponent:new Uint8Array([1, 0, 1]), hash:<cryptohash> }, true, ["sign", "verify"]);
+<new any> = crypto.subtle.generateKey({ name:"ECDSA", namedCurve:"P-256" }, true, ["sign", "verify"]);
+<new any> = crypto.subtle.generateKey({ name:"ECDSA", namedCurve:"P-384" }, true, ["sign", "verify"]);
+<new any> = crypto.subtle.generateKey({ name:"ECDH", namedCurve:"P-521" }, true, ["deriveKey"]);
+<new any> = crypto.subtle.generateKey({ name:"Ed25519" }, true, ["sign", "verify"]);
+<new any> = crypto.subtle.importKey("raw", <ArrayBuffer>, "AES-GCM", false, ["encrypt"]);
+<new any> = crypto.subtle.importKey("raw", <Uint8Array>, { name:"HMAC", hash:<cryptohash> }, false, ["sign"]);
+<new any> = crypto.subtle.importKey("jwk", { kty:"oct", k:"AAAA" }, "AES-GCM", false, ["encrypt"]);
+<new any> = crypto.subtle.importKey("spki", <ArrayBuffer>, "ECDSA", false, ["verify"]);
+<new any> = crypto.subtle.importKey("pkcs8", <ArrayBuffer>, "RSA-OAEP", false, ["decrypt"]);
+<new any> = crypto.subtle.exportKey("raw", <any>);
+<new any> = crypto.subtle.exportKey("jwk", <any>);
+<new any> = crypto.subtle.exportKey("spki", <any>);
+<new any> = crypto.subtle.encrypt({ name:"AES-GCM", iv:new Uint8Array(12) }, <any>, <ArrayBuffer>);
+<new any> = crypto.subtle.encrypt({ name:"AES-CBC", iv:new Uint8Array(16) }, <any>, <ArrayBuffer>);
+<new any> = crypto.subtle.decrypt({ name:"AES-GCM", iv:new Uint8Array(12) }, <any>, <ArrayBuffer>);
+<new any> = crypto.subtle.sign({ name:"HMAC" }, <any>, <ArrayBuffer>);
+<new any> = crypto.subtle.verify({ name:"HMAC" }, <any>, <ArrayBuffer>, <ArrayBuffer>);
+<new any> = crypto.subtle.deriveBits({ name:"ECDH", public:new Uint8Array(0) }, <any>, <fuzzint min=1 max=1024>);
+<new any> = crypto.subtle.deriveKey({ name:"ECDH", public:new Uint8Array(0) }, <any>, { name:"AES-GCM", length:256 }, true, ["encrypt"]);
+<new any> = crypto.subtle.wrapKey("raw", <any>, <any>, { name:"AES-GCM", iv:new Uint8Array(12) });
+<new any> = crypto.subtle.unwrapKey("raw", <ArrayBuffer>, <any>, { name:"AES-GCM", iv:new Uint8Array(12) }, "AES-GCM", true, ["encrypt"]);
+
+#Web Audio
+<new AudioContext> = new AudioContext();
+<new AudioContext> = new AudioContext({ latencyHint:"interactive" });
+<new AudioContext> = new AudioContext({ latencyHint:"playback" });
+<new AudioContext> = new AudioContext({ latencyHint:<float> });
+<new AudioContext> = new AudioContext({ sampleRate:<fuzzint min=8000 max=96000> });
+<new AudioContext> = new AudioContext({ sampleRate:<fuzzint min=8000 max=96000>, latencyHint:"interactive" });
+<new OfflineAudioContext> = new OfflineAudioContext(<fuzzint min=1 max=8>, <fuzzint min=1 max=44100>, <fuzzint min=8000 max=96000>);
+<new OfflineAudioContext> = new OfflineAudioContext({ numberOfChannels:<fuzzint min=1 max=8>, length:<fuzzint min=1 max=44100>, sampleRate:44100 });
+<new DOMString> = <AudioContext>.state;
+<new double> = <AudioContext>.sampleRate;
+<new double> = <AudioContext>.currentTime;
+<new double> = <AudioContext>.baseLatency;
+<new double> = <AudioContext>.outputLatency;
+<new any> = <AudioContext>.destination;
+<new any> = <AudioContext>.listener;
+<new any> = <AudioContext>.createGain();
+<new any> = <AudioContext>.createOscillator();
+<new any> = <AudioContext>.createBufferSource();
+<new any> = <AudioContext>.createAnalyser();
+<new any> = <AudioContext>.createBiquadFilter();
+<new any> = <AudioContext>.createDelay();
+<new any> = <AudioContext>.createDynamicsCompressor();
+<new any> = <AudioContext>.createConvolver();
+<new any> = <AudioContext>.createPanner();
+<new any> = <AudioContext>.createStereoPanner();
+<new any> = <AudioContext>.createWaveShaper();
+<new any> = <AudioContext>.createConstantSource();
+<new any> = <AudioContext>.createChannelMerger();
+<new any> = <AudioContext>.createChannelSplitter();
+<new any> = <AudioContext>.createScriptProcessor();
+<new any> = <AudioContext>.createPeriodicWave(new Float32Array(<fuzzint min=1 max=16>), new Float32Array(<fuzzint min=1 max=16>));
+<new AudioBuffer> = <AudioContext>.createBuffer(<fuzzint min=1 max=8>, <fuzzint min=1 max=1024>, <fuzzint min=8000 max=96000>);
+<new AudioBuffer> = new AudioBuffer({ length:<fuzzint min=1 max=1024>, numberOfChannels:<fuzzint min=1 max=8>, sampleRate:44100 });
+<new AudioBuffer> = new AudioBuffer({ length:1, numberOfChannels:1, sampleRate:44100 });
+<new any> = <AudioContext>.decodeAudioData(<ArrayBuffer>);
+<new any> = <AudioContext>.decodeAudioData(<ArrayBuffer>, <eventhandler>);
+<new any> = <AudioContext>.resume();
+<new any> = <AudioContext>.suspend();
+<new any> = <AudioContext>.close();
+<new any> = <AudioContext>.createMediaStreamDestination();
+<new any> = <AudioContext>.createMediaElementSource(<HTMLMediaElement>);
+
+<new OscillatorNode> = <AudioContext>.createOscillator();
+<new GainNode> = <AudioContext>.createGain();
+<new AnalyserNode> = <AudioContext>.createAnalyser();
+<new BiquadFilterNode> = <AudioContext>.createBiquadFilter();
+<new DelayNode> = <AudioContext>.createDelay();
+<new StereoPannerNode> = <AudioContext>.createStereoPanner();
+<new ConstantSourceNode> = <AudioContext>.createConstantSource();
+<new DynamicsCompressorNode> = <AudioContext>.createDynamicsCompressor();
+<new ConvolverNode> = <AudioContext>.createConvolver();
+<new PannerNode> = <AudioContext>.createPanner();
+<new WaveShaperNode> = <AudioContext>.createWaveShaper();
+<new ChannelMergerNode> = <AudioContext>.createChannelMerger();
+<new ChannelSplitterNode> = <AudioContext>.createChannelSplitter();
+<new AudioBufferSourceNode> = <AudioContext>.createBufferSource();
+
+<OscillatorNode>.type = "square";
+<OscillatorNode>.type = "sine";
+<OscillatorNode>.type = "sawtooth";
+<OscillatorNode>.type = "triangle";
+<OscillatorNode>.type = "custom";
+<new DOMString> = <OscillatorNode>.type;
+<new double> = <OscillatorNode>.frequency.value;
+<OscillatorNode>.frequency.value = <float>;
+<OscillatorNode>.frequency.setValueAtTime(<float>, <AudioContext>.currentTime);
+<OscillatorNode>.frequency.linearRampToValueAtTime(<float>, <AudioContext>.currentTime);
+<OscillatorNode>.setPeriodicWave(<AudioContext>.createPeriodicWave(new Float32Array(2), new Float32Array(2)));
+<OscillatorNode>.start();
+<OscillatorNode>.start(<double>);
+<OscillatorNode>.stop();
+<OscillatorNode>.stop(<double>);
+<OscillatorNode>.connect(<AudioContext>.destination);
+<OscillatorNode>.connect(<GainNode>);
+<OscillatorNode>.disconnect();
+<OscillatorNode>.addEventListener("ended", <eventhandler>);
+<GainNode>.gain.value = <float>;
+<GainNode>.gain.setValueAtTime(<float>, 0);
+<GainNode>.gain.exponentialRampToValueAtTime(<float>, <AudioContext>.currentTime);
+<GainNode>.connect(<AudioContext>.destination);
+<GainNode>.disconnect();
+<new double> = <GainNode>.gain.value;
+<BiquadFilterNode>.type = "lowpass";
+<BiquadFilterNode>.type = "highpass";
+<BiquadFilterNode>.type = "bandpass";
+<BiquadFilterNode>.frequency.value = <float>;
+<BiquadFilterNode>.Q.value = <float>;
+<BiquadFilterNode>.gain.value = <float>;
+<DelayNode>.delayTime.value = <float>;
+<DelayNode>.connect(<AudioContext>.destination);
+<AnalyserNode>.fftSize = <fuzzint min=1 max=32768>;
+<AnalyserNode>.frequencyBinCount;
+<AnalyserNode>.getByteFrequencyData(new Uint8Array(<fuzzint min=1 max=1024>));
+<AnalyserNode>.getByteTimeDomainData(new Uint8Array(<fuzzint min=1 max=1024>));
+<AnalyserNode>.getFloatFrequencyData(new Float32Array(<fuzzint min=1 max=1024>));
+<AnalyserNode>.getFloatTimeDomainData(new Float32Array(<fuzzint min=1 max=1024>));
+<ConstantSourceNode>.offset.value = <float>;
+<ConstantSourceNode>.start();
+<ConstantSourceNode>.stop();
+<ConstantSourceNode>.connect(<AudioContext>.destination);
+<StereoPannerNode>.pan.value = <float>;
+<StereoPannerNode>.connect(<AudioContext>.destination);
+<AudioBufferSourceNode>.buffer = <AudioBuffer>;
+<AudioBufferSourceNode>.loop = <boolean>;
+<AudioBufferSourceNode>.playbackRate.value = <float>;
+<AudioBufferSourceNode>.start();
+<AudioBufferSourceNode>.start(0, <double>, <double>);
+<AudioBufferSourceNode>.stop();
+<new double> = <AudioBuffer>.sampleRate;
+<new long> = <AudioBuffer>.length;
+<new double> = <AudioBuffer>.duration;
+<new long> = <AudioBuffer>.numberOfChannels;
+<AudioBuffer>.getChannelData(<fuzzint min=0 max=8>);
+<new any> = <OfflineAudioContext>.startRendering();
+<new any> = <OfflineAudioContext>.resume();
+<new any> = <OfflineAudioContext>.suspend(<double>);
+
+#Streams
+<new ReadableStream> = new ReadableStream();
+<new ReadableStream> = new ReadableStream({ start:function(c){} });
+<new ReadableStream> = new ReadableStream({ pull:function(c){} });
+<new ReadableStream> = new ReadableStream({ cancel:function(){} });
+<new ReadableStream> = new ReadableStream({ start:function(c){ c.enqueue(<DOMString>); }, pull:function(c){ c.enqueue(<Uint8Array>); } });
+<new WritableStream> = new WritableStream();
+<new WritableStream> = new WritableStream({ write:function(c){} });
+<new WritableStream> = new WritableStream({ write:function(c){}, close:function(){} });
+<new WritableStream> = new WritableStream({ write:function(c){}, abort:function(){} });
+<new TransformStream> = new TransformStream();
+<new TransformStream> = new TransformStream({ transform:function(c, ctl){ ctl.enqueue(c); } });
+<new TransformStream> = new TransformStream({ start:function(){} }, { write:function(c){} });
+<new any> = <ReadableStream>.getReader();
+<new any> = <ReadableStream>.getReader({ mode:"byob" });
+<new any> = <WritableStream>.getWriter();
+<new any> = <TransformStream>.readable;
+<new any> = <TransformStream>.writable;
+<new any> = <ReadableStream>.pipeThrough(new TransformStream());
+<new any> = <ReadableStream>.pipeTo(new WritableStream());
+<new any> = <ReadableStream>.cancel();
+<new any> = <ReadableStream>.tee();
+<new any> = <ReadableStream>.values();
+<new any> = <ReadableStream>.locked;
+<new any> = ReadableStream.from([<DOMString>, <DOMString>]);
+<new any> = ReadableStream.from(<Array>);
+
+#HTML Sanitizer API
+<new Sanitizer> = new Sanitizer();
+<new Sanitizer> = new Sanitizer({ allowElements:["div", "span"] });
+<new Sanitizer> = new Sanitizer({ blockElements:["script"] });
+<new Sanitizer> = new Sanitizer({ dropElements:["style"] });
+<new Sanitizer> = new Sanitizer({ allowAttributes:{ "class":["*"] } });
+<new Sanitizer> = new Sanitizer({ dropAttributes:{ "onclick":["*"] } });
+<new Sanitizer> = new Sanitizer({ allowComments:true });
+<new Sanitizer> = new Sanitizer({ allowCustomElements:true });
+<new DocumentFragment> = <Sanitizer>.sanitizeFor("div", <DOMString>);
+<new DocumentFragment> = <Sanitizer>.sanitizeFor("div", <Document>);
+<new any> = <Sanitizer>.sanitize(<DocumentFragment>);
+<Element>.setHTML(<DOMString>);
+<Element>.setHTML(<DOMString>, <Sanitizer>);
+<Element>.setHTMLUnsafe(<DOMString>);
+<new any> = <Element>.getHTML();
+<new any> = <Element>.getHTML({ serializableShadowRoots:true });
+<new DOMString> = <Element>.innerHTML;
+<Element>.innerHTML = <DOMString>;
+
+#View Transitions
+<new ViewTransition> = document.startViewTransition(<EventHandler>);
+<new ViewTransition> = document.startViewTransition(function(){});
+<new ViewTransition> = document.startViewTransition(<EventHandler>);
+<new ViewTransition> = <Element>.startViewTransition(<EventHandler>);
+<new any> = <ViewTransition>.ready;
+<new any> = <ViewTransition>.finished;
+<new any> = <ViewTransition>.updateCallbackDone;
+<new any> = <ViewTransition>.skipTransition();
+
+#Storage Manager (partial)
+<new any> = navigator.storage.getDirectory();
+<new any> = navigator.storage.estimate();
+<new any> = navigator.storage.persist();
+<new any> = navigator.storage.persisted();
+<new any> = navigator.storageBuckets;
+<new boolean> = navigator.cookieEnabled;
+
+#ReportingObserver
+<new ReportingObserver> = new ReportingObserver(<EventHandler>);
+<new ReportingObserver> = new ReportingObserver(<EventHandler>, { buffered:true });
+<new ReportingObserver> = new ReportingObserver(<EventHandler>, { types:["deprecation", "intervention"] });
+<ReportingObserver>.observe();
+<ReportingObserver>.disconnect();
+<ReportingObserver>.takeRecords();

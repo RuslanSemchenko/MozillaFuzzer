@@ -1,0 +1,274 @@
+Полный детальный анализ кода MozillaFuzzer (Domato + Grizzly adapter)
+     Обзор проекта
+     Проект — это адаптер для фреймворка Grizzly, который использует Google Domato для генерации fuzz-тестов
+     DOM-парсера браузера (Firefox). Архитектура:
+
+     ┌──────────────────────┐            ┌────────────────────────────────────────┐
+     │       fuzz.bat       │      ┌─────┤canvas/jscript/php/vbscript/webgl/webgpu│
+     └───────────┬──────────┘      │     └────────────────────────────────────────┘
+        запускает▼                 │
+     ┌──────────────────────┐      │
+     │   Grizzly harness    │      │
+     └───────────┬──────────┘      │
+            entry▼point            │
+     ┌──────────────────────┐ standalone
+     │grz_domato/__init__.py│      │
+     └───────────┬──────────┘      │
+            load_module            │
+     ┌──────────────────────┐      │
+     │ domato/generator.py  ├──────┼──────import──────────────┐
+     └───────────┬──────────┘      │                          │
+              import───────────────┘                          ▼
+     ┌──────────────────────┐            ┌────────────────────────────────────────┐
+     │  domato/grammar.py   │            │   html_tags / svg_tags / mathml_tags   │
+     └───────────┬──────────┘            └────────────────────────────────────────┘
+              exec()
+     ┌──────────────────────┐
+     │User-defined functions│
+     └──────────────────────┘
+
+     ---
+
+     1. Критические проблемы безопасности
+     1.1. Использование exec() в grammar.py (строки 307–322)
+     exec(compiled_function, args)
+
+     Это критическая уязвимость: пользовательский код из grammar-файлов выполняется через exec(). Злоумышленник может
+     вставить произвольный Python-код в grammar-файл и получить RCE.
+
+     Рекомендация: Заменить на безопасный sandbox (например,  RestrictedPython) или хотя бы ограничить доступные
+     globals через __builtins__={}.
+
+     1.2. compile() без ограничений (строка 810)
+     compiled_fn = compile(source, name, 'exec')
+
+     Компилируется произвольный Python-код из файлов грамматики без какой-либо проверки.
+
+     ---
+
+     2. Архитектурные проблемы
+     2.1. Массовое дублирование кода (DRY violation)
+     Файлы canvas/generator.py, jscript/generator.py, php/generator.py, vbscript/generator.py, webgl/generator.py,
+     webgpu/generator.py — практически идентичны. Функции get_option(), main(), generate_samples() скопированы слово
+     в слово.
+
+     Рекомендация: Вынести общий код в базовый класс или модуль domato/base_generator.py с параметризованными
+     константами (шаблон, grammar-файл, placeholder, расширение).
+
+     2.2. from __future__ import print_function — Python 2 legacy
+     Все файлы содержат эту строку, но pyproject.toml требует requires-python = ">=3.9". Это мёртвый код, который
+     нужно удалить.
+
+     2.3. Непоследовательное использование with для файлов
+     В некоторых местах файлы открываются правильно:
+
+     with open(outfile, 'w') as f:
+         f.write(result)
+
+     В других — без контекстного менеджера:
+
+     f = open(filepath)
+     content = f.read()
+     f.close()
+
+     Если произойдет исключение между open() и close(), файл останется открытым.
+
+     Рекомендация: Везде использовать with open(...) as f:.
+
+     ---
+
+     3. Стиль и качество кода
+     3.1. Опасные магические числа
+     _N_MAIN_LINES = 1000
+     _N_EVENTHANDLER_LINES = 500
+
+     Разбросаны по каждому generator.py без единой конфигурации. В webgl/generator.py они 100 и 1 соответственно.
+
+     3.2. Опечатка в mathml_tags.py (строка 51)
+     'semantics': 'MathMLelement'  # должно быть MathMLElement
+
+     3.3. Опасная строковая конкатенация вместо f-strings
+     Везде используется + для конкатенации строк:
+
+     ctx['htmlvargen'] += '/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname + ' =
+     document.createElement(\"' + tag + '\"); //' + tagtype + '\n'
+
+     Рекомендация: Заменить на f-strings для читаемости:
+
+     ctx['htmlvargen'] += f"/* newvar{{{varname}:{tagtype}}} */ var {varname} = document.createElement(\"{tag}\");
+     //{tagtype}\n"
+
+     3.4. Grammar class — 1046 строк
+     Один класс делает слишком много: парсинг, генерация, управление переменными, обработка импортов, вычисление
+     вероятностей.
+
+     Рекомендация: Разделить на:
+
+     • GrammarParser — парсинг файлов
+     • GrammarGenerator — генерация кода
+     • VariableManager — управление переменными
+     • ProbabilityEngine — CDF и вероятности
+
+     3.5. print() вместо логирования
+     Везде используется print() для отладки и ошибок. Нет модуля logging.
+
+     Рекомендация: Заменить на logging с уровнями (WARNING, ERROR, DEBUG).
+
+     3.6. Отсутствуют type hints
+     Нигде нет аннотаций типов, хотя проект требует Python 3.9+.
+
+     Рекомендация: Добавить type hints для всех публичных функций.
+
+     ---
+
+     4. Логические проблемы
+     4.1. add_html_ids() — дублирование логики (строки 47–68 в generator.py)
+     Три ветки if/elif для HTML, SVG, MathML делают практически одно и то же, только с разными счётчиками.
+
+     Рекомендация: Вынести в параметризованную функцию:
+
+     def _add_tag_id(matchobj, ctx, tag_map, prefix, counter_key):
+         tagname = matchobj.group(0)[1:-1]
+         if tagname not in tag_map:
+             return matchobj.group(0)
+         ctx[counter_key] += 1
+         varname = f"{prefix}{ctx[counter_key]:05d}"
+         # ...
+
+     4.2. generate_function_body() в jscript/generator.py (строки 39–42)
+     if random.random() < 0.1:
+         js += 'throw new Error();\n'
+     else:
+         js += 'return vars[' + str(random.randint(0,99)) + '];\n'
+
+     Массив vars может не содержать 100 элементов. Это генерирует невалидный JS-код.
+
+     4.3. parse_from_file() — утечка file handle (строки 987–993 в grammar.py)
+     f = open(filename)
+     content = f.read()
+     f.close()
+
+     Если f.read() выбросит исключение, файл не закроется.
+
+     4.4. _include_from_file() — та же проблема (строки 937–939)
+     f = open(filepath)
+     content = f.read()
+     f.close()
+
+     4.5. webgpu/generator.py строка 114 — двойной os.path.join
+     err = webgpugrammar.parse_from_file(os.path.join(grammar_dir, os.path.join(grammar_dir, 'webgpu.txt')), extra)
+
+     grammar_dir добавляется дважды — это баг, путь будет некорректным.
+
+     4.6. build_grammar.py — дублирование функции parse_dictionaries()
+     Функция объявлена дважды (строки 73 и 122). Вторая перезаписывает первую, так что первая версия никогда не
+     вызывается.
+
+     4.7. build_grammar.py — жёстко заданный пустой путь
+     PATH_TO_CHROME_BUILD_DIR = ""
+
+     Скрипт не работает без ручной правки.
+
+     ---
+
+     5. Проблемы с тестированием
+     5.1. Нет тестов
+     В проекте нет ни одного тестового файла (кроме mathml3_legacy/test.py, который является скорее скриптом, чем
+     тестом).
+
+     Рекомендация: Добавить unit-тесты для Grammar класса и adapter'а.
+
+     5.2. mathml3_legacy/test.py — относительные пути
+     cssgrammar.parse_from_file('css.txt')
+
+     Скрипт работает только из определённой директории.
+
+     ---
+
+     6. Проблемы конфигурации
+     6.1. pyproject.toml — нет зависимостей
+     requires-python = ">=3.9"
+
+     Но нет dependencies. Проект зависит от grizzly и sapphire, но они не объявлены.
+
+     Рекомендация: Добавить:
+
+     dependencies = ["grizzly", "sapphire"]
+
+     6.2. fuzz.bat — жёстко заданный путь к Firefox
+     set "BROWSER="C:\mozilla-source\firefox\obj-x86_64-pc-windows-msvc\dist\bin\firefox.exe""
+
+     Не работает без ручной правки.
+
+     ---
+
+     7. Производительность
+     7.1. copy.deepcopy(context) в цикле (строка 287 в grammar.py)
+     while len(context['lines']) < num_lines:
+         tmp_context = copy.deepcopy(context)
+
+     deepcopy на каждой итерации при num_lines = 1000 — это медленно.
+
+     Рекомендация: Использовать copy.copy() и shallow-копировать только те части, которые действительно изменяются.
+
+     7.2. random.choice(list(_HTML_TYPES)) (строка 39 в generator.py)
+     list(_HTML_TYPES) создаёт новый список на каждой итерации.
+
+     Рекомендация: Кэшировать список один раз:
+
+     _HTML_TAGS_LIST = list(_HTML_TYPES)
+
+     7.3. _add_variable() — создание set на каждой итерации (строки 1026–1028 в grammar.py)
+     set1 = set(context['interesting_lines'])
+     set2 = set(self._interesting_lines[var_type])
+     new_interesting = set2 - set1
+
+     При частых вызовах это дорого.
+
+     ---
+
+     8. Документация
+     8.1. Нет README
+     В проекте нет README.md с описанием установки, использования и архитектуры.
+
+     8.2. Docstrings не соответствуют коду
+     В canvas/generator.py функция GenerateNewSample имеет docstring, где описаны htmlgrammar и cssgrammar, хотя
+     функция принимает только template и jsgrammar.
+
+     8.3. Смешанные соглашения об именовании
+     • generate_new_sample (snake_case) vs GenerateNewSample (PascalCase)
+     • _N_MAIN_LINES (константа) vs num_lines (переменная)
+
+     ---
+
+     9. Сводная таблица приоритетов
+     ╭────────────────┬────────────────────────────────┬──────────────────────────────╮
+     │ Приоритет      │ Проблема                       │ Файл                         │
+     ├────────────────┼────────────────────────────────┼──────────────────────────────┤
+     │ 🔴 Критический │ exec() без sandbox             │ grammar.py:319               │
+     │ 🔴 Критический │ Двойной os.path.join           │ webgpu/generator.py:114      │
+     │ 🟠 Высокий     │ Утечка file handles            │ grammar.py, все generator.py │
+     │ 🟠 Высокий     │ vars[0..99] — выход за границы │ jscript/generator.py:42      │
+     │ 🟡 Средний     │ Массовое дублирование кода     │ Все generator.py             │
+     │ 🟡 Средний     │ deepcopy в цикле               │ grammar.py:287               │
+     │ 🟡 Средний     │ Опечатка MathMLelement         │ mathml_tags.py:51            │
+     │ 🟢 Низкий      │ from __future__ — мёртвый код  │ Все файлы                    │
+     │ 🟢 Низкий      │ Нет type hints                 │ Все файлы                    │
+     │ 🟢 Низкий      │ Нет тестов                     │ Проект                       │
+     │ 🟢 Низкий      │ Нет README                     │ Проект                       │
+     │ 🟢 Низкий      │ print() вместо logging         │ Все файлы                    │
+     ╰────────────────┴────────────────────────────────┴──────────────────────────────╯
+
+     ---
+
+     10. Рекомендации по рефакторингу
+     1. Безопасность: Заменить exec() на безопасную альтернативу или хотя бы ограничить __builtins__
+     2. DRY: Создать domato/base_generator.py с общим кодом для всех генераторов
+     3. Resource management: Заменить все open()/close() на with-блоки
+     4. Разделение ответственности: Разбить Grammar class на несколько классов
+     5. Типизация: Добавить type hints
+     6. Тесты: Добавить unit-тесты для Grammar и DomatoAdapter
+     7. Конфигурация: Добавить dependencies в pyproject.toml
+     8. Документация: Написать README.md
+     9. Logging: Заменить print() на logging
+     10. Python 3.9+: Удалить from __future__ import print_function
