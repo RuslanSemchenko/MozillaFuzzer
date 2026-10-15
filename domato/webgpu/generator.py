@@ -32,16 +32,15 @@ _N_MAIN_LINES = 1000
 _N_SHADERS = 10
 
 def extract_shader_stages_and_functions(code):
-    # Pattern to match both single-line and multiline stage attributes
-    pattern = r'@(?:compute|vertex|fragment)(?:\s+@[^(\n]+(?:\([^)]*\))?)*\s*(?:\n\s*)?fn\s+(\w+)'
+    # Pattern to match both single-line and multiline stage attributes without backtracking
+    pattern = r'@(compute|vertex|fragment)(?:\s+@[a-zA-Z0-9_]+(?:\([^)]*\))?)*\s+fn\s+(\w+)'
     matches = re.finditer(pattern, code)
     
     # Extract stage-function pairs
     result = []
     for match in matches:
-        # Find the stage attribute within the matched attributes
-        stage_attr = re.search(r'@(compute|vertex|fragment)', match.group(0)).group(0)
-        function_name = match.group(1)
+        stage_attr = '@' + match.group(1)
+        function_name = match.group(2)
         result.append((stage_attr, function_name))
     
     return result
