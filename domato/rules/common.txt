@@ -60,8 +60,22 @@
 <color> = green
 <color> = white
 <color> = black
+<color> = transparent
+<color> = currentcolor
 <color> = #<hex><hex><hex><hex><hex><hex>
-<color> = rgb(<int min=0 max=255>,<int min=0 max=255>,<int min=0 max=255>)
+<color> = rgb(<int min=0 max=255>, <int min=0 max=255>, <int min=0 max=255>)
+<color> = rgba(<int min=0 max=255>, <int min=0 max=255>, <int min=0 max=255>, <float min=0 max=1>)
+<color> = hsl(<int min=0 max=360>deg <percentage>% <percentage>%)
+<color> = hsla(<int min=0 max=360>deg, <percentage>%, <percentage>%, <float min=0 max=1>)
+<color> = hwb(<int min=0 max=360>deg <percentage>% <percentage>%)
+<color> = lab(<percentage>% <fuzzint min=-125 max=125> <fuzzint min=-125 max=125>)
+<color> = lch(<percentage>% <fuzzint min=0 max=150> <int min=0 max=360>deg)
+<color> = oklab(<percentage>% <float min=-0.4 max=0.4> <float min=-0.4 max=0.4>)
+<color> = oklch(<percentage>% <float min=0 max=0.4> <int min=0 max=360>deg)
+<color> = color-mix(in srgb, <color>, <color>)
+<color> = color-mix(in oklch, <color> <percentage>%, <color>)
+<color> = color(display-p3 <float min=0 max=1> <float min=0 max=1> <float min=0 max=1>)
+<color> = light-dark(<color>, <color>)
 
 <tagname> = a
 <tagname> = abbr
@@ -175,9 +189,11 @@
 <tagname> = s
 <tagname> = samp
 <tagname> = script
+<tagname> = search
 <tagname> = section
 <tagname> = select
 <tagname> = shadow
+<tagname> = slot
 <tagname> = small
 <tagname> = source
 <tagname> = spacer

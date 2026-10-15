@@ -70,6 +70,16 @@
 <selector2> = input:valid
 <selector2> = :root
 <selector2> = <element>:empty
+<selector2> = <element>:has(<element>)
+<selector2> = <element>:is(<selector>, <selector>)
+<selector2> = <element>:where(<selector>, <selector>)
+<selector2> = <element>:focus-visible
+<selector2> = <element>:focus-within
+<selector2> = <element>:modal
+<selector2> = <element>:fullscreen
+<selector2> = <element>:defined
+<selector2> = <element>:user-valid
+<selector2> = <element>:user-invalid
 
 #at rules
 <fontfacerule> = @font-face

@@ -448,3 +448,45 @@
 <ReportingObserver>.observe();
 <ReportingObserver>.disconnect();
 <ReportingObserver>.takeRecords();
+
+#ResizeObserver
+<new ResizeObserver> = new ResizeObserver(<EventHandler>);
+<new ResizeObserver> = new ResizeObserver(function(entries, obs){});
+<ResizeObserver>.observe(<Element>);
+<ResizeObserver>.observe(<Element>, { box: "border-box" });
+<ResizeObserver>.observe(<Element>, { box: "content-box" });
+<ResizeObserver>.observe(<Element>, { box: "device-pixel-content-box" });
+<ResizeObserver>.unobserve(<Element>);
+<ResizeObserver>.disconnect();
+
+#IntersectionObserver
+<new IntersectionObserver> = new IntersectionObserver(<EventHandler>);
+<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { threshold: [<float min=0 max=1>] });
+<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { root: <Element>, rootMargin: "<fuzzint>px" });
+<IntersectionObserver>.observe(<Element>);
+<IntersectionObserver>.unobserve(<Element>);
+<IntersectionObserver>.disconnect();
+<new any> = <IntersectionObserver>.takeRecords();
+
+#Web Animations API
+<new Animation> = <Element>.animate([{ opacity: 0 }, { opacity: 1 }], <fuzzint min=100 max=5000>);
+<new Animation> = <Element>.animate({ transform: ["scale(1)", "scale(2)"] }, { duration: <fuzzint min=100 max=2000>, iterations: Infinity, direction: "alternate" });
+<new KeyframeEffect> = new KeyframeEffect(<Element>, [{ transform: "translate(0, 0)" }, { transform: "translate(100px, 100px)" }], { duration: 1000 });
+<new Animation> = new Animation(<KeyframeEffect>, document.timeline);
+<Animation>.play();
+<Animation>.pause();
+<Animation>.reverse();
+<Animation>.cancel();
+<Animation>.finish();
+<new any> = <Animation>.currentTime;
+<new any> = <Animation>.playbackRate;
+<new any> = <Element>.getAnimations();
+<new any> = document.getAnimations();
+
+#CompressionStream API
+<new CompressionStream> = new CompressionStream("gzip");
+<new CompressionStream> = new CompressionStream("deflate");
+<new CompressionStream> = new CompressionStream("deflate-raw");
+<new DecompressionStream> = new DecompressionStream("gzip");
+<new DecompressionStream> = new DecompressionStream("deflate");
+<new DecompressionStream> = new DecompressionStream("deflate-raw");
