@@ -490,3 +490,98 @@
 <new DecompressionStream> = new DecompressionStream("gzip");
 <new DecompressionStream> = new DecompressionStream("deflate");
 <new DecompressionStream> = new DecompressionStream("deflate-raw");
+
+#WebGPU API
+<new GPU> = navigator.gpu;
+<new GPUAdapter> = undefined;
+navigator.gpu.requestAdapter().then(function(a){ fuzzervars["adapter"] = a; });
+<new GPUDevice> = undefined;
+<GPUAdapter>.requestDevice().then(function(d){ fuzzervars["device"] = d; });
+<new GPUQueue> = <GPUDevice>.queue;
+<new GPUBuffer> = <GPUDevice>.createBuffer({ size: <fuzzint min=16 max=65536>, usage: 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 512 });
+<new GPUBuffer> = <GPUDevice>.createBuffer({ size: <fuzzint min=16 max=4096>, usage: 0x0004 | 0x0008, mappedAtCreation: true });
+<new GPUTexture> = <GPUDevice>.createTexture({ size: [<fuzzint min=1 max=256>, <fuzzint min=1 max=256>], format: "rgba8unorm", usage: 0x01 | 0x04 | 0x10 });
+<new GPUTexture> = <GPUDevice>.createTexture({ size: [<fuzzint min=1 max=128>, <fuzzint min=1 max=128>, <fuzzint min=1 max=4>], format: "depth24plus", usage: 0x10 });
+<new GPUTextureView> = <GPUTexture>.createView();
+<new GPUTextureView> = <GPUTexture>.createView({ format: "rgba8unorm", dimension: "2d", aspect: "all" });
+<new GPUSampler> = <GPUDevice>.createSampler();
+<new GPUSampler> = <GPUDevice>.createSampler({ addressModeU: "repeat", addressModeV: "mirror-repeat", magFilter: "linear", minFilter: "linear", mipmapFilter: "nearest" });
+<new GPUSampler> = <GPUDevice>.createSampler({ compare: "less-equal" });
+<new GPUShaderModule> = <GPUDevice>.createShaderModule({ code: "@vertex fn vs() -> @builtin(position) vec4f { return vec4f(0,0,0,1); } @fragment fn fs() -> @location(0) vec4f { return vec4f(1,0,0,1); }" });
+<new GPUShaderModule> = <GPUDevice>.createShaderModule({ code: "@compute @workgroup_size(1) fn cs() {}" });
+<new GPUBindGroupLayout> = <GPUDevice>.createBindGroupLayout({ entries: [] });
+<new GPUPipelineLayout> = <GPUDevice>.createPipelineLayout({ bindGroupLayouts: [] });
+<new GPUPipelineLayout> = <GPUDevice>.createPipelineLayout({ bindGroupLayouts: [<GPUBindGroupLayout>] });
+<new GPUComputePipeline> = <GPUDevice>.createComputePipeline({ layout: "auto", compute: { module: <GPUShaderModule>, entryPoint: "cs" } });
+<new GPURenderPipeline> = <GPUDevice>.createRenderPipeline({ layout: "auto", vertex: { module: <GPUShaderModule>, entryPoint: "vs" }, fragment: { module: <GPUShaderModule>, entryPoint: "fs", targets: [{ format: "rgba8unorm" }] } });
+<new GPUCommandEncoder> = <GPUDevice>.createCommandEncoder();
+<new GPUComputePassEncoder> = <GPUCommandEncoder>.beginComputePass();
+<GPUComputePassEncoder>.setPipeline(<GPUComputePipeline>);
+<GPUComputePassEncoder>.dispatchWorkgroups(<fuzzint min=1 max=8>);
+<GPUComputePassEncoder>.end();
+<new GPURenderPassEncoder> = <GPUCommandEncoder>.beginRenderPass({ colorAttachments: [{ view: <GPUTextureView>, loadOp: "clear", storeOp: "store" }] });
+<GPURenderPassEncoder>.setPipeline(<GPURenderPipeline>);
+<GPURenderPassEncoder>.draw(<fuzzint min=1 max=6>);
+<GPURenderPassEncoder>.end();
+<new GPUCommandBuffer> = <GPUCommandEncoder>.finish();
+<GPUQueue>.submit([<GPUCommandBuffer>]);
+<GPUQueue>.writeBuffer(<GPUBuffer>, 0, new Uint8Array([1, 2, 3, 4]));
+<GPUBuffer>.destroy();
+<GPUTexture>.destroy();
+<GPUDevice>.destroy();
+
+#WebCodecs API
+<new VideoDecoder> = new VideoDecoder({ output: function(f){ try { f.close(); } catch(e){} }, error: function(e){} });
+<VideoDecoder>.configure({ codec: "vp8" });
+<VideoDecoder>.configure({ codec: "avc1.42001E" });
+<VideoDecoder>.flush();
+<VideoDecoder>.reset();
+<VideoDecoder>.close();
+<new AudioDecoder> = new AudioDecoder({ output: function(d){ try { d.close(); } catch(e){} }, error: function(e){} });
+<AudioDecoder>.configure({ codec: "opus", sampleRate: 48000, numberOfChannels: 2 });
+<AudioDecoder>.flush();
+<AudioDecoder>.reset();
+<AudioDecoder>.close();
+<new VideoEncoder> = new VideoEncoder({ output: function(c, m){}, error: function(e){} });
+<VideoEncoder>.configure({ codec: "vp8", width: 320, height: 240, bitrate: 1000000 });
+<VideoEncoder>.flush();
+<VideoEncoder>.reset();
+<VideoEncoder>.close();
+<new AudioEncoder> = new AudioEncoder({ output: function(c, m){}, error: function(e){} });
+<AudioEncoder>.configure({ codec: "opus", sampleRate: 48000, numberOfChannels: 2, bitrate: 64000 });
+<AudioEncoder>.flush();
+<AudioEncoder>.reset();
+<AudioEncoder>.close();
+
+#OffscreenCanvas and ImageBitmap
+<new OffscreenCanvas> = new OffscreenCanvas(<fuzzint min=32 max=1024>, <fuzzint min=32 max=1024>);
+<new OffscreenCanvas> = <HTMLCanvasElement>.transferControlToOffscreen();
+<new any> = <OffscreenCanvas>.getContext("2d");
+<new any> = <OffscreenCanvas>.getContext("webgl2");
+<new any> = <OffscreenCanvas>.getContext("webgpu");
+<new any> = <OffscreenCanvas>.getContext("bitmaprenderer");
+<new any> = <HTMLCanvasElement>.getContext("bitmaprenderer");
+<new any> = <OffscreenCanvas>.convertToBlob();
+<new any> = <OffscreenCanvas>.transferToImageBitmap();
+<new any> = createImageBitmap(<HTMLCanvasElement>);
+<new any> = createImageBitmap(<HTMLImageElement>);
+<new any> = createImageBitmap(<HTMLVideoElement>);
+<new any> = createImageBitmap(<OffscreenCanvas>);
+
+#Web Locks and Scheduling
+navigator.locks.request(<DOMString>, function(lock){});
+navigator.locks.request(<DOMString>, { mode: "shared" }, function(lock){});
+navigator.locks.query();
+requestIdleCallback(<EventHandler>);
+requestIdleCallback(<EventHandler>, { timeout: <fuzzint min=100 max=2000> });
+cancelIdleCallback(<fuzzint>);
+
+#Permissions and Clipboard
+navigator.permissions.query({ name: "camera" });
+navigator.permissions.query({ name: "microphone" });
+navigator.permissions.query({ name: "geolocation" });
+navigator.permissions.query({ name: "notifications" });
+navigator.clipboard.readText();
+navigator.clipboard.writeText(<DOMString>);
+navigator.setAppBadge(<fuzzint min=1 max=99>);
+navigator.clearAppBadge();
