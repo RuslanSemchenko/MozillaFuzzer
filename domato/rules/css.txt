@@ -3000,5 +3000,65 @@
 <cssproperty> = color: oklch(from blue L 0.2 200)
 <cssproperty> = fill: oklab(from <cssproperty_color> L a b)
 
+# Modern CSS Layout and Box Model
+<cssproperty> = aspect-ratio: <fuzzint min=1 max=16> / <fuzzint min=1 max=16>
+<cssproperty> = aspect-ratio: auto <fuzzint min=1 max=16> / <fuzzint min=1 max=16>
+<cssproperty> = aspect-ratio: <float min=0.1 max=5>
+<cssproperty> = accent-color: <color>
+<cssproperty> = accent-color: auto
+<cssproperty> = caret-color: <color>
+<cssproperty> = caret-color: transparent
+<cssproperty> = backdrop-filter: blur(<fuzzint min=1 max=50>px)
+<cssproperty> = backdrop-filter: brightness(<percentage>%)
+<cssproperty> = backdrop-filter: contrast(<percentage>%)
+<cssproperty> = backdrop-filter: blur(<fuzzint min=1 max=20>px) brightness(<percentage>%)
+<cssproperty> = backdrop-filter: none
+<cssproperty> = container-type: inline-size
+<cssproperty> = container-type: size
+<cssproperty> = container-type: normal
+<cssproperty> = container-name: <DOMString>
+<cssproperty> = container: <DOMString> / inline-size
+<cssproperty> = container: <DOMString> / size
+<cssproperty> = overscroll-behavior: contain
+<cssproperty> = overscroll-behavior: none
+<cssproperty> = overscroll-behavior: auto
+<cssproperty> = overscroll-behavior-x: contain
+<cssproperty> = overscroll-behavior-y: none
+<cssproperty> = scrollbar-gutter: stable
+<cssproperty> = scrollbar-gutter: stable both-edges
+<cssproperty> = scrollbar-width: thin
+<cssproperty> = scrollbar-width: none
+<cssproperty> = scrollbar-color: <color> <color>
+<cssproperty> = scroll-behavior: smooth
+<cssproperty> = scroll-snap-type: x mandatory
+<cssproperty> = scroll-snap-type: y mandatory
+<cssproperty> = scroll-snap-type: both mandatory
+<cssproperty> = scroll-snap-type: block proximity
+<cssproperty> = scroll-snap-align: start
+<cssproperty> = scroll-snap-align: center
+<cssproperty> = scroll-snap-align: end
+<cssproperty> = scroll-snap-stop: always
+<cssproperty> = touch-action: pan-x pan-y
+<cssproperty> = touch-action: manipulation
+<cssproperty> = touch-action: none
+<cssproperty> = user-select: none
+<cssproperty> = user-select: text
+<cssproperty> = user-select: all
+<cssproperty> = user-select: contain
+<cssproperty> = will-change: transform, opacity
+<cssproperty> = will-change: scroll-position
+<cssproperty> = will-change: contents
+<cssproperty> = mix-blend-mode: multiply
+<cssproperty> = mix-blend-mode: screen
+<cssproperty> = mix-blend-mode: overlay
+<cssproperty> = mix-blend-mode: difference
+<cssproperty> = mix-blend-mode: exclusion
+<cssproperty> = mix-blend-mode: plus-lighter
+<cssproperty> = isolation: isolate
+<cssproperty> = image-rendering: pixelated
+<cssproperty> = image-rendering: crisp-edges
+<cssproperty> = font-palette: dark
+<cssproperty> = font-palette: light
+<cssproperty> = forced-color-adjust: none
 
 !include cssproperties.txt

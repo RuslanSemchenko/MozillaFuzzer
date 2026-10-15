@@ -585,3 +585,99 @@ navigator.clipboard.readText();
 navigator.clipboard.writeText(<DOMString>);
 navigator.setAppBadge(<fuzzint min=1 max=99>);
 navigator.clearAppBadge();
+
+#WebRTC API
+<new RTCPeerConnection> = new RTCPeerConnection();
+<new RTCPeerConnection> = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+<new RTCPeerConnection> = new RTCPeerConnection({ iceTransportPolicy: "relay", bundlePolicy: "max-bundle" });
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("data", { ordered: true });
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("data2", { ordered: false, maxRetransmits: 3 });
+<RTCDataChannel>.send(<DOMString>);
+<RTCDataChannel>.send(<ArrayBuffer>);
+<RTCDataChannel>.send(<Uint8Array>);
+<RTCDataChannel>.close();
+<RTCPeerConnection>.createOffer().then(function(offer){ <RTCPeerConnection>.setLocalDescription(offer); });
+<RTCPeerConnection>.createAnswer().then(function(ans){ <RTCPeerConnection>.setLocalDescription(ans); });
+<RTCPeerConnection>.restartIce();
+<RTCPeerConnection>.close();
+<new any> = <RTCPeerConnection>.getStats();
+<new MediaStream> = new MediaStream();
+<new MediaStream> = <HTMLCanvasElement>.captureStream();
+<new MediaStream> = <HTMLVideoElement>.captureStream();
+<new any> = <MediaStream>.getTracks();
+<new any> = <MediaStream>.getAudioTracks();
+<new any> = <MediaStream>.getVideoTracks();
+<MediaStream>.clone();
+
+#WebTransport API
+<new WebTransport> = new WebTransport("https://127.0.0.1:4433/");
+<new any> = <WebTransport>.ready;
+<new any> = <WebTransport>.closed;
+<new any> = <WebTransport>.draining;
+<new any> = <WebTransport>.createBidirectionalStream();
+<new any> = <WebTransport>.createUnidirectionalStream();
+<new any> = <WebTransport>.incomingBidirectionalStreams;
+<new any> = <WebTransport>.incomingUnidirectionalStreams;
+<new any> = <WebTransport>.datagrams;
+<WebTransport>.close();
+
+#Web Workers and MessageChannel
+<new MessageChannel> = new MessageChannel();
+<MessageChannel>.port1.postMessage(<DOMString>);
+<MessageChannel>.port1.postMessage(<ArrayBuffer>, [<ArrayBuffer>]);
+<MessageChannel>.port1.start();
+<MessageChannel>.port1.close();
+<MessageChannel>.port2.start();
+<MessageChannel>.port2.close();
+<new BroadcastChannel> = new BroadcastChannel(<DOMString>);
+<BroadcastChannel>.postMessage(<DOMString>);
+<BroadcastChannel>.postMessage({ type: "ping", val: <fuzzint> });
+<BroadcastChannel>.close();
+<new Worker> = new Worker(URL.createObjectURL(new Blob(["onmessage=function(e){postMessage(e.data);};"], { type: "application/javascript" })));
+<Worker>.postMessage(<DOMString>);
+<Worker>.postMessage(<ArrayBuffer>, [<ArrayBuffer>]);
+<Worker>.terminate();
+
+#FileSystem and Storage API
+navigator.storage.getDirectory().then(function(dir){ fuzzervars["root_dir"] = dir; });
+<new any> = window.showOpenFilePicker();
+<new any> = window.showSaveFilePicker();
+<new any> = window.showDirectoryPicker();
+<new any> = caches.open("cache-<DOMString>");
+<new any> = caches.keys();
+<new any> = caches.has("cache-<DOMString>");
+<new any> = caches.delete("cache-<DOMString>");
+
+#Performance Timeline and Navigation
+performance.mark("mark-<DOMString>");
+performance.measure("meas-<DOMString>", "mark-<DOMString>");
+performance.clearMarks();
+performance.clearMeasures();
+<new any> = performance.now();
+<new any> = performance.getEntries();
+<new any> = performance.getEntriesByType("resource");
+<new any> = performance.getEntriesByType("navigation");
+<new any> = performance.getEntriesByType("paint");
+<new PerformanceObserver> = new PerformanceObserver(<EventHandler>);
+<PerformanceObserver>.observe({ entryTypes: ["mark", "measure", "resource", "paint"] });
+<PerformanceObserver>.disconnect();
+<PerformanceObserver>.takeRecords();
+
+#Popover API and Modern Element methods
+<Element>.showPopover();
+<Element>.hidePopover();
+<Element>.togglePopover();
+<Element>.requestFullscreen();
+document.exitFullscreen();
+<HTMLDialogElement>.showModal();
+<HTMLDialogElement>.show();
+<HTMLDialogElement>.close();
+<Element>.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+<Element>.scrollIntoView({ behavior: "instant", block: "start" });
+<Element>.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true });
+<Element>.replaceChildren(<Element>);
+<Element>.replaceWith(<Element>);
+<Element>.before(<Element>);
+<Element>.after(<Element>);
+<Element>.prepend(<Element>);
+<Element>.append(<Element>);
