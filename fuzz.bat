@@ -19,13 +19,20 @@ if "%~2" neq "" (
 
 if not exist "%OUT%" mkdir "%OUT%"
 
+if defined PYTHON_BIN (
+    set "PYTHON=%PYTHON_BIN%"
+) else (
+    set "PYTHON=py -3.14"
+)
+
 echo Grizzly + Domato fuzzing
+echo Python:  %PYTHON%
 echo Browser: %BROWSER%
 echo Runtime: %RUNTIME%s (stop via Ctrl+C)
 echo Output:  %OUT%
 echo.
 
-python -m grizzly --runtime %RUNTIME% -o "%OUT%" "%BROWSER%" domato
+%PYTHON% -m grizzly --runtime %RUNTIME% -o "%OUT%" "%BROWSER%" domato
 
 echo.
 echo Done.

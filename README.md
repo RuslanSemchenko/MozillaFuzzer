@@ -10,7 +10,7 @@ A DOM fuzzing environment for **Mozilla Firefox** integrating Mozilla's [Grizzly
 
 ## Prerequisites
 
-- Python 3.9+ (tested with Python 3.14)
+- Python 3.14 (default)
 - [Grizzly Framework](https://github.com/MozillaSecurity/grizzly) (`pip install grizzly-framework`)
 - Firefox build (Debug or ASan build recommended for fuzzing)
 
