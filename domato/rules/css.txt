@@ -80,6 +80,26 @@
 <selector2> = <element>:defined
 <selector2> = <element>:user-valid
 <selector2> = <element>:user-invalid
+<selector2> = <element>:dir(rtl)
+<selector2> = <element>:lang(en)
+<selector2> = <element>:target
+<selector2> = <element>:checked
+<selector2> = <element>:indeterminate
+<selector2> = <element>:placeholder-shown
+<selector2> = <element>:popover-open
+<selector2> = <element>:nth-child(2n+1)
+<selector2> = <element>:nth-last-child(2n)
+<selector2> = <element>:has(><element>)
+<selector2> = :is(<element>, <element>):not(:first-child)
+<selector2> = <element>:nth-child(2n+1 of .<class>)
+<selector2> = <element>:nth-last-child(odd)
+<selector2> = <element>:nth-of-type(even)
+<selector2> = <element>:host
+<selector2> = <element>:host(<element>)
+<selector2> = ::view-transition
+<selector2> = ::view-transition-group(root)
+<selector2> = ::view-transition-old(root)
+<selector2> = ::view-transition-new(root)
 
 #at rules
 <fontfacerule> = @font-face
@@ -87,6 +107,41 @@
 #todo all rules
 <rule p=0.95> = <selector> { <declaration> }
 <rule> = <fontfacerule> { <fontfacedeclaration> }
+<rule p=0.08> = @media <cssmediaquery> { <selector> { <declaration5> } }
+<rule p=0.08> = @supports <csssupportscondition> { <selector> { <declaration5> } }
+<rule p=0.08> = @container <csscontainername> (<csscontainercondition>) { <selector> { <declaration5> } }
+<rule p=0.06> = @layer <csslayername> { <selector> { <declaration5> } }
+<rule p=0.06> = @scope (<selector>) to (<selector>) { <selector> { <declaration5> } }
+<rule p=0.04> = @starting-style { <selector> { <declaration5> } }
+<rule p=0.04> = @keyframes fuzz-keyframes { from { <csskeyframedeclaration> } to { <csskeyframedeclaration> } }
+<rule p=0.03> = @property --fuzz-number { syntax: "<lt>number<gt>"; inherits: false; initial-value: <fuzzfloat>; }
+
+<cssmediaquery> = screen and (min-width: <fuzzint min=1 max=1200>px)
+<cssmediaquery> = (prefers-reduced-motion: reduce)
+<cssmediaquery> = (prefers-color-scheme: dark)
+<cssmediaquery> = print
+
+<csssupportscondition> = (display: grid)
+<csssupportscondition> = (display: flex)
+<csssupportscondition> = (selector(:has(*)))
+<csssupportscondition> = (container-type: inline-size)
+
+<csscontainername> = card
+<csscontainername> = sidebar
+<csscontainername> = layout
+
+<csscontainercondition> = min-width: <fuzzint min=1 max=1200>px
+<csscontainercondition> = max-width: <fuzzint min=1 max=1200>px
+<csscontainercondition> = orientation: landscape
+<csscontainercondition> = orientation: portrait
+
+<csslayername> = base
+<csslayername> = components
+<csslayername> = overrides
+
+<csskeyframedeclaration> = opacity: <float min=0 max=1>; transform: translateX(<fuzzint>px);
+<csskeyframedeclaration> = opacity: <float min=0 max=1>; color: <color>;
+<csskeyframedeclaration> = transform: rotate(<fuzzint min=0 max=360>deg) scale(<float min=0 max=2>);
 
 <fontfacedeclaration> = <fontfacedescriptor>;
 <fontfacedeclaration> = <fontfacedescriptor>; <fontfacedescriptor>; <fontfacedescriptor>;

@@ -2746,7 +2746,7 @@
 <new RTCDTMFToneChangeEvent> = document.createEvent("RTCDTMFToneChangeEvent");
 <new RTCDataChannelEvent> = document.createEvent("RTCDataChannelEvent");
 <new RTCIceCandidateEvent> = document.createEvent("RTCIceCandidateEvent");
-<new SpeechRecognitionError> = document.createEvent("SpeechRecognitionError");
+<new SpeechRecognitionErrorEvent> = new SpeechRecognitionErrorEvent("error", { error:"no-speech" });
 <new SpeechRecognitionEvent> = document.createEvent("SpeechRecognitionEvent");
 <new SpeechSynthesisEvent> = document.createEvent("SpeechSynthesisEvent");
 <new AudioProcessingEvent> = document.createEvent("AudioProcessingEvent");

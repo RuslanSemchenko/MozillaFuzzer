@@ -114,42 +114,40 @@
 <new XPathResult> = <XPathExpression>.evaluate(<Element>,<fuzzint>,<XPathResult>);
 <new XPathResult> = <XPathExpression>.evaluate(<Element>,XPathResult.ANY_TYPE,<XPathResult>);
 
-#AnimationEffectTiming
-!extends AnimationEffectTiming AnimationEffectTimingReadOnly
-<new AnimationEffectTimingReadOnly> = <AnimationEffectTiming>;
-<new double> = <AnimationEffectTiming>.delay;
-<AnimationEffectTiming>.delay = <double>;
-<new double> = <AnimationEffectTiming>.endDelay;
-<AnimationEffectTiming>.endDelay = <double>;
-<new DOMString> = <AnimationEffectTiming>.fill;
-<AnimationEffectTiming>.fill = <DOMString>;
-<new double> = <AnimationEffectTiming>.iterationStart;
-<AnimationEffectTiming>.iterationStart = <double>;
-<new double> = <AnimationEffectTiming>.iterations;
-<AnimationEffectTiming>.iterations = <double>;
-<new double> = <AnimationEffectTiming>.duration;
-<AnimationEffectTiming>.duration = <double>;
-<new DOMString> = <AnimationEffectTiming>.duration;
-<AnimationEffectTiming>.duration = <DOMString>;
-<new DOMString> = <AnimationEffectTiming>.direction;
-<AnimationEffectTiming>.direction = <DOMString>;
-<new DOMString> = <AnimationEffectTiming>.easing;
-<AnimationEffectTiming>.easing = <DOMString>;
-
 #AnimationTimeline
-<new double> = <AnimationTimeline>.currentTime;
-<AnimationTimeline>.currentTime = <double>;
+<new any> = <AnimationTimeline>.currentTime;
+<AnimationTimeline>.currentTime = CSS.ms(<fuzzint>);
+<new any> = <AnimationTimeline>.duration;
 <new sequence_Animation_> = <AnimationTimeline>.getAnimations();
+
+#Scroll and View Timelines
+!extends ScrollTimeline AnimationTimeline
+!extends ViewTimeline ScrollTimeline
+<new ScrollTimeline> = new ScrollTimeline();
+<new ScrollTimeline> = new ScrollTimeline({ source:<Element>, axis:"y" });
+<new ScrollTimeline> = new ScrollTimeline({ source:null, axis:"inline" });
+<new Element> = <ScrollTimeline>.source;
+<new any> = <ScrollTimeline>.axis;
+<new ViewTimeline> = new ViewTimeline({ subject:<Element>, axis:"block", inset:"auto" });
+<new ViewTimeline> = new ViewTimeline({ subject:<Element>, axis:"x", inset:["10%", "20px"] });
+<new Element> = <ViewTimeline>.subject;
+<new CSSNumericValue> = <ViewTimeline>.startOffset;
+<new CSSNumericValue> = <ViewTimeline>.endOffset;
+<new Animation> = <Element>.animate([{ opacity:0 }, { opacity:1 }], { duration:1, timeline:new ScrollTimeline({ source:<Element>, axis:"y" }) });
+<new Animation> = <Element>.animate([{ transform:"translateY(0)" }, { transform:"translateY(100px)" }], { duration:1, timeline:new ViewTimeline({ subject:<Element>, axis:"block" }), rangeStart:"entry 0%", rangeEnd:"cover 100%" });
 
 #Animation
 !extends Animation EventTarget
+!extends CSSAnimation Animation
+!extends CSSTransition Animation
 <new EventTarget> = <Animation>;
-<new AnimationEffectReadOnly> = <Animation>.effect;
-<Animation>.effect = <AnimationEffectReadOnly>;
+document.getAnimations().forEach(function(animation){ if(animation instanceof CSSAnimation){ animation.animationName; } if(animation instanceof CSSTransition){ animation.transitionProperty; } });
+<new AnimationEffect> = <Animation>.effect;
+<Animation>.effect = <AnimationEffect>;
 <new AnimationTimeline> = <Animation>.timeline;
-<new double> = <Animation>.startTime;
+<new any> = <Animation>.startTime;
 <Animation>.startTime = <double>;
-<new double> = <Animation>.currentTime;
+<new any> = <Animation>.currentTime;
 <Animation>.currentTime = <double>;
 <new double> = <Animation>.playbackRate;
 <Animation>.playbackRate = <double>;
@@ -168,28 +166,38 @@
 <new Promise_Animation_> = <Animation>.finished;
 <new Promise_Animation_> = <Animation>.ready;
 
-#AnimationEffectReadOnly
-<new AnimationEffectTimingReadOnly> = <AnimationEffectReadOnly>.timing;
-<new ComputedTimingProperties> = <AnimationEffectReadOnly>.getComputedTiming();
-
-#KeyframeEffectReadOnly
-!extends KeyframeEffectReadOnly AnimationEffectReadOnly
-<new AnimationEffectReadOnly> = <KeyframeEffectReadOnly>;
-
-#AnimationEffectTimingReadOnly
-<new double> = <AnimationEffectTimingReadOnly>.delay;
-<new double> = <AnimationEffectTimingReadOnly>.endDelay;
-<new DOMString> = <AnimationEffectTimingReadOnly>.fill;
-<new double> = <AnimationEffectTimingReadOnly>.iterationStart;
-<new double> = <AnimationEffectTimingReadOnly>.iterations;
-<new double> = <AnimationEffectTimingReadOnly>.duration;
-<new DOMString> = <AnimationEffectTimingReadOnly>.duration;
-<new DOMString> = <AnimationEffectTimingReadOnly>.direction;
-<new DOMString> = <AnimationEffectTimingReadOnly>.easing;
+#AnimationEffect
+<new any> = <AnimationEffect>.getTiming();
+<new any> = <AnimationEffect>.getComputedTiming();
+<new any> = <AnimationEffect>.getComputedTiming().duration;
+<new any> = <AnimationEffect>.getComputedTiming().progress;
+<new any> = <AnimationEffect>.getComputedTiming().currentIteration;
+<AnimationEffect>.updateTiming({ delay:<fuzzint>, endDelay:<fuzzint>, fill:"both", iterations:<fuzzfloat>, duration:<fuzzint>, direction:"alternate", easing:"ease-in-out" });
 
 #KeyframeEffect
-!extends KeyframeEffect KeyframeEffectReadOnly
-<new KeyframeEffectReadOnly> = <KeyframeEffect>;
+!extends KeyframeEffect AnimationEffect
+<new AnimationEffect> = <KeyframeEffect>;
+<new Element> = <KeyframeEffect>.target;
+<KeyframeEffect>.target = <Element>;
+<new DOMString> = <KeyframeEffect>.pseudoElement;
+<KeyframeEffect>.pseudoElement = "::before";
+<new sequence_Dictionary_> = <KeyframeEffect>.getKeyframes();
+<KeyframeEffect>.setKeyframes([{ opacity:0 }, { opacity:1 }]);
+<new DOMString> = <KeyframeEffect>.iterationComposite;
+<KeyframeEffect>.iterationComposite = "accumulate";
+<new DOMString> = <KeyframeEffect>.composite;
+<KeyframeEffect>.composite = "add";
+
+#KeyframeEffect
+<new KeyframeEffect> = new KeyframeEffect(<Element>, [{ opacity:0 }, { opacity:1 }], { duration:100, iterations:2, easing:"ease-in-out" });
+<new KeyframeEffect> = new KeyframeEffect(<KeyframeEffect>);
+<new Animation> = new Animation(<KeyframeEffect>, document.timeline);
+<Animation>.updatePlaybackRate(<fuzzfloat>);
+<Animation>.persist();
+<Animation>.commitStyles();
+<new any> = <Animation>.overallProgress;
+<Animation>.rangeStart = "normal";
+<Animation>.rangeEnd = "normal";
 
 #Element
 <new Animation> = <Element>.animate(<sequence_Dictionary_>,<double>);
@@ -845,7 +853,17 @@
 
 #HTMLSelectElement
 !extends HTMLSelectElement Element
+!extends HTMLSelectedContentElement HTMLElement
 <new Element> = <HTMLSelectElement>;
+<new HTMLSelectedContentElement> = document.createElement("selectedcontent");
+<new HTMLSelectElement> = document.createElement("select");
+<new HTMLButtonElement> = document.createElement("button");
+<HTMLButtonElement>.appendChild(<HTMLSelectedContentElement>);
+<HTMLSelectElement>.appendChild(<HTMLButtonElement>);
+<new HTMLOptionElement> = document.createElement("option");
+<HTMLOptionElement>.textContent = "<DOMString>";
+<HTMLSelectElement>.appendChild(<HTMLOptionElement>);
+<new HTMLSelectedContentElement> = <HTMLSelectElement>.querySelector("selectedcontent");
 <new boolean> = <HTMLSelectElement>.autofocus;
 <HTMLSelectElement>.autofocus = <boolean>;
 <new boolean> = <HTMLSelectElement>.disabled;
@@ -1204,6 +1222,28 @@
 <FormData>.set(<USVString>,<Blob>);
 <FormData>.set(<USVString>,<Blob>,<USVString>);
 <FormData>.set(<USVString>,<USVString>);
+<new FormDataEvent> = new FormDataEvent("formdata", { formData:new FormData() });
+<new FormData> = <FormDataEvent>.formData;
+<Element>.onformdata = <EventHandler>;
+
+#ElementInternals and form-associated custom elements
+customElements.define("domato-form-control", class extends HTMLElement { static formAssociated=true; constructor(){ super(); this.internals=this.attachInternals(); } });
+<new ElementInternals> = document.createElement("domato-form-control").internals;
+<ElementInternals>.setFormValue(<DOMString>);
+<ElementInternals>.setFormValue(new FormData(), <DOMString>);
+<ElementInternals>.setValidity({ valueMissing:true }, "required");
+<ElementInternals>.setValidity({ typeMismatch:true }, "invalid value");
+<new Element> = <ElementInternals>.form;
+<new boolean> = <ElementInternals>.willValidate;
+<new ValidityState> = <ElementInternals>.validity;
+<new DOMString> = <ElementInternals>.validationMessage;
+<new boolean> = <ElementInternals>.checkValidity();
+<new boolean> = <ElementInternals>.reportValidity();
+<new NodeList> = <ElementInternals>.labels;
+<new CustomStateSet> = <ElementInternals>.states;
+<CustomStateSet>.add("--fuzz-ready");
+<new boolean> = <CustomStateSet>.delete("--fuzz-ready");
+<CustomStateSet>.clear();
 
 #MediaError
 <new short> = <MediaError>.code;
@@ -2469,18 +2509,23 @@
 <new ClientRect> = <ClientRectList id=1>[<ClientRectList id=1>.length];
 
 #StaticRange
-<new Element> = <StaticRange>.startContainer;
-<StaticRange>.startContainer = <Element>;
-<new long> = <StaticRange>.startOffset;
-<StaticRange>.startOffset = <fuzzint>;
-<new Element> = <StaticRange>.endContainer;
-<StaticRange>.endContainer = <Element>;
-<new long> = <StaticRange>.endOffset;
-<StaticRange>.endOffset = <fuzzint>;
+!extends StaticRange AbstractRange
+<new Node> = <StaticRange>.startContainer;
+<new unsignedLong> = <StaticRange>.startOffset;
+<new Node> = <StaticRange>.endContainer;
+<new unsignedLong> = <StaticRange>.endOffset;
 <new boolean> = <StaticRange>.collapsed;
-<StaticRange>.setStart(<Element>,<fuzzint>);
-<StaticRange>.setEnd(<Element>,<fuzzint>);
-<new Range> = <StaticRange>.toRange();
+<new StaticRange> = new StaticRange({ startContainer:document.body, startOffset:0, endContainer:document.body, endOffset:0 });
+<new StaticRange> = new StaticRange({ startContainer:document.documentElement, startOffset:0, endContainer:document.documentElement, endOffset:0 });
+
+#AbstractRange
+<new AbstractRange> = <Range>;
+<new AbstractRange> = <StaticRange>;
+<new Node> = <AbstractRange>.startContainer;
+<new unsignedLong> = <AbstractRange>.startOffset;
+<new Node> = <AbstractRange>.endContainer;
+<new unsignedLong> = <AbstractRange>.endOffset;
+<new boolean> = <AbstractRange>.collapsed;
 
 #DOMImplementation
 <new DocumentType> = <DOMImplementation>.createDocumentType(<DOMString>,<DOMString>,<DOMString>);
@@ -2999,7 +3044,11 @@
 <new long> = <NodeList>.length;
 
 #MutationObserver
+<new MutationObserver> = new MutationObserver(function(records, observer){ records.length; observer.takeRecords(); });
 <MutationObserver>.observe(<Element>,<MutationObserverInit>);
+<MutationObserver>.observe(<Element>, { childList:true, subtree:true });
+<MutationObserver>.observe(<Element>, { attributes:true, attributeOldValue:true, attributeFilter:["class", "style"] });
+<MutationObserver>.observe(<Element>, { characterData:true, characterDataOldValue:true, subtree:true });
 <MutationObserver>.disconnect();
 <new sequence_MutationRecord_> = <MutationObserver>.takeRecords();
 
@@ -3035,33 +3084,34 @@
 <CharacterData>.replaceData(<fuzzint>,<fuzzint>,<DOMString>);
 
 #Range
-<new Element> = <Range>.startContainer;
-<new long> = <Range>.startOffset;
-<new Element> = <Range>.endContainer;
-<new long> = <Range>.endOffset;
+!extends Range AbstractRange
+<new Node> = <Range>.startContainer;
+<new unsignedLong> = <Range>.startOffset;
+<new Node> = <Range>.endContainer;
+<new unsignedLong> = <Range>.endOffset;
 <new boolean> = <Range>.collapsed;
-<new Element> = <Range>.commonAncestorContainer;
-<Range>.setStart(<Element>,<fuzzint>);
-<Range>.setEnd(<Element>,<fuzzint>);
-<Range>.setStartBefore(<Element>);
-<Range>.setStartAfter(<Element>);
-<Range>.setEndBefore(<Element>);
-<Range>.setEndAfter(<Element>);
+<new Node> = <Range>.commonAncestorContainer;
+<Range>.setStart(<Node>,<fuzzint>);
+<Range>.setEnd(<Node>,<fuzzint>);
+<Range>.setStartBefore(<Node>);
+<Range>.setStartAfter(<Node>);
+<Range>.setEndBefore(<Node>);
+<Range>.setEndAfter(<Node>);
 <Range>.collapse();
 <Range>.collapse(<boolean>);
-<Range>.selectNode(<Element>);
-<Range>.selectNodeContents(<Element>);
+<Range>.selectNode(<Node>);
+<Range>.selectNodeContents(<Node>);
 <new short> = <Range>.compareBoundaryPoints(<fuzzint>,<Range>);
 <Range>.deleteContents();
 <new DocumentFragment> = <Range>.extractContents();
 <new DocumentFragment> = <Range>.cloneContents();
-<Range>.insertNode(<Element>);
-<Range>.surroundContents(<Element>);
+<Range>.insertNode(<Node>);
+<Range>.surroundContents(<Node>);
 <new Range> = <Range>.cloneRange();
 <Range>.detach();
-<new boolean> = <Range>.isPointInRange(<Element>,<fuzzint>);
-<new short> = <Range>.comparePoint(<Element>,<fuzzint>);
-<new boolean> = <Range>.intersectsNode(<Element>);
+<new boolean> = <Range>.isPointInRange(<Node>,<fuzzint>);
+<new short> = <Range>.comparePoint(<Node>,<fuzzint>);
+<new boolean> = <Range>.intersectsNode(<Node>);
 <new ClientRectList> = <Range>.getClientRects();
 <new ClientRect> = <Range>.getBoundingClientRect();
 <new DocumentFragment> = <Range>.createContextualFragment(<DOMString>);
@@ -6086,9 +6136,13 @@ setTimeout(<eventhandler>, <timeout_time>);
 <VideoEncoder>.configure({ codec:"avc1.42E01E", width:<fuzzint>, height:<fuzzint>, bitrate:<fuzzint> });
 <VideoEncoder>.configure({ codec:"vp09.00.10.08", width:<fuzzint>, height:<fuzzint>, bitrate:<fuzzint> });
 <new DOMString> = <VideoEncoder>.state;
-<new boolean> = <VideoEncoder>.supports({ codec:"vp8", width:<fuzzint>, height:<fuzzint> });
-<VideoEncoder>.encode(<ImageBitmap>, { keyFrame:true });
-<VideoEncoder>.encode(<ImageBitmap>, { keyFrame:false });
+<new any> = VideoEncoder.isConfigSupported({ codec:"vp8", width:320, height:240, bitrate:500000, framerate:30 }).then(function(support){ support.supported; support.config; }, function(error){ console.error(error); });
+<new VideoFrame> = new VideoFrame(<HTMLVideoElement>, { timestamp:0, duration:33333 });
+<VideoEncoder>.encode(<VideoFrame>, { keyFrame:true });
+<VideoEncoder>.encode(<VideoFrame>, { keyFrame:false });
+<new unsignedLong> = <VideoEncoder>.encodeQueueSize;
+<new EventHandler> = <VideoEncoder>.ondequeue;
+<VideoEncoder>.ondequeue = <eventhandler>;
 <VideoEncoder>.flush();
 <VideoEncoder>.reset();
 <VideoEncoder>.close();
@@ -6099,9 +6153,11 @@ setTimeout(<eventhandler>, <timeout_time>);
 <VideoDecoder>.configure({ codec:"av01.0.01M.08", codedWidth:<fuzzint>, codedHeight:<fuzzint> });
 <VideoDecoder>.configure({ codec:"avc1.42E01E", codedWidth:<fuzzint>, codedHeight:<fuzzint> });
 <new DOMString> = <VideoDecoder>.state;
-<new boolean> = <VideoDecoder>.supports({ codec:"vp8", codedWidth:<fuzzint>, codedHeight:<fuzzint> });
+<new any> = VideoDecoder.isConfigSupported({ codec:"vp8", codedWidth:320, codedHeight:240 }).then(function(support){ support.supported; support.config; }, function(error){ console.error(error); });
 <VideoDecoder>.decode(<EncodedVideoChunk>);
-<VideoDecoder>.decode(<EncodedVideoChunk>, { timestamp:<fuzzint> });
+<new unsignedLong> = <VideoDecoder>.decodeQueueSize;
+<new EventHandler> = <VideoDecoder>.ondequeue;
+<VideoDecoder>.ondequeue = <eventhandler>;
 <VideoDecoder>.flush();
 <VideoDecoder>.reset();
 <VideoDecoder>.close();
@@ -6111,7 +6167,11 @@ setTimeout(<eventhandler>, <timeout_time>);
 <AudioEncoder>.configure({ codec:"opus", sampleRate:<fuzzint>, numberOfChannels:<fuzzint>, bitrate:<fuzzint> });
 <AudioEncoder>.configure({ codec:"mp4a.40.2", sampleRate:<fuzzint>, numberOfChannels:<fuzzint> });
 <new DOMString> = <AudioEncoder>.state;
-<AudioEncoder>.encode(<AudioData>, { frameSize:<fuzzint> });
+<new any> = AudioEncoder.isConfigSupported({ codec:"opus", sampleRate:48000, numberOfChannels:2, bitrate:64000 }).then(function(support){ support.supported; support.config; }, function(error){ console.error(error); });
+<AudioEncoder>.encode(<AudioData>);
+<new unsignedLong> = <AudioEncoder>.encodeQueueSize;
+<new EventHandler> = <AudioEncoder>.ondequeue;
+<AudioEncoder>.ondequeue = <eventhandler>;
 <AudioEncoder>.flush();
 <AudioEncoder>.reset();
 <AudioEncoder>.close();
@@ -6121,33 +6181,60 @@ setTimeout(<eventhandler>, <timeout_time>);
 <AudioDecoder>.configure({ codec:"opus", sampleRate:<fuzzint>, numberOfChannels:<fuzzint> });
 <AudioDecoder>.configure({ codec:"mp4a.40.2", sampleRate:<fuzzint>, numberOfChannels:<fuzzint> });
 <new DOMString> = <AudioDecoder>.state;
+<new any> = AudioDecoder.isConfigSupported({ codec:"opus", sampleRate:48000, numberOfChannels:2 }).then(function(support){ support.supported; support.config; }, function(error){ console.error(error); });
 <AudioDecoder>.decode(<EncodedAudioChunk>);
+<new unsignedLong> = <AudioDecoder>.decodeQueueSize;
+<new EventHandler> = <AudioDecoder>.ondequeue;
+<AudioDecoder>.ondequeue = <eventhandler>;
 <AudioDecoder>.flush();
 <AudioDecoder>.reset();
 <AudioDecoder>.close();
 
 #EncodedVideoChunk
-<new EncodedVideoChunk> = new EncodedVideoChunk({ type:"key", data:<ArrayBuffer> });
-<new EncodedVideoChunk> = new EncodedVideoChunk({ type:"delta", data:<ArrayBuffer> });
+<new EncodedVideoChunk> = new EncodedVideoChunk({ type:"key", timestamp:0, data:new Uint8Array([0, 0, 0, 1]) });
+<new EncodedVideoChunk> = new EncodedVideoChunk({ type:"delta", timestamp:33333, duration:33333, data:new Uint8Array([0, 0, 0, 1]) });
 <new DOMString> = <EncodedVideoChunk>.type;
-<new boolean> = <EncodedVideoChunk>.isSync;
-<new unsignedLongLong> = <EncodedVideoChunk>.duration;
-<new unsignedLongLong> = <EncodedVideoChunk>.timestamp;
+<new unsignedLong> = <EncodedVideoChunk>.byteLength;
+<new long long> = <EncodedVideoChunk>.timestamp;
+<new any> = <EncodedVideoChunk>.duration;
+<EncodedVideoChunk>.copyTo(new Uint8Array(16));
 
 #EncodedAudioChunk
-<new EncodedAudioChunk> = new EncodedAudioChunk({ type:"key", data:<ArrayBuffer> });
+<new EncodedAudioChunk> = new EncodedAudioChunk({ type:"key", timestamp:0, data:new Uint8Array([0, 0, 0, 1]) });
+<new EncodedAudioChunk> = new EncodedAudioChunk({ type:"delta", timestamp:20000, duration:20000, data:new Uint8Array([0, 0, 0, 1]) });
 <new DOMString> = <EncodedAudioChunk>.type;
-<new boolean> = <EncodedAudioChunk>.isSync;
+<new unsignedLong> = <EncodedAudioChunk>.byteLength;
+<new long long> = <EncodedAudioChunk>.timestamp;
+<new any> = <EncodedAudioChunk>.duration;
+<EncodedAudioChunk>.copyTo(new Uint8Array(16));
 
 #AudioData
-<new AudioData> = new AudioData({ sampleRate:<fuzzint>, numberOfChannels:<fuzzint>, timestamp:<fuzzint>, data:<ArrayBuffer> });
-<new AudioData> = new AudioData({ sampleRate:48000, numberOfChannels:2, timestamp:<fuzzint>, format:"f32-planar", data:<ArrayBuffer> });
+<new AudioData> = new AudioData({ format:"f32", sampleRate:48000, numberOfFrames:1, numberOfChannels:2, timestamp:0, data:new Float32Array([0, 0]) });
+<new AudioData> = new AudioData({ format:"f32-planar", sampleRate:44100, numberOfFrames:2, numberOfChannels:2, timestamp:1000, data:new Float32Array([0, 0, 0, 0]) });
 <new DOMString> = <AudioData>.format;
 <new unsignedLong> = <AudioData>.sampleRate;
+<new unsignedLong> = <AudioData>.numberOfFrames;
 <new unsignedLong> = <AudioData>.numberOfChannels;
-<new unsignedLongLong> = <AudioData>.timestamp;
-<AudioData>.copyTo(<ArrayBuffer>, { planeIndex:<fuzzint>, frameOffset:<fuzzint>, length:<fuzzint> });
+<new unsignedLongLong> = <AudioData>.duration;
+<new long long> = <AudioData>.timestamp;
+<new unsignedLong> = <AudioData>.allocationSize({ planeIndex:0, frameCount:1 });
+<AudioData>.copyTo(new Float32Array(2), { planeIndex:0, frameCount:1 });
+<new AudioData> = <AudioData>.clone();
 <AudioData>.close();
+
+#VideoFrame
+<new VideoFrame> = new VideoFrame(<HTMLCanvasElement>, { timestamp:0, duration:33333 });
+<new VideoFrame> = new VideoFrame(<VideoFrame>, { timestamp:33333 });
+<new unsignedLong> = <VideoFrame>.codedWidth;
+<new unsignedLong> = <VideoFrame>.codedHeight;
+<new unsignedLong> = <VideoFrame>.displayWidth;
+<new unsignedLong> = <VideoFrame>.displayHeight;
+<new long long> = <VideoFrame>.timestamp;
+<new any> = <VideoFrame>.format;
+<new unsignedLong> = <VideoFrame>.allocationSize();
+<new any> = <VideoFrame>.copyTo(new Uint8Array(64));
+<new VideoFrame> = <VideoFrame>.clone();
+<VideoFrame>.close();
 
 #ImageBitmap
 <new ImageBitmap> = createImageBitmap(<HTMLCanvasElement>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>);
@@ -6484,25 +6571,77 @@ setTimeout(<eventhandler>, <timeout_time>);
 <PerformanceObserver>.observe({ type:"first-input" });
 <PerformanceObserver>.observe({ type:"event" });
 <PerformanceObserver>.observe({ type:"task" });
+<PerformanceObserver>.observe({ type:"event", buffered:true, durationThreshold:16 });
 <PerformanceObserver>.disconnect();
 <new PerformanceEntry[]> = <PerformanceObserver>.takeRecords();
 
+#PerformanceEventTiming
+!extends PerformanceEventTiming PerformanceEntry
+<new PerformanceEventTiming> = performance.getEntriesByType("event")[0];
+<new DOMHighResTimeStamp> = <PerformanceEventTiming>.processingStart;
+<new DOMHighResTimeStamp> = <PerformanceEventTiming>.processingEnd;
+<new boolean> = <PerformanceEventTiming>.cancelable;
+<new Node> = <PerformanceEventTiming>.target;
+<new unsignedLongLong> = <PerformanceEventTiming>.interactionId;
+<new any> = <PerformanceEventTiming>.toJSON();
+<new unsignedLongLong> = performance.eventCounts.get("click");
+<new unsignedLongLong> = performance.eventCounts.get("keydown");
+<new unsignedLongLong> = performance.interactionCount;
+
 #PerformanceEntry
+!extends PerformanceResourceTiming PerformanceEntry
+!extends PerformanceNavigationTiming PerformanceResourceTiming
+!extends PerformancePaintTiming PerformanceEntry
+!extends LargestContentfulPaint PerformanceEntry
+!extends PerformanceContainerTiming PerformanceEntry
 <new DOMString> = <PerformanceEntry>.name;
 <new DOMString> = <PerformanceEntry>.entryType;
 <new DOMHighResTimeStamp> = <PerformanceEntry>.startTime;
 <new DOMHighResTimeStamp> = <PerformanceEntry>.duration;
+<new PerformanceResourceTiming> = performance.getEntriesByType("resource")[0];
+<new DOMString> = <PerformanceResourceTiming>.initiatorType;
+<new DOMString> = <PerformanceResourceTiming>.nextHopProtocol;
+<new DOMHighResTimeStamp> = <PerformanceResourceTiming>.fetchStart;
+<new DOMHighResTimeStamp> = <PerformanceResourceTiming>.requestStart;
+<new DOMHighResTimeStamp> = <PerformanceResourceTiming>.responseStart;
+<new DOMHighResTimeStamp> = <PerformanceResourceTiming>.responseEnd;
+<new unsignedLongLong> = <PerformanceResourceTiming>.transferSize;
+<new unsignedLongLong> = <PerformanceResourceTiming>.encodedBodySize;
+<new unsignedLongLong> = <PerformanceResourceTiming>.decodedBodySize;
+<new unsignedShort> = <PerformanceResourceTiming>.responseStatus;
+<new DOMString> = <PerformanceResourceTiming>.contentType;
+<new PerformanceServerTiming> = <PerformanceResourceTiming>.serverTiming[0];
+<new DOMString> = <PerformanceServerTiming>.name;
+<new DOMHighResTimeStamp> = <PerformanceServerTiming>.duration;
+<new DOMString> = <PerformanceServerTiming>.description;
+<new PerformanceNavigationTiming> = performance.getEntriesByType("navigation")[0];
+<new DOMHighResTimeStamp> = <PerformanceNavigationTiming>.domInteractive;
+<new DOMHighResTimeStamp> = <PerformanceNavigationTiming>.domContentLoadedEventStart;
+<new DOMHighResTimeStamp> = <PerformanceNavigationTiming>.domContentLoadedEventEnd;
+<new DOMHighResTimeStamp> = <PerformanceNavigationTiming>.domComplete;
+<new DOMHighResTimeStamp> = <PerformanceNavigationTiming>.loadEventStart;
+<new DOMHighResTimeStamp> = <PerformanceNavigationTiming>.loadEventEnd;
+<new any> = <PerformanceNavigationTiming>.type;
+<new unsignedShort> = <PerformanceNavigationTiming>.redirectCount;
+<new PerformancePaintTiming> = performance.getEntriesByType("paint")[0];
+<new DOMHighResTimeStamp> = <PerformancePaintTiming>.paintTime;
+<new DOMHighResTimeStamp> = <PerformancePaintTiming>.presentationTime;
+<new LargestContentfulPaint> = performance.getEntriesByType("largest-contentful-paint")[0];
+<new PerformanceContainerTiming> = performance.getEntriesByType("container")[0];
+<new PerformanceObserver> = new PerformanceObserver(function(list){ list.getEntries().forEach(function(entry){ if(entry instanceof LargestContentfulPaint){ entry.renderTime; entry.loadTime; entry.size; entry.id; entry.url; entry.element; } if(entry instanceof PerformanceContainerTiming){ entry.identifier; entry.intersectionRect; entry.size; entry.firstRenderTime; entry.lastPaintedElement; entry.rootElement; } }); });
+<PerformanceObserver>.observe({ type:"largest-contentful-paint", buffered:true });
+<PerformanceObserver>.observe({ type:"container", buffered:true });
 
 #BroadcastChannel
 <new BroadcastChannel> = new BroadcastChannel("<DOMString>");
 <new DOMString> = <BroadcastChannel>.name;
-<new long> = <BroadcastChannel>.port;
 <new EventHandler> = <BroadcastChannel>.onmessage;
 <BroadcastChannel>.onmessage = <EventHandler>;
 <new EventHandler> = <BroadcastChannel>.onmessageerror;
 <BroadcastChannel>.onmessageerror = <EventHandler>;
 <BroadcastChannel>.postMessage("<DOMString>");
 <BroadcastChannel>.postMessage(<fuzzint>);
+<BroadcastChannel>.postMessage({ type:"message", value:<fuzzint> });
 <BroadcastChannel>.close();
 
 #CacheStorage
@@ -6611,6 +6750,7 @@ Notification.requestPermission();
 <Geolocation>.getCurrentPosition(<EventHandler>, <EventHandler>, { enableHighAccuracy:true });
 <Geolocation>.getCurrentPosition(<EventHandler>, <EventHandler>, { timeout:<fuzzint> });
 <Geolocation>.getCurrentPosition(<EventHandler>, <EventHandler>, { maximumAge:<fuzzint> });
+<Geolocation>.getCurrentPosition(function(position){ position.coords.latitude; }, function(error){ error.code; error.message; }, { timeout:1000 });
 <new GeolocationPosition> = <Geolocation>.watchPosition(<EventHandler>);
 <Geolocation>.clearWatch(<fuzzint>);
 
@@ -6627,6 +6767,55 @@ Notification.requestPermission();
 <new double> = <GeolocationCoordinates>.heading;
 <new double> = <GeolocationCoordinates>.speed;
 
+#DeviceLightEvent (preference-gated)
+!extends DeviceLightEvent Event
+<new Event> = <DeviceLightEvent>;
+<new DeviceLightEvent> = new DeviceLightEvent("devicelight", { value:<fuzzfloat> });
+<new double> = <DeviceLightEvent>.value;
+<new EventHandler> = <window>.ondevicelight;
+<window>.ondevicelight = <EventHandler>;
+
+#ImageCaptureErrorEvent (preference-gated)
+!extends ImageCaptureErrorEvent Event
+<new Event> = <ImageCaptureErrorEvent>;
+<new ImageCaptureErrorEvent> = new ImageCaptureErrorEvent("error", { imageCaptureError:null });
+<new ImageCaptureError> = <ImageCaptureErrorEvent>.imageCaptureError;
+
+#BlobEvent
+!extends BlobEvent Event
+<new Event> = <BlobEvent>;
+<new BlobEvent> = new BlobEvent("dataavailable", { data:new Blob(["domato"]) });
+<new Blob> = <BlobEvent>.data;
+
+#CookieChangeEvent (secure-context and preference-gated)
+!extends CookieChangeEvent Event
+<new Event> = <CookieChangeEvent>;
+<new CookieChangeEvent> = new CookieChangeEvent("change", { changed:[], deleted:[] });
+<new any> = <CookieChangeEvent>.changed;
+<new any> = <CookieChangeEvent>.deleted;
+
+#EditContext (preference-gated)
+<new EditContext> = new EditContext({ text:"domato", selectionStart:1, selectionEnd:4 });
+<EditContext>.updateText(0, 1, "f");
+<EditContext>.updateSelection(0, 2);
+<EditContext>.updateControlBounds(new DOMRect(0, 0, 100, 30));
+<EditContext>.updateSelectionBounds(new DOMRect(2, 0, 1, 20));
+<EditContext>.updateCharacterBounds(0, 2, [new DOMRect(0, 0, 8, 16), new DOMRect(8, 0, 8, 16)]);
+<new DOMString> = <EditContext>.text;
+<new unsignedLong> = <EditContext>.selectionStart;
+<new unsignedLong> = <EditContext>.selectionEnd;
+<new DOMRect[]> = <EditContext>.characterBounds();
+<new EventHandler> = <EditContext>.ontextupdate;
+<EditContext>.ontextupdate = <EventHandler>;
+<new EventHandler> = <EditContext>.ontextformatupdate;
+<EditContext>.ontextformatupdate = <EventHandler>;
+
+#CaretPosition
+<new CaretPosition> = document.caretPositionFromPoint(<fuzzint>, <fuzzint>);
+<new Node> = <CaretPosition>.offsetNode;
+<new unsignedLong> = <CaretPosition>.offset;
+<new DOMRect> = <CaretPosition>.getClientRect();
+
 #Gamepad
 #Gamepad API
 <new Gamepad[]> = navigator.getGamepads();
@@ -6634,12 +6823,26 @@ Notification.requestPermission();
 <new DOMString> = <Gamepad>.id;
 <new long> = <Gamepad>.index;
 <new boolean> = <Gamepad>.connected;
-<new unsignedLong> = <Gamepad>.timestamp;
+<new DOMHighResTimeStamp> = <Gamepad>.timestamp;
+<new DOMString> = <Gamepad>.mapping;
+<new DOMString> = <Gamepad>.hand;
 <new double[]> = <Gamepad>.axes;
-<new boolean[]> = <Gamepad>.buttons;
-<new EventHandler> = <Gamepad>.ongamepadconnected;
+<new GamepadButton> = <Gamepad>.buttons[<fuzzint min=0 max=0>];
+<new boolean> = <GamepadButton>.pressed;
+<new boolean> = <GamepadButton>.touched;
+<new double> = <GamepadButton>.value;
+<new GamepadHapticActuator> = <Gamepad>.hapticActuators[<fuzzint min=0 max=0>];
+<new DOMString> = <GamepadHapticActuator>.type;
+<GamepadHapticActuator>.pulse(0.5, 50).then(function(result){ return result; }, function(error){ console.error(error); });
+<new GamepadTouch> = <Gamepad>.touchEvents[<fuzzint min=0 max=0>];
+<new unsignedLong> = <GamepadTouch>.touchId;
+<new octet> = <GamepadTouch>.surfaceId;
+<new Float32Array> = <GamepadTouch>.position;
+<new Uint32Array> = <GamepadTouch>.surfaceDimensions;
+<new GamepadPose> = <Gamepad>.pose;
+<new EventHandler> = <window>.ongamepadconnected;
 <window>.ongamepadconnected = <EventHandler>;
-<new EventHandler> = <Gamepad>.ongamepaddisconnected;
+<new EventHandler> = <window>.ongamepaddisconnected;
 <window>.ongamepaddisconnected = <EventHandler>;
 
 #Compression Streams
@@ -6759,8 +6962,29 @@ Notification.requestPermission();
 <CredentialsContainer>.get();
 <CredentialsContainer>.get({ password:true });
 <CredentialsContainer>.get({ unmediated:true });
+<CredentialsContainer>.create({ publicKey:{ rp:{ name:"Domato test RP", id:"localhost" }, user:{ id:new Uint8Array([1, 2, 3, 4]), name:"fuzz-user", displayName:"Fuzz User" }, challenge:new Uint8Array([5, 6, 7, 8]), pubKeyCredParams:[{ type:"public-key", alg:-7 }, { type:"public-key", alg:-257 }], timeout:60000, authenticatorSelection:{ residentKey:"preferred", userVerification:"preferred" }, attestation:"none" } }).then(function(credential){ credential.rawId; credential.response.clientDataJSON; credential.getClientExtensionResults(); }, function(error){ error.name; });
+<CredentialsContainer>.get({ publicKey:{ challenge:new Uint8Array([9, 10, 11, 12]), timeout:60000, rpId:"localhost", userVerification:"preferred" } }).then(function(credential){ credential.rawId; credential.response.clientDataJSON; }, function(error){ error.name; });
 <CredentialsContainer>.store(<PasswordCredential>);
 <CredentialsContainer>.preventSilentAccess();
+
+#Web Authentication (WebAuthn; secure-context and preference gated in Firefox)
+<new any> = PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function(available){ return available; }, function(error){ console.error(error); });
+<new any> = PublicKeyCredential.isConditionalMediationAvailable().then(function(available){ return available; }, function(error){ console.error(error); });
+<new any> = PublicKeyCredential.getClientCapabilities().then(function(capabilities){ return capabilities; }, function(error){ console.error(error); });
+<new any> = PublicKeyCredential.parseCreationOptionsFromJSON({ rp:{ name:"Domato test RP", id:"localhost" }, user:{ id:"AQIDBA", name:"fuzz-user", displayName:"Fuzz User" }, challenge:"BQYHCA", pubKeyCredParams:[{ type:"public-key", alg:-7 }] });
+<new any> = PublicKeyCredential.parseRequestOptionsFromJSON({ challenge:"CQoLDA", rpId:"localhost", userVerification:"preferred" });
+<new DOMString> = <PublicKeyCredential>.authenticatorAttachment;
+<new AuthenticatorResponse> = <PublicKeyCredential>.response;
+<new any> = <PublicKeyCredential>.getClientExtensionResults();
+<new any> = <PublicKeyCredential>.toJSON();
+<new ArrayBuffer> = <AuthenticatorResponse>.clientDataJSON;
+<new ArrayBuffer> = <AuthenticatorAttestationResponse>.attestationObject;
+<new DOMString[]> = <AuthenticatorAttestationResponse>.getTransports();
+<new ArrayBuffer> = <AuthenticatorAttestationResponse>.getAuthenticatorData();
+<new ArrayBuffer> = <AuthenticatorAttestationResponse>.getPublicKey();
+<new ArrayBuffer> = <AuthenticatorAssertionResponse>.authenticatorData;
+<new ArrayBuffer> = <AuthenticatorAssertionResponse>.signature;
+<new ArrayBuffer> = <AuthenticatorAssertionResponse>.userHandle;
 
 #PasswordCredential
 <new PasswordCredential> = new PasswordCredential({ id:"<DOMString>", password:"<DOMString>" });
@@ -6895,62 +7119,262 @@ Notification.requestPermission();
 
 #WebXR
 #XRSystem
+!extends XRSystem EventTarget
+<new EventTarget> = <XRSystem>;
 <new XRSystem> = navigator.xr;
-<XRSystem>.isSessionSupported("immersive-vr");
-<XRSystem>.isSessionSupported("immersive-ar");
-<XRSystem>.isSessionSupported("inline");
-<XRSystem>.requestSession("immersive-vr");
-<XRSystem>.requestSession("immersive-ar");
-<XRSystem>.requestSession("inline");
-<XRSystem>.requestSession("immersive-vr", { optionalFeatures:["local-floor", "bounded-floor"] });
+<XRSystem>.isSessionSupported("immersive-vr").then(function(supported){ return supported; }, function(error){ console.error(error); });
+<XRSystem>.isSessionSupported("immersive-ar").then(function(supported){ return supported; }, function(error){ console.error(error); });
+<XRSystem>.isSessionSupported("inline").then(function(supported){ return supported; }, function(error){ console.error(error); });
+<XRSystem>.requestSession("inline").then(function(session){ session.visibilityState; session.renderState.depthNear; session.renderState.depthFar; session.inputSources.length; session.requestReferenceSpace("viewer").then(function(space){ session.requestAnimationFrame(function(time, frame){ var pose=frame.getViewerPose(space); if(pose){ pose.transform.position; pose.transform.orientation; pose.views.forEach(function(view){ view.eye; view.projectionMatrix; view.transform; var baseLayer=frame.session.renderState.baseLayer; if(baseLayer){ baseLayer.getViewport(view); } }); } var sameSpacePose=frame.getPose(space, space); if(sameSpacePose){ sameSpacePose.transform.matrix; } }); space.getOffsetReferenceSpace(new XRRigidTransform()).onreset; }, function(error){ console.error(error); }); var gl=document.createElement("canvas").getContext("webgl"); if(gl){ var layer=new XRWebGLLayer(session, gl, { antialias:false, depth:true }); session.updateRenderState({ baseLayer:layer, depthNear:0.1, depthFar:1000 }); layer.framebufferWidth; layer.framebufferHeight; } session.updateTargetFrameRate(60).then(function(){}, function(error){ console.error(error); }); session.end().then(function(){}, function(error){ console.error(error); }); }, function(error){ console.error(error); });
+<XRSystem>.requestSession("immersive-vr", { optionalFeatures:["local-floor", "bounded-floor"] }).then(function(session){ session.requestReferenceSpace("local-floor").then(function(space){ return space; }, function(error){ console.error(error); }); }, function(error){ console.error(error); });
 <new EventHandler> = <XRSystem>.ondevicechange;
 <XRSystem>.ondevicechange = <EventHandler>;
 
 #XRSession
-<new XRReferenceSpaceType> = <XRSession>.requestReferenceSpace("local");
-<XRSession>.requestReferenceSpace("local-floor");
-<XRSession>.requestReferenceSpace("bounded-floor");
-<XRSession>.requestReferenceSpace("viewer");
-<XRSession>.requestReferenceSpace("world");
-<new XRInputSources> = <XRSession>.inputSources;
-<new EventHandler> = <XRSession>.end;
-<XRSession>.end();
-<XRSession>.updateRenderState({ baseLayer:<XRLayer> });
-<XRSession>.requestHitTestSource({ space:<XRSpace> });
-<new DOMString> = <XRSession>.environmentBlendMode;
+!extends XRSession EventTarget
+<new EventTarget> = <XRSession>;
+<new XRInputSourceArray> = <XRSession>.inputSources;
+<new DOMString> = <XRSession>.visibilityState;
+<new XRRenderState> = <XRSession>.renderState;
+<new float> = <XRSession>.frameRate;
+<new Float32Array> = <XRSession>.supportedFrameRates;
+<XRSession>.updateRenderState({ depthNear:0.1, depthFar:1000 });
+<XRSession>.updateTargetFrameRate(72);
+<XRSession>.cancelAnimationFrame(<fuzzint>);
+<new EventHandler> = <XRSession>.onend;
+<XRSession>.onend = <EventHandler>;
+<new EventHandler> = <XRSession>.oninputsourceschange;
+<XRSession>.oninputsourceschange = <EventHandler>;
+<new EventHandler> = <XRSession>.onselect;
+<XRSession>.onselect = <EventHandler>;
+<new EventHandler> = <XRSession>.onvisibilitychange;
+<XRSession>.onvisibilitychange = <EventHandler>;
+
+#XRRenderState
+<new double> = <XRRenderState>.depthNear;
+<new double> = <XRRenderState>.depthFar;
+<new double> = <XRRenderState>.inlineVerticalFieldOfView;
+<new XRWebGLLayer> = <XRRenderState>.baseLayer;
+
+#XRInputSourceArray
+<new unsignedLong> = <XRInputSourceArray>.length;
+<new XRInputSource> = <XRInputSourceArray>[0];
 
 #XRFrame
-<new XRPose> = <XRFrame>.getViewerPose(<XRSpace>);
-<new XRRigidTransform> = <XRFrame>.getPose(<XRSpace>, <XRSpace>);
-<new XRInputSource[]> = <XRFrame>.getInputSources();
+<new XRSession> = <XRFrame>.session;
+<new XRViewerPose> = <XRFrame>.getViewerPose(<XRReferenceSpace>);
+<new XRPose> = <XRFrame>.getPose(<XRSpace>, <XRSpace>);
 
 #XRInputSource
-<new DOMString> = <XRInputSource>.targetRaySpace;
 <new DOMString> = <XRInputSource>.handedness;
-<new boolean> = <XRInputSource>.gamepad;
+<new DOMString> = <XRInputSource>.targetRayMode;
+<new XRSpace> = <XRInputSource>.targetRaySpace;
+<new XRSpace> = <XRInputSource>.gripSpace;
+<new DOMString[]> = <XRInputSource>.profiles;
+<new Gamepad> = <XRInputSource>.gamepad;
+
+#XRReferenceSpace
+!extends XRReferenceSpace XRSpace
+<new XRSpace> = <XRReferenceSpace>;
+<new XRReferenceSpace> = <XRReferenceSpace>.getOffsetReferenceSpace(new XRRigidTransform());
+<new EventHandler> = <XRReferenceSpace>.onreset;
+<XRReferenceSpace>.onreset = <EventHandler>;
+
+#XRBoundedReferenceSpace
+!extends XRBoundedReferenceSpace XRReferenceSpace
+<new XRReferenceSpace> = <XRBoundedReferenceSpace>;
+<new DOMPointReadOnly[]> = <XRBoundedReferenceSpace>.boundsGeometry;
+
+#XRSpace
+!extends XRSpace EventTarget
+<new EventTarget> = <XRSpace>;
+
+#XRReferenceSpaceEvent
+!extends XRReferenceSpaceEvent Event
+<new Event> = <XRReferenceSpaceEvent>;
+<new XRReferenceSpaceEvent> = new XRReferenceSpaceEvent("reset", { referenceSpace:<XRReferenceSpace>, transform:new XRRigidTransform() });
+<new XRReferenceSpace> = <XRReferenceSpaceEvent>.referenceSpace;
+<new XRRigidTransform> = <XRReferenceSpaceEvent>.transform;
+
+#XRInputSourceEvent
+!extends XRInputSourceEvent Event
+<new Event> = <XRInputSourceEvent>;
+<new XRInputSourceEvent> = new XRInputSourceEvent("select", { frame:<XRFrame>, inputSource:<XRInputSource> });
+<new XRFrame> = <XRInputSourceEvent>.frame;
+<new XRInputSource> = <XRInputSourceEvent>.inputSource;
+
+#XRInputSourcesChangeEvent
+!extends XRInputSourcesChangeEvent Event
+<new Event> = <XRInputSourcesChangeEvent>;
+<new XRInputSourcesChangeEvent> = new XRInputSourcesChangeEvent("inputsourceschange", { session:<XRSession>, added:[<XRInputSource>], removed:[<XRInputSource>] });
+<new XRSession> = <XRInputSourcesChangeEvent>.session;
+<new XRInputSource[]> = <XRInputSourcesChangeEvent>.added;
+<new XRInputSource[]> = <XRInputSourcesChangeEvent>.removed;
+
+#XRViewerPose and XRPose
+!extends XRViewerPose XRPose
+<new XRPose> = <XRViewerPose>;
+<new XRRigidTransform> = <XRPose>.transform;
+<new boolean> = <XRPose>.emulatedPosition;
+<new XRView[]> = <XRViewerPose>.views;
+
+#XRRigidTransform
+<new XRRigidTransform> = new XRRigidTransform({ x:<fuzzfloat>, y:<fuzzfloat>, z:<fuzzfloat> }, { x:0, y:0, z:0, w:1 });
+<new DOMPointReadOnly> = <XRRigidTransform>.position;
+<new DOMPointReadOnly> = <XRRigidTransform>.orientation;
+<new Float32Array> = <XRRigidTransform>.matrix;
+<new XRRigidTransform> = <XRRigidTransform>.inverse;
+
+#XRView and XRViewport
+<new DOMString> = <XRView>.eye;
+<new Float32Array> = <XRView>.projectionMatrix;
+<new XRRigidTransform> = <XRView>.transform;
+<new long> = <XRViewport>.x;
+<new long> = <XRViewport>.y;
+<new long> = <XRViewport>.width;
+<new long> = <XRViewport>.height;
+
+#XRWebGLLayer
+<new boolean> = <XRWebGLLayer>.antialias;
+<new boolean> = <XRWebGLLayer>.ignoreDepthValues;
+<new WebGLFramebuffer> = <XRWebGLLayer>.framebuffer;
+<new unsignedLong> = <XRWebGLLayer>.framebufferWidth;
+<new unsignedLong> = <XRWebGLLayer>.framebufferHeight;
+<new XRViewport> = <XRWebGLLayer>.getViewport(<XRView>);
+<new double> = XRWebGLLayer.getNativeFramebufferScaleFactor(<XRSession>);
 
 #WebTransport
-#WebTransport
+!extends WebTransportDatagramsWritable WritableStream
+!extends WebTransportSendStream WritableStream
+!extends WebTransportReceiveStream ReadableStream
+!extends WebTransportError DOMException
 <new WebTransport> = new WebTransport("<DOMString>");
-<new WebTransport> = new WebTransport("<DOMString>", { serverCertificateHashes:[{ algorithm:"sha-256", value:<ArrayBuffer> }] });
-<new WebTransport> = new WebTransport("<DOMString>", { protocols:["<DOMString>"] });
-<new WebTransport> = new WebTransport("<DOMString>", { maxStreams:{ unidirectional:<fuzzint> } });
-<new WebTransport> = new WebTransport("<DOMString>", { allowPooling:true });
-<new WebTransport> = new WebTransport("<DOMString>", { datagrams:{ maxStreamDatagramUSize:<fuzzint> } });
-<new WebTransportBidirectionalStream> = <WebTransport>.createBidirectionalStream();
-<new WebTransportSendStream> = <WebTransport>.createUnidirectionalStream();
-<new WebTransportReceiveStream> = <WebTransport>.incomingUnidirectionalStreams;
+<new WebTransport> = new WebTransport("https://localhost:4433", { allowPooling:true, requireUnreliable:true, congestionControl:"low-latency", protocols:["domato"] });
+<new WebTransport> = new WebTransport("https://localhost:4433", { serverCertificateHashes:[{ algorithm:"sha-256", value:<ArrayBuffer> }] });
+<new any> = <WebTransport>.ready;
+<new any> = <WebTransport>.closed;
+<new any> = <WebTransport>.draining;
+<new any> = <WebTransport>.reliability;
+<new any> = <WebTransport>.congestionControl;
+<new DOMString> = <WebTransport>.protocol;
+<new any> = WebTransport.supportsReliableOnly;
+<new any> = <WebTransport>.getStats().then(function(stats){ return stats; }, function(error){ console.error(error); });
+<new any> = <WebTransport>.exportKeyingMaterial(new Uint8Array([1, 2, 3]), new Uint8Array([4, 5])).then(function(key){ return key; }, function(error){ console.error(error); });
 <new WebTransportDatagramDuplexStream> = <WebTransport>.datagrams;
-<new WebTransport>.ready;
-<new WebTransport>.close();
-<new WebTransport>.close({ errorCode:<fuzzint>, reason:"<DOMString>" });
-<new WebTransport>.close();
-<new EventHandler> = <WebTransport>.onconnect;
-<WebTransport>.onconnect = <EventHandler>;
-<new EventHandler> = <WebTransport>.onclose;
-<WebTransport>.onclose = <EventHandler>;
-<new EventHandler> = <WebTransport>.onerror;
-<WebTransport>.onerror = <EventHandler>;
+<new unsignedLong> = <WebTransportDatagramDuplexStream>.maxDatagramSize;
+<WebTransportDatagramDuplexStream>.incomingMaxAge = <fuzzfloat>;
+<WebTransportDatagramDuplexStream>.outgoingMaxAge = <fuzzfloat>;
+<WebTransportDatagramDuplexStream>.incomingHighWaterMark = <fuzzfloat>;
+<WebTransportDatagramDuplexStream>.outgoingHighWaterMark = <fuzzfloat>;
+<new WebTransportDatagramsWritable> = <WebTransportDatagramDuplexStream>.createWritable({ sendOrder:<fuzzint> });
+<new any> = <WebTransportDatagramDuplexStream>.readable.getReader().read().then(function(result){ return result; }, function(error){ console.error(error); });
+<new WebTransportSendGroup> = <WebTransport>.createSendGroup();
+<new any> = <WebTransportSendGroup>.getStats().then(function(stats){ return stats; }, function(error){ console.error(error); });
+<new any> = <WebTransport>.createBidirectionalStream({ sendGroup:<WebTransportSendGroup>, sendOrder:<fuzzint> }).then(function(stream){ stream.readable.getReader().read().then(function(result){ return result; }, function(error){ console.error(error); }); stream.writable.getWriter().write(new Uint8Array([1, 2, 3])).then(function(){}, function(error){ console.error(error); }); return stream; }, function(error){ console.error(error); });
+<new any> = <WebTransport>.createUnidirectionalStream({ sendOrder:<fuzzint> }).then(function(stream){ const writer = stream.getWriter(); writer.write(new Uint8Array([1, 2, 3])).then(function(){ return writer.close(); }, function(error){ console.error(error); }); return stream; }, function(error){ console.error(error); });
+<new ReadableStreamDefaultReader> = <WebTransport>.incomingBidirectionalStreams.getReader();
+<new any> = <WebTransport>.incomingBidirectionalStreams.getReader().read().then(function(result){ if(!result.done){ result.value.readable.getReader().read(); result.value.writable.getWriter().write(new Uint8Array([7, 8])); } return result; }, function(error){ console.error(error); });
+<new any> = <WebTransport>.incomingUnidirectionalStreams.getReader().read().then(function(result){ return result; }, function(error){ console.error(error); });
+<WebTransport>.close({ closeCode:<fuzzint>, reason:"<DOMString>" });
+<new WebTransportError> = new WebTransportError({ streamErrorCode:<fuzzint>, message:"<DOMString>" });
+<new any> = <WebTransportError>.source;
+<new any> = <WebTransportError>.streamErrorCode;
+
+#Speech Synthesis (preference-gated in Firefox)
+!extends SpeechSynthesis EventTarget
+!extends SpeechSynthesisUtterance EventTarget
+!extends SpeechSynthesisEvent Event
+!extends SpeechSynthesisErrorEvent SpeechSynthesisEvent
+<new SpeechSynthesis> = <Window>.speechSynthesis;
+<new boolean> = <SpeechSynthesis>.pending;
+<new boolean> = <SpeechSynthesis>.speaking;
+<new boolean> = <SpeechSynthesis>.paused;
+<new SpeechSynthesisUtterance> = new SpeechSynthesisUtterance();
+<new SpeechSynthesisUtterance> = new SpeechSynthesisUtterance("<DOMString>");
+<SpeechSynthesisUtterance>.text = "<DOMString>";
+<SpeechSynthesisUtterance>.lang = "en-US";
+<SpeechSynthesisUtterance>.volume = <fuzzfloat>;
+<SpeechSynthesisUtterance>.rate = <fuzzfloat>;
+<SpeechSynthesisUtterance>.pitch = <fuzzfloat>;
+<new EventHandler> = <SpeechSynthesisUtterance>.onstart;
+<SpeechSynthesisUtterance>.onstart = <EventHandler>;
+<new EventHandler> = <SpeechSynthesisUtterance>.onend;
+<SpeechSynthesisUtterance>.onend = <EventHandler>;
+<new EventHandler> = <SpeechSynthesisUtterance>.onerror;
+<SpeechSynthesisUtterance>.onerror = <EventHandler>;
+<new EventHandler> = <SpeechSynthesisUtterance>.onpause;
+<SpeechSynthesisUtterance>.onpause = <EventHandler>;
+<new EventHandler> = <SpeechSynthesisUtterance>.onresume;
+<SpeechSynthesisUtterance>.onresume = <EventHandler>;
+<new EventHandler> = <SpeechSynthesisUtterance>.onmark;
+<SpeechSynthesisUtterance>.onmark = <EventHandler>;
+<new EventHandler> = <SpeechSynthesisUtterance>.onboundary;
+<SpeechSynthesisUtterance>.onboundary = <EventHandler>;
+<new SpeechSynthesisVoice> = <SpeechSynthesis>.getVoices()[0];
+<new DOMString> = <SpeechSynthesisVoice>.voiceURI;
+<new DOMString> = <SpeechSynthesisVoice>.name;
+<new DOMString> = <SpeechSynthesisVoice>.lang;
+<new boolean> = <SpeechSynthesisVoice>.localService;
+<new boolean> = <SpeechSynthesisVoice>.default;
+<SpeechSynthesisUtterance>.voice = <SpeechSynthesisVoice>;
+<SpeechSynthesis>.speak(<SpeechSynthesisUtterance>);
+<SpeechSynthesis>.pause();
+<SpeechSynthesis>.resume();
+<SpeechSynthesis>.cancel();
+<new EventHandler> = <SpeechSynthesis>.onvoiceschanged;
+<SpeechSynthesis>.onvoiceschanged = <EventHandler>;
+<new SpeechSynthesisEvent> = new SpeechSynthesisEvent("boundary", { utterance:<SpeechSynthesisUtterance>, charIndex:<fuzzint>, elapsedTime:<fuzzfloat>, name:"word" });
+<new SpeechSynthesisUtterance> = <SpeechSynthesisEvent>.utterance;
+<new unsignedLong> = <SpeechSynthesisEvent>.charIndex;
+<new unsignedLong> = <SpeechSynthesisEvent>.charLength;
+<new float> = <SpeechSynthesisEvent>.elapsedTime;
+<new DOMString> = <SpeechSynthesisEvent>.name;
+<new SpeechSynthesisErrorEvent> = new SpeechSynthesisErrorEvent("error", { utterance:<SpeechSynthesisUtterance>, error:"synthesis-failed" });
+<new any> = <SpeechSynthesisErrorEvent>.error;
+
+#Speech Recognition (secure-context and preference-gated)
+!extends SpeechRecognition EventTarget
+!extends SpeechRecognitionEvent Event
+!extends SpeechRecognitionErrorEvent Event
+<new SpeechRecognition> = new SpeechRecognition();
+<SpeechRecognition>.lang = "en-US";
+<SpeechRecognition>.continuous = <boolean>;
+<SpeechRecognition>.interimResults = <boolean>;
+<SpeechRecognition>.unspokenPunctuation = <boolean>;
+<SpeechRecognition>.maxAlternatives = <fuzzint>;
+<SpeechRecognition>.processLocally = <boolean>;
+<new SpeechGrammarList> = new SpeechGrammarList();
+<new SpeechGrammar> = new SpeechGrammar();
+<SpeechGrammar>.src = "data:application/grammar+xml,%3Cgrammar%2F%3E";
+<SpeechGrammar>.weight = <fuzzfloat>;
+<SpeechGrammarList>.addFromUri("data:application/grammar+xml,%3Cgrammar%2F%3E", <fuzzfloat>);
+<SpeechGrammarList>.addFromString("<DOMString>", <fuzzfloat>);
+<SpeechRecognition>.grammars = <SpeechGrammarList>;
+<new SpeechRecognitionPhrase> = new SpeechRecognitionPhrase("<DOMString>", <fuzzfloat>);
+<new DOMString> = <SpeechRecognitionPhrase>.phrase;
+<new float> = <SpeechRecognitionPhrase>.boost;
+<SpeechRecognition>.phrases = [new SpeechRecognitionPhrase("domato", 0.5)];
+<SpeechRecognition>.start();
+<SpeechRecognition>.start(<MediaStreamTrack>);
+<SpeechRecognition>.stop();
+<SpeechRecognition>.abort();
+<new any> = SpeechRecognition.available({ langs:["en-US"], processLocally:<boolean>, quality:"dictation" }).then(function(status){ return status; }, function(error){ console.error(error); });
+<new any> = SpeechRecognition.install({ langs:["en-US"], processLocally:true }).then(function(installed){ return installed; }, function(error){ console.error(error); });
+<new EventHandler> = <SpeechRecognition>.onresult;
+<SpeechRecognition>.onresult = function(event){ const results = event.results; const result = results.item(0); const alternative = result.item(0); alternative.transcript; alternative.confidence; result.isFinal; event.resultIndex; event.interpretation; event.emma; };
+<SpeechRecognition>.onerror = function(event){ event.error; event.message; };
+<SpeechRecognition>.onaudiostart = <EventHandler>;
+<SpeechRecognition>.onsoundstart = <EventHandler>;
+<SpeechRecognition>.onspeechstart = <EventHandler>;
+<SpeechRecognition>.onspeechend = <EventHandler>;
+<SpeechRecognition>.onsoundend = <EventHandler>;
+<SpeechRecognition>.onaudioend = <EventHandler>;
+<SpeechRecognition>.onnomatch = <EventHandler>;
+<SpeechRecognition>.onstart = <EventHandler>;
+<SpeechRecognition>.onend = <EventHandler>;
+<new SpeechRecognitionErrorEvent> = new SpeechRecognitionErrorEvent("error", { error:"language-not-supported", message:"<DOMString>" });
+<new any> = <SpeechRecognitionErrorEvent>.error;
+<new DOMString> = <SpeechRecognitionErrorEvent>.message;
 
 #WebNN
 #ML
@@ -6968,18 +7392,27 @@ Notification.requestPermission();
 
 #Payment Request
 #PaymentRequest
+!extends PaymentRequest EventTarget
+!extends PaymentResponse EventTarget
+!extends PaymentRequestUpdateEvent Event
+!extends PaymentMethodChangeEvent PaymentRequestUpdateEvent
 <new PaymentRequest> = new PaymentRequest([{ supportedMethods:"basic-card" }], { total:{ label:"Total", amount:{ currency:"USD", value:"<fuzzfloat>" } } });
 <new PaymentRequest> = new PaymentRequest([{ supportedMethods:"basic-card", data:{ supportedCards:["visa", "mastercard"] } }], { total:{ label:"Total", amount:{ currency:"USD", value:"10.00" } } });
-<PaymentRequest>.show();
-<PaymentRequest>.abort();
+<new PaymentRequest> = new PaymentRequest([{ supportedMethods:"basic-card" }], { id:"domato", displayItems:[{ label:"Item", amount:{ currency:"USD", value:"2.00" } }], total:{ label:"Total", amount:{ currency:"USD", value:"2.00" } }, shippingOptions:[{ id:"standard", label:"Standard", amount:{ currency:"USD", value:"0.00" }, selected:true }] }, { requestPayerName:true, requestPayerEmail:true, requestPayerPhone:true, requestShipping:true, requestBillingAddress:true, shippingType:"delivery" });
+<new DOMString> = <PaymentRequest>.id;
+<new DOMString> = <PaymentRequest>.shippingOption;
+<new any> = <PaymentRequest>.shippingType;
+<new any> = <PaymentRequest>.show().then(function(response){ response.toJSON(); response.requestId; response.methodName; response.details; response.payerName; response.payerEmail; response.payerPhone; response.shippingAddress; response.shippingOption; response.complete("success"); return response; }, function(error){ console.error(error); });
+<new any> = <PaymentRequest>.show(Promise.resolve({ total:{ label:"Updated total", amount:{ currency:"USD", value:"3.00" } } })).then(function(response){ return response; }, function(error){ console.error(error); });
+<new any> = <PaymentRequest>.abort().then(function(){}, function(error){ console.error(error); });
 <new EventHandler> = <PaymentRequest>.onpaymentmethodchange;
 <PaymentRequest>.onpaymentmethodchange = <EventHandler>;
 <new EventHandler> = <PaymentRequest>.onshippingaddresschange;
 <PaymentRequest>.onshippingaddresschange = <EventHandler>;
 <new EventHandler> = <PaymentRequest>.onshippingoptionchange;
 <PaymentRequest>.onshippingoptionchange = <EventHandler>;
-<new boolean> = <PaymentRequest>.canMakePayment();
-<PaymentRequest>.show().total;
+<new any> = <PaymentRequest>.canMakePayment().then(function(canPay){ return canPay; }, function(error){ console.error(error); });
+<PaymentRequest>.onmerchantvalidation = <EventHandler>;
 
 #PaymentMethodData
 <new PaymentMethodData> = { supportedMethods:"basic-card", data:{ supportedCards:["visa"] } };
@@ -6989,9 +7422,33 @@ Notification.requestPermission();
 
 #PaymentResponse
 <new DOMString> = <PaymentResponse>.methodName;
-<PaymentResponse>.complete("success");
-<PaymentResponse>.complete("fail");
-<PaymentResponse>.complete("user-cancel");
+<new PaymentAddress> = <PaymentResponse>.shippingAddress;
+<new any> = <PaymentResponse>.details;
+<new DOMString> = <PaymentResponse>.requestId;
+<new DOMString> = <PaymentResponse>.payerName;
+<new DOMString> = <PaymentResponse>.payerEmail;
+<new DOMString> = <PaymentResponse>.payerPhone;
+<new any> = <PaymentResponse>.complete("success");
+<new any> = <PaymentResponse>.complete("fail");
+<new any> = <PaymentResponse>.complete("unknown");
+<new any> = <PaymentResponse>.retry({ error:"invalid payment details", payer:{ email:"invalid@example.test" }, shippingAddress:{ country:"US", postalCode:"00000" } });
+<PaymentResponse>.onpayerdetailchange = <EventHandler>;
+<new DOMString> = <PaymentAddress>.country;
+<new DOMString> = <PaymentAddress>.region;
+<new DOMString> = <PaymentAddress>.regionCode;
+<new DOMString> = <PaymentAddress>.city;
+<new DOMString> = <PaymentAddress>.dependentLocality;
+<new any> = <PaymentAddress>.addressLine;
+<new DOMString> = <PaymentAddress>.postalCode;
+<new DOMString> = <PaymentAddress>.sortingCode;
+<new DOMString> = <PaymentAddress>.organization;
+<new DOMString> = <PaymentAddress>.recipient;
+<new DOMString> = <PaymentAddress>.phone;
+<new PaymentMethodChangeEvent> = new PaymentMethodChangeEvent("paymentmethodchange", { methodName:"basic-card", methodDetails:{ supportedNetworks:["visa"] } });
+<new DOMString> = <PaymentMethodChangeEvent>.methodName;
+<new any> = <PaymentMethodChangeEvent>.methodDetails;
+<new PaymentRequestUpdateEvent> = new PaymentRequestUpdateEvent("shippingaddresschange");
+<PaymentRequestUpdateEvent>.updateWith(Promise.resolve({ total:{ label:"Updated total", amount:{ currency:"USD", value:"4.00" } }, shippingOptions:[{ id:"express", label:"Express", amount:{ currency:"USD", value:"5.00" } }] }));
 
 #Web Locks
 #LockManager
@@ -7234,4 +7691,3 @@ freememory();
 freememory();
 
 !end lines
-

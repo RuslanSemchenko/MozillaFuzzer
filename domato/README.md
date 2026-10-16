@@ -45,6 +45,24 @@ grammar.py contains the generation engine that is mostly application-agnostic an
 
 .txt files contain grammar definitions. There are 3 main files, html.txt, css.txt and js.txt which contain HTML, CSS and JavaScript grammars, respectively. These root grammar files may include content from other files.
 
+The shared rules in `rules/` also include modern CSS conditional/grouping rules,
+CSS Typed OM color/math/transform values, CSS animation/transition objects and
+CSSOM rules for containers, layers, properties, font palettes/features, page
+margins, and custom media, Web Animations effects, Range and StaticRange,
+resource/navigation/paint timing and
+ReportingObserver, EditContext and caret geometry, file and storage APIs,
+media capture, device APIs,
+event-driven APIs, document traversal/observation, and newer sensor,
+audio-session, network information, user activation, and document lifecycle
+APIs, including WebAuthn, Push, Payment
+Request, Media Capabilities, Digital Credentials, FedCM, Media Session, Screen
+Orientation, Firefox Fluent localization, worker-only OPFS access,
+ImageDecoder/WebCodecs objects, plus Service Worker registration and messaging.
+Canvas 2D, WebGL, and WebGPU also have dedicated fuzzing grammars. WebTransport,
+speech synthesis, and speech recognition are included with their Firefox
+preference-gated interfaces. Experimental or permission-gated browser APIs are
+included intentionally to exercise both supported and unsupported code paths.
+
 #### Using the generation engine and writing grammars
 
 To use the generation engine with a custom grammar, you can use the following python code:
@@ -275,4 +293,3 @@ Some of the bugs that have been found with Domato:
 #### Disclaimer
 
 This is not an official Google product.
-

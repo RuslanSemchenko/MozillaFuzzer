@@ -27,6 +27,18 @@
 # Basic Types
 # ----------------------------------------------------------------------------
 
+# Named references used by MathML token content and identifier-valued attributes.
+<identifier> = amp
+<identifier> = lt
+<identifier> = gt
+<identifier> = quot
+<identifier> = apos
+<identifier> = nbsp
+<identifier> = alpha
+<identifier> = beta
+<identifier> = gamma
+<identifier> = infin
+
 # Boolean attributes in MathML (case-insensitive in spec)
 <mathmlattr_boolean_value> = true
 <mathmlattr_boolean_value> = false

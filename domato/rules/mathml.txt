@@ -453,7 +453,7 @@
 <mathmlattr_global> = class="<class>"
 <mathmlattr_global> = dir="<direction_value>"
 <mathmlattr_global> = displaystyle="<boolean>"
-<mathmlattr_global> = id="<id>"
+<mathmlattr_global> = id="<mathmlelementid>"
 <mathmlattr_global> = mathbackground="<color>"
 <mathmlattr_global> = mathcolor="<color>"
 <mathmlattr_global> = mathsize="<mathmlattr_global_mathsize_value>"
@@ -462,6 +462,6 @@
 <mathmlattr_global> = scriptlevel="<mathmlattr_scriptlevel_value>"
 <mathmlattr_global> = style="<style_value>"
 <mathmlattr_global> = tabindex="<tabindex_value>"
-<mathmlattr_global> = href="<uri>"
+<mathmlattr_global> = href="<attributestring>"
 <mathmlattr_global> = <attribute_eventhandler>
 <mathmlattr_global> = <attributes>

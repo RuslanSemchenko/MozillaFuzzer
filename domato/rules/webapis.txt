@@ -7,6 +7,7 @@
 #   Sections:
 #     * creators for types that js.txt references but does not define
 #       (without these the generator raises "No creators for type ...")
+#     * event-driven APIs       (EventSource, URLPattern, document PiP)
 #     * Encoding API        (TextEncoder / TextDecoder)
 #     * WebSocket
 #     * Web Crypto          (crypto / SubtleCrypto)
@@ -146,6 +147,17 @@
 <new USBDevice> = undefined;
 <new PaymentResponse> = undefined;
 <new Lock> = undefined;
+<new ServiceWorkerRegistration> = undefined;
+<new PushSubscription> = undefined;
+<new PublicKeyCredential> = undefined;
+<new AuthenticatorResponse> = <PublicKeyCredential>.response;
+<new AuthenticatorAttestationResponse> = undefined;
+<new AuthenticatorAssertionResponse> = undefined;
+<new DigitalCredential> = undefined;
+<new IdentityCredential> = undefined;
+<new ImageTrack> = undefined;
+<new ImageTrackList> = undefined;
+<new FragmentDirective> = undefined;
 <new NDEFRecord> = new NDEFRecord({ recordType:"text", mediaType:"text/plain", data:<DOMString> });
 <new NDEFRecord> = new NDEFRecord({ recordType:"text", data:<DOMString> });
 <new NDEFRecord> = new NDEFRecord({ recordType:"absolute-url", data:<DOMString> });
@@ -165,7 +177,15 @@
 <new XRSpace> = undefined;
 <new XRFrame> = undefined;
 <new XRInputSource> = undefined;
-<new XRLayer> = undefined;
+<new XRReferenceSpace> = undefined;
+<new XRInputSourceArray> = undefined;
+<new XRRenderState> = undefined;
+<new XRBoundedReferenceSpace> = undefined;
+<new XRViewerPose> = undefined;
+<new XRPose> = undefined;
+<new XRView> = undefined;
+<new XRWebGLLayer> = undefined;
+<new XRViewport> = undefined;
 
 #The generator configures "window"/"navigator" as initial variables of type
 #Window/Navigator, but js.txt also uses the lowercase <window>/<navigator>
@@ -222,6 +242,47 @@
 <WebSocket>.close(<fuzzint min=1000 max=4999>, <DOMString>);
 <WebSocket>.addEventListener("message", <eventhandler>);
 
+#Firefox TCP sockets (availability-gated)
+!extends TCPSocket EventTarget
+!extends TCPServerSocket EventTarget
+!extends TCPSocketEvent Event
+!extends TCPSocketErrorEvent Event
+!extends TCPServerSocketEvent Event
+<new LegacyMozTCPSocket> = navigator.mozTCPSocket;
+<new TCPSocket> = new TCPSocket("127.0.0.1", 443);
+<new TCPSocket> = new TCPSocket("localhost", 80, { useSecureTransport:true, binaryType:"arraybuffer" });
+<new TCPSocket> = <LegacyMozTCPSocket>.open("localhost", 443, { useSecureTransport:true, binaryType:"string" });
+<new USVString> = <TCPSocket>.host;
+<new unsignedShort> = <TCPSocket>.port;
+<new boolean> = <TCPSocket>.ssl;
+<new unsignedLongLong> = <TCPSocket>.bufferedAmount;
+<new any> = <TCPSocket>.readyState;
+<new any> = <TCPSocket>.binaryType;
+<new any> = <TCPSocket>.transport;
+<new boolean> = <TCPSocket>.send("domato socket payload");
+<new boolean> = <TCPSocket>.send(new Uint8Array([1, 2, 3]).buffer, 0, 3);
+<TCPSocket>.suspend();
+<TCPSocket>.resume();
+<TCPSocket>.upgradeToSecure();
+<TCPSocket>.close();
+<TCPSocket>.onopen = <EventHandler>;
+<TCPSocket>.ondrain = <EventHandler>;
+<TCPSocket>.ondata = function(event){ event.data; };
+<TCPSocket>.onerror = function(event){ event.name; event.message; event.errorCode; };
+<TCPSocket>.onclose = <EventHandler>;
+<new TCPServerSocket> = new TCPServerSocket(0, { binaryType:"arraybuffer" }, 4);
+<new TCPServerSocket> = <LegacyMozTCPSocket>.listen(0, { binaryType:"string" }, 2);
+<new unsignedShort> = <TCPServerSocket>.localPort;
+<TCPServerSocket>.onconnect = function(event){ event.socket.send("accepted"); event.socket.close(); };
+<TCPServerSocket>.onerror = <EventHandler>;
+<TCPServerSocket>.close();
+<new TCPServerSocketEvent> = new TCPServerSocketEvent("connect", { socket:<TCPSocket> });
+<new TCPSocket> = <TCPServerSocketEvent>.socket;
+<new TCPSocketEvent> = new TCPSocketEvent("data", { data:new Uint8Array([1, 2, 3]).buffer });
+<new any> = <TCPSocketEvent>.data;
+<new TCPSocketErrorEvent> = new TCPSocketErrorEvent("error", { name:"NetworkError", message:"socket error", errorCode:0 });
+<new DOMString> = <TCPSocketErrorEvent>.message;
+
 #Web Crypto
 <new any> = crypto.getRandomValues(new Uint8Array(<fuzzint min=1 max=32>));
 <new any> = crypto.getRandomValues(new Uint32Array(<fuzzint min=1 max=16>));
@@ -259,6 +320,32 @@
 <new any> = crypto.subtle.unwrapKey("raw", <ArrayBuffer>, <any>, { name:"AES-GCM", iv:new Uint8Array(12) }, "AES-GCM", true, ["encrypt"]);
 
 #Web Audio
+!extends AudioContext BaseAudioContext
+!extends OfflineAudioContext BaseAudioContext
+!extends BaseAudioContext EventTarget
+!extends AudioNode EventTarget
+!extends AudioDestinationNode AudioNode
+!extends AudioScheduledSourceNode AudioNode
+!extends OscillatorNode AudioScheduledSourceNode
+!extends AudioBufferSourceNode AudioScheduledSourceNode
+!extends ConstantSourceNode AudioScheduledSourceNode
+!extends GainNode AudioNode
+!extends AnalyserNode AudioNode
+!extends BiquadFilterNode AudioNode
+!extends DelayNode AudioNode
+!extends DynamicsCompressorNode AudioNode
+!extends ConvolverNode AudioNode
+!extends PannerNode AudioNode
+!extends StereoPannerNode AudioNode
+!extends WaveShaperNode AudioNode
+!extends ChannelMergerNode AudioNode
+!extends ChannelSplitterNode AudioNode
+!extends ScriptProcessorNode AudioNode
+!extends IIRFilterNode AudioNode
+!extends MediaElementAudioSourceNode AudioNode
+!extends MediaStreamAudioSourceNode AudioNode
+!extends MediaStreamTrackAudioSourceNode AudioNode
+!extends MediaStreamAudioDestinationNode AudioNode
 <new AudioContext> = new AudioContext();
 <new AudioContext> = new AudioContext({ latencyHint:"interactive" });
 <new AudioContext> = new AudioContext({ latencyHint:"playback" });
@@ -272,49 +359,85 @@
 <new double> = <AudioContext>.currentTime;
 <new double> = <AudioContext>.baseLatency;
 <new double> = <AudioContext>.outputLatency;
-<new any> = <AudioContext>.destination;
-<new any> = <AudioContext>.listener;
-<new any> = <AudioContext>.createGain();
-<new any> = <AudioContext>.createOscillator();
-<new any> = <AudioContext>.createBufferSource();
-<new any> = <AudioContext>.createAnalyser();
-<new any> = <AudioContext>.createBiquadFilter();
-<new any> = <AudioContext>.createDelay();
-<new any> = <AudioContext>.createDynamicsCompressor();
-<new any> = <AudioContext>.createConvolver();
-<new any> = <AudioContext>.createPanner();
-<new any> = <AudioContext>.createStereoPanner();
-<new any> = <AudioContext>.createWaveShaper();
-<new any> = <AudioContext>.createConstantSource();
-<new any> = <AudioContext>.createChannelMerger();
-<new any> = <AudioContext>.createChannelSplitter();
-<new any> = <AudioContext>.createScriptProcessor();
-<new any> = <AudioContext>.createPeriodicWave(new Float32Array(<fuzzint min=1 max=16>), new Float32Array(<fuzzint min=1 max=16>));
-<new AudioBuffer> = <AudioContext>.createBuffer(<fuzzint min=1 max=8>, <fuzzint min=1 max=1024>, <fuzzint min=8000 max=96000>);
-<new AudioBuffer> = new AudioBuffer({ length:<fuzzint min=1 max=1024>, numberOfChannels:<fuzzint min=1 max=8>, sampleRate:44100 });
-<new AudioBuffer> = new AudioBuffer({ length:1, numberOfChannels:1, sampleRate:44100 });
-<new any> = <AudioContext>.decodeAudioData(<ArrayBuffer>);
-<new any> = <AudioContext>.decodeAudioData(<ArrayBuffer>, <eventhandler>);
-<new any> = <AudioContext>.resume();
-<new any> = <AudioContext>.suspend();
-<new any> = <AudioContext>.close();
-<new any> = <AudioContext>.createMediaStreamDestination();
-<new any> = <AudioContext>.createMediaElementSource(<HTMLMediaElement>);
-
-<new OscillatorNode> = <AudioContext>.createOscillator();
+<new AudioDestinationNode> = <AudioContext>.destination;
+<new AudioListener> = <AudioContext>.listener;
 <new GainNode> = <AudioContext>.createGain();
+<new OscillatorNode> = <AudioContext>.createOscillator();
+<new AudioBufferSourceNode> = <AudioContext>.createBufferSource();
 <new AnalyserNode> = <AudioContext>.createAnalyser();
 <new BiquadFilterNode> = <AudioContext>.createBiquadFilter();
 <new DelayNode> = <AudioContext>.createDelay();
-<new StereoPannerNode> = <AudioContext>.createStereoPanner();
-<new ConstantSourceNode> = <AudioContext>.createConstantSource();
 <new DynamicsCompressorNode> = <AudioContext>.createDynamicsCompressor();
 <new ConvolverNode> = <AudioContext>.createConvolver();
 <new PannerNode> = <AudioContext>.createPanner();
+<new StereoPannerNode> = <AudioContext>.createStereoPanner();
 <new WaveShaperNode> = <AudioContext>.createWaveShaper();
+<new ConstantSourceNode> = <AudioContext>.createConstantSource();
 <new ChannelMergerNode> = <AudioContext>.createChannelMerger();
 <new ChannelSplitterNode> = <AudioContext>.createChannelSplitter();
-<new AudioBufferSourceNode> = <AudioContext>.createBufferSource();
+<new ScriptProcessorNode> = <AudioContext>.createScriptProcessor();
+<new PeriodicWave> = <AudioContext>.createPeriodicWave(new Float32Array(<fuzzint min=1 max=16>), new Float32Array(<fuzzint min=1 max=16>));
+<new AudioBuffer> = <AudioContext>.createBuffer(<fuzzint min=1 max=8>, <fuzzint min=1 max=1024>, <fuzzint min=8000 max=96000>);
+<new AudioBuffer> = new AudioBuffer({ length:<fuzzint min=1 max=1024>, numberOfChannels:<fuzzint min=1 max=8>, sampleRate:44100 });
+<new AudioBuffer> = new AudioBuffer({ length:1, numberOfChannels:1, sampleRate:44100 });
+<AudioContext>.decodeAudioData(<ArrayBuffer>).then(function(buffer){ buffer.duration; buffer.numberOfChannels; }, function(error){ console.error(error); });
+<AudioContext>.decodeAudioData(<ArrayBuffer>, function(buffer){ buffer.duration; }, function(error){ console.error(error); });
+<new any> = <AudioContext>.resume();
+<new any> = <AudioContext>.suspend();
+<new any> = <AudioContext>.close();
+<new MediaStreamAudioDestinationNode> = <AudioContext>.createMediaStreamDestination();
+<new MediaElementAudioSourceNode> = <AudioContext>.createMediaElementSource(<HTMLMediaElement>);
+<new MediaStreamAudioSourceNode> = <AudioContext>.createMediaStreamSource(<MediaStream>);
+<new MediaStreamTrackAudioSourceNode> = <AudioContext>.createMediaStreamTrackSource(<MediaStreamTrack>);
+<new any> = <AudioContext>.getOutputTimestamp().contextTime;
+<new any> = <AudioContext>.getOutputTimestamp().performanceTime;
+<new IIRFilterNode> = <AudioContext>.createIIRFilter([1, 0.5], [1, 0.2]);
+<new EventTarget> = <AudioNode>;
+<new AudioNode> = <GainNode>;
+<new AudioNode> = <OscillatorNode>;
+<new AudioNode> = <AudioDestinationNode>;
+<new AudioScheduledSourceNode> = <OscillatorNode>;
+<new AudioParam> = <GainNode>.gain;
+<new AudioParam> = <OscillatorNode>.frequency;
+
+#AudioNode
+<new BaseAudioContext> = <AudioNode>.context;
+<new unsignedLong> = <AudioNode>.numberOfInputs;
+<new unsignedLong> = <AudioNode>.numberOfOutputs;
+<AudioNode>.channelCount = <fuzzint>;
+<AudioNode>.channelCountMode = "explicit";
+<AudioNode>.channelInterpretation = "discrete";
+<new AudioNode> = <AudioNode>.connect(<AudioNode>);
+<AudioNode>.connect(<AudioParam>);
+<AudioNode>.disconnect();
+<AudioNode>.disconnect(<AudioNode>);
+<AudioNode>.disconnect(<AudioParam>);
+
+#AudioDestinationNode
+<new unsignedLong> = <AudioDestinationNode>.maxChannelCount;
+
+#AudioListener
+<AudioListener>.setPosition(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>);
+<AudioListener>.setOrientation(0, 0, -1, 0, 1, 0);
+
+#AudioScheduledSourceNode
+<new EventHandler> = <AudioScheduledSourceNode>.onended;
+<AudioScheduledSourceNode>.onended = <EventHandler>;
+<AudioScheduledSourceNode>.start(<fuzzfloat>);
+<AudioScheduledSourceNode>.stop(<fuzzfloat>);
+
+#AudioParam
+<new float> = <AudioParam>.value;
+<AudioParam>.value = <fuzzfloat>;
+<new float> = <AudioParam>.defaultValue;
+<new float> = <AudioParam>.minValue;
+<new float> = <AudioParam>.maxValue;
+<AudioParam>.setValueAtTime(<fuzzfloat>, <fuzzfloat>);
+<AudioParam>.linearRampToValueAtTime(<fuzzfloat>, <fuzzfloat>);
+<AudioParam>.exponentialRampToValueAtTime(1, 1);
+<AudioParam>.setTargetAtTime(<fuzzfloat>, <fuzzfloat>, 0.1);
+<AudioParam>.setValueCurveAtTime([0, 0.5, 1], 0, 1);
+<AudioParam>.cancelScheduledValues(0);
 
 <OscillatorNode>.type = "square";
 <OscillatorNode>.type = "sine";
@@ -424,6 +547,8 @@
 <Element>.innerHTML = <DOMString>;
 
 #View Transitions
+!extends PageRevealEvent Event
+!extends PageSwapEvent Event
 <new ViewTransition> = document.startViewTransition(<EventHandler>);
 <new ViewTransition> = document.startViewTransition(function(){});
 <new ViewTransition> = document.startViewTransition(<EventHandler>);
@@ -432,6 +557,11 @@
 <new any> = <ViewTransition>.finished;
 <new any> = <ViewTransition>.updateCallbackDone;
 <new any> = <ViewTransition>.skipTransition();
+<new PageRevealEvent> = new PageRevealEvent("pagereveal", { viewTransition:<ViewTransition> });
+<new ViewTransition> = <PageRevealEvent>.viewTransition;
+<new PageSwapEvent> = new PageSwapEvent("pageswap", { activation:<NavigationActivation>, viewTransition:<ViewTransition> });
+<new NavigationActivation> = <PageSwapEvent>.activation;
+<new ViewTransition> = <PageSwapEvent>.viewTransition;
 
 #Storage Manager (partial)
 <new any> = navigator.storage.getDirectory();
@@ -445,6 +575,7 @@
 <new ReportingObserver> = new ReportingObserver(<EventHandler>);
 <new ReportingObserver> = new ReportingObserver(<EventHandler>, { buffered:true });
 <new ReportingObserver> = new ReportingObserver(<EventHandler>, { types:["deprecation", "intervention"] });
+<new ReportingObserver> = new ReportingObserver(function(reports, observer){ reports.forEach(function(report){ report.type; report.url; if(report.body){ report.body.toJSON(); } }); }, { types:["deprecation", "intervention", "csp-violation"], buffered:true });
 <ReportingObserver>.observe();
 <ReportingObserver>.disconnect();
 <ReportingObserver>.takeRecords();
@@ -567,14 +698,27 @@ navigator.gpu.requestAdapter().then(function(a){ fuzzervars["adapter"] = a; });
 <new any> = createImageBitmap(<HTMLImageElement>);
 <new any> = createImageBitmap(<HTMLVideoElement>);
 <new any> = createImageBitmap(<OffscreenCanvas>);
+<new ImageBitmap> = createImageBitmap(<HTMLCanvasElement>);
+<new ImageBitmapRenderingContext> = <HTMLCanvasElement>.getContext("bitmaprenderer");
+<new any> = <ImageBitmapRenderingContext>.canvas;
+<ImageBitmapRenderingContext>.transferFromImageBitmap(<ImageBitmap>);
+<ImageBitmapRenderingContext>.transferImageBitmap(<ImageBitmap>);
 
 #Web Locks and Scheduling
 navigator.locks.request(<DOMString>, function(lock){});
 navigator.locks.request(<DOMString>, { mode: "shared" }, function(lock){});
 navigator.locks.query();
-requestIdleCallback(<EventHandler>);
-requestIdleCallback(<EventHandler>, { timeout: <fuzzint min=100 max=2000> });
+<new unsignedLong> = requestIdleCallback(function(deadline){ deadline.didTimeout; deadline.timeRemaining(); });
+<new unsignedLong> = requestIdleCallback(function(deadline){ deadline.timeRemaining(); }, { timeout: <fuzzint min=100 max=2000> });
 cancelIdleCallback(<fuzzint>);
+!extends NetworkInformation EventTarget
+<new NetworkInformation> = navigator.connection;
+<new any> = <NetworkInformation>.type;
+<new EventHandler> = <NetworkInformation>.ontypechange;
+<NetworkInformation>.ontypechange = <EventHandler>;
+<new UserActivation> = navigator.userActivation;
+<new boolean> = <UserActivation>.hasBeenActive;
+<new boolean> = <UserActivation>.isActive;
 
 #Permissions and Clipboard
 navigator.permissions.query({ name: "camera" });
@@ -602,7 +746,11 @@ navigator.clearAppBadge();
 <RTCPeerConnection>.close();
 <new any> = <RTCPeerConnection>.getStats();
 <new MediaStream> = new MediaStream();
-<new MediaStream> = <HTMLCanvasElement>.captureStream();
+!extends CanvasCaptureMediaStream MediaStream
+<new CanvasCaptureMediaStream> = <HTMLCanvasElement>.captureStream();
+<new CanvasCaptureMediaStream> = <HTMLCanvasElement>.captureStream(<fuzzfloat>);
+<new HTMLCanvasElement> = <CanvasCaptureMediaStream>.canvas;
+<CanvasCaptureMediaStream>.requestFrame();
 <new MediaStream> = <HTMLVideoElement>.captureStream();
 <new any> = <MediaStream>.getTracks();
 <new any> = <MediaStream>.getAudioTracks();
@@ -637,16 +785,47 @@ navigator.clearAppBadge();
 <Worker>.postMessage(<DOMString>);
 <Worker>.postMessage(<ArrayBuffer>, [<ArrayBuffer>]);
 <Worker>.terminate();
+<new Worker> = new Worker(URL.createObjectURL(new Blob(["onmessage=function(){const reader=new FileReaderSync();const blob=new Blob(['worker payload']);reader.readAsArrayBuffer(blob);reader.readAsBinaryString(blob);reader.readAsText(blob,'utf-8');reader.readAsDataURL(blob);};"], { type:"application/javascript" })));
+<Worker>.postMessage("exercise-file-reader-sync");
+<Worker>.terminate();
 
 #FileSystem and Storage API
 navigator.storage.getDirectory().then(function(dir){ fuzzervars["root_dir"] = dir; });
-<new any> = window.showOpenFilePicker();
-<new any> = window.showSaveFilePicker();
-<new any> = window.showDirectoryPicker();
 <new any> = caches.open("cache-<DOMString>");
 <new any> = caches.keys();
 <new any> = caches.has("cache-<DOMString>");
 <new any> = caches.delete("cache-<DOMString>");
+
+#Firefox Fluent Localization API (feature-gated)
+!extends DOMLocalization Localization
+!extends DocumentL10n DOMLocalization
+<new Localization> = new Localization(["domato.ftl"]);
+<new Localization> = new Localization(["domato.ftl"], true);
+<new DOMLocalization> = new DOMLocalization(["domato.ftl"]);
+<new DOMLocalization> = document.l10n;
+<new DocumentL10n> = document.l10n;
+<new any> = <DOMLocalization>.ready;
+<new any> = <DocumentL10n>.ready;
+<DOMLocalization>.addResourceIds(["domato.ftl"]);
+<new unsignedLong> = <DOMLocalization>.removeResourceIds(["domato.ftl"]);
+<new any> = <Localization>.formatValue("domato-message", { value:"fuzz" }).then(function(value){ return value; }, function(error){ console.error(error); });
+<new any> = <Localization>.formatValues(["domato-message", { id:"domato-count", args:{ count:2 } }]).then(function(values){ return values; }, function(error){ console.error(error); });
+<new any> = <Localization>.formatMessages(["domato-message", { id:"domato-count", args:{ count:2 } }]).then(function(messages){ return messages; }, function(error){ console.error(error); });
+<new DOMString> = <Localization>.formatValueSync("domato-message", { value:"fuzz" });
+<new any> = <Localization>.formatValuesSync(["domato-message"]);
+<new any> = <Localization>.formatMessagesSync(["domato-message"]);
+<Localization>.setAsync();
+<DOMLocalization>.connectRoot(<Node>);
+<DocumentL10n>.connectRoot(<Node>, <boolean>);
+<DOMLocalization>.disconnectRoot(<Node>);
+<DOMLocalization>.pauseObserving();
+<DOMLocalization>.resumeObserving();
+<DOMLocalization>.setAttributes(<Element>, "domato-message", { count:2 });
+<new any> = <DOMLocalization>.getAttributes(<Element>);
+<DOMLocalization>.setArgs(<Element>, { count:3 });
+<new any> = <DOMLocalization>.translateFragment(<Node>).then(function(result){ return result; }, function(error){ console.error(error); });
+<new any> = <DOMLocalization>.translateElements([<Element>]).then(function(){}, function(error){ console.error(error); });
+<new any> = <DOMLocalization>.translateRoots().then(function(){}, function(error){ console.error(error); });
 
 #Performance Timeline and Navigation
 performance.mark("mark-<DOMString>");
@@ -681,3 +860,507 @@ document.exitFullscreen();
 <Element>.after(<Element>);
 <Element>.prepend(<Element>);
 <Element>.append(<Element>);
+
+#File, Blob, and URL APIs
+<new Blob> = new Blob([<DOMString>]);
+<new Blob> = new Blob([<DOMString>], { type:"text/plain" });
+<new Blob> = new Blob([<Uint8Array>], { type:"application/octet-stream", endings:"native" });
+<new File> = new File([<DOMString>], "fuzz.txt");
+<new File> = new File([<Uint8Array>], "fuzz.bin", { type:"application/octet-stream", lastModified:<fuzzint> });
+<new FileReader> = new FileReader();
+<FileReader>.readAsText(<Blob>);
+<FileReader>.readAsArrayBuffer(<Blob>);
+<FileReader>.readAsDataURL(<Blob>);
+<FileReader>.readAsBinaryString(<Blob>);
+<FileReader>.abort();
+<new DOMString> = <Blob>.type;
+<new long> = <Blob>.size;
+<new Blob> = <Blob>.slice(<fuzzint>, <fuzzint>, "text/plain");
+<new any> = <Blob>.stream();
+<new any> = <Blob>.text();
+<new any> = <Blob>.arrayBuffer();
+<new DOMString> = <File>.name;
+<new long> = <File>.lastModified;
+<new URL> = new URL("https://example.com/path?query=value#fragment");
+<new URLSearchParams> = new URLSearchParams("a=1&b=two");
+<URLSearchParams>.append("key", <DOMString>);
+<URLSearchParams>.set("key", <DOMString>);
+<URLSearchParams>.delete("key");
+<new any> = <URLSearchParams>.getAll("key");
+<new DOMString> = URL.createObjectURL(<Blob>);
+URL.revokeObjectURL(URL.createObjectURL(<Blob>));
+<new any> = structuredClone({ value:<DOMString>, bytes:new Uint8Array([1, 2, 3]) });
+<new any> = structuredClone(<ArrayBuffer>, { transfer:[<ArrayBuffer>] });
+
+#Origin Private File System (secure-context and preference-gated)
+navigator.storage.getDirectory().then(function(directory){ directory.entries(); directory.keys(); directory.values(); directory.getFileHandle("domato.bin", { create:true }).then(function(file){ file.getFile().then(function(blob){ blob.text(); blob.arrayBuffer(); }, function(error){ console.error(error); }); file.isSameEntry(file).then(function(same){ return same; }, function(error){ console.error(error); }); file.move("domato-moved.bin").then(function(){}, function(error){ console.error(error); }); file.createWritable({ keepExistingData:true }).then(function(writer){ writer.write({ type:"write", position:0, data:"payload" }).then(function(){ writer.seek(0).then(function(){ writer.truncate(8).then(function(){ writer.close(); }, function(error){ console.error(error); }); }, function(error){ console.error(error); }); }, function(error){ console.error(error); }); }, function(error){ console.error(error); }); }, function(error){ console.error(error); }); directory.getDirectoryHandle("nested", { create:true }).then(function(child){ child.entries().next().then(function(entry){ return entry; }); directory.resolve(child).then(function(path){ return path; }, function(error){ console.error(error); }); child.move("domato-nested").then(function(){}, function(error){ console.error(error); }); directory.removeEntry("nested", { recursive:true }).then(function(){}, function(error){ console.error(error); }); }, function(error){ console.error(error); }); }, function(error){ console.error(error); });
+
+#CSS Typed OM
+<new CSSUnitValue> = CSS.px(<fuzzint>);
+<new CSSUnitValue> = CSS.percent(<fuzzint>);
+<new CSSUnitValue> = CSS.em(<fuzzfloat>);
+<new CSSUnitValue> = CSS.deg(<fuzzint>);
+<new CSSUnitValue> = CSS.s(<fuzzfloat>);
+<new CSSNumericValue> = CSSNumericValue.parse("<fuzzint>px");
+<new CSSStyleValue> = CSSStyleValue.parse("transform", "translateX(<fuzzint>px)");
+<new any> = CSSStyleValue.parseAll("color", "<color>");
+<new any> = <Element>.computedStyleMap();
+<new any> = <Element>.attributeStyleMap;
+<CSSUnitValue>.to("px");
+<CSSUnitValue>.toSum("px", "em");
+<new CSSNumericValue> = <CSSUnitValue>.add(CSS.px(<fuzzint>));
+<new CSSNumericValue> = <CSSUnitValue>.sub(CSS.px(<fuzzint>));
+<new CSSNumericValue> = <CSSUnitValue>.mul(<fuzzfloat>);
+<new CSSNumericValue> = <CSSUnitValue>.div(<fuzzfloat>);
+<new boolean> = <CSSUnitValue>.equals(CSS.px(<fuzzint>));
+<new any> = <Element>.computedStyleMap().get("width");
+<new any> = <Element>.computedStyleMap().getAll("transform");
+<Element>.attributeStyleMap.set("width", CSS.px(<fuzzint>));
+<Element>.attributeStyleMap.set("opacity", CSS.number(<float min=0 max=1>));
+<Element>.attributeStyleMap.delete("width");
+<Element>.attributeStyleMap.clear();
+<new CSSMathValue> = new CSSMathSum(CSS.px(<fuzzint>), CSS.em(<fuzzfloat>));
+<new CSSMathValue> = new CSSMathProduct(CSS.number(<fuzzfloat>), CSS.px(<fuzzint>));
+<new CSSMathValue> = new CSSMathMin(CSS.px(<fuzzint>), CSS.percent(<fuzzint>));
+<new CSSMathValue> = new CSSMathMax(CSS.px(<fuzzint>), CSS.em(<fuzzfloat>));
+<new CSSMathValue> = new CSSMathClamp(CSS.px(0), CSS.px(<fuzzint>), CSS.px(100));
+<new CSSMathValue> = new CSSMathNegate(CSS.px(<fuzzint>));
+<new CSSMathValue> = new CSSMathInvert(CSS.number(<fuzzfloat>));
+<new CSSMathSum> = new CSSMathSum(CSS.px(<fuzzint>), CSS.percent(<fuzzint>));
+<new CSSMathProduct> = new CSSMathProduct(CSS.number(<fuzzfloat>), CSS.em(<fuzzfloat>));
+<new DOMString> = <CSSMathValue>.operator;
+<new CSSNumericArray> = <CSSMathSum>.values;
+<new CSSNumericArray> = <CSSMathProduct>.values;
+<new CSSNumericValue> = <CSSNumericArray>[0];
+<new long> = <CSSNumericArray>.length;
+<new CSSKeywordValue> = new CSSKeywordValue("auto");
+<new DOMString> = <CSSKeywordValue>.value;
+<CSSKeywordValue>.value = "inherit";
+<new CSSImageValue> = CSSStyleValue.parse("background-image", "url(data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=)");
+<new CSSRGB> = new CSSRGB(<fuzzint>, <fuzzint>, <fuzzint>);
+<new CSSRGB> = new CSSRGB("red", "green", "blue", 0.5);
+<new CSSHSL> = new CSSHSL(CSS.deg(<fuzzint>), <float min=0 max=1>, <float min=0 max=1>);
+<new CSSHWB> = new CSSHWB(CSS.deg(<fuzzint>), <float min=0 max=1>, <float min=0 max=1>);
+<new CSSLab> = new CSSLab(<float min=0 max=100>, <fuzzfloat>, <fuzzfloat>);
+<new CSSLCH> = new CSSLCH(<float min=0 max=100>, <fuzzfloat>, CSS.deg(<fuzzint>));
+<new CSSOKLab> = new CSSOKLab(<float min=0 max=1>, <fuzzfloat>, <fuzzfloat>);
+<new CSSOKLCH> = new CSSOKLCH(<float min=0 max=1>, <fuzzfloat>, CSS.deg(<fuzzint>));
+<new CSSColorValue> = CSSColorValue.parse("color(srgb 1 0 0)");
+<new CSSColorValue> = CSSColorValue.parse("lab(50% 20 30)");
+<new CSSColorValue> = CSSColorValue.parse("oklch(60% 0.2 30)");
+<new any> = <CSSRGB>.r;
+<new any> = <CSSRGB>.g;
+<new any> = <CSSRGB>.b;
+<new any> = <CSSRGB>.alpha;
+<CSSRGB>.r = <fuzzint>;
+<CSSRGB>.alpha = 0.5;
+<new any> = <CSSHSL>.h;
+<new any> = <CSSHSL>.s;
+<new any> = <CSSHWB>.w;
+<new any> = <CSSHWB>.b;
+<new any> = <CSSLab>.a;
+<new any> = <CSSLCH>.c;
+<new any> = <CSSOKLab>.l;
+<new any> = <CSSOKLCH>.h;
+<new CSSVariableReferenceValue> = new CSSVariableReferenceValue("--fuzz-color");
+<new CSSUnparsedValue> = new CSSUnparsedValue(["var(--fuzz-color)"]);
+<new DOMString> = <CSSVariableReferenceValue>.variable;
+<CSSVariableReferenceValue>.variable = "--fuzz-size";
+<new any> = <CSSVariableReferenceValue>.fallback;
+<new long> = <CSSUnparsedValue>.length;
+<new any> = <CSSUnparsedValue>[0];
+<new CSSTransformComponent> = new CSSRotate(CSS.deg(<fuzzint>));
+<new CSSTransformComponent> = new CSSRotate(0, 0, 1, CSS.deg(<fuzzint>));
+<new CSSTransformComponent> = new CSSScale(<fuzzfloat>, <fuzzfloat>);
+<new CSSTransformComponent> = new CSSSkew(CSS.deg(<fuzzint>), CSS.deg(<fuzzint>));
+<new CSSSkewX> = new CSSSkewX(CSS.deg(<fuzzint>));
+<new CSSSkewY> = new CSSSkewY(CSS.deg(<fuzzint>));
+<new CSSTransformComponent> = new CSSTranslate(CSS.px(<fuzzint>), CSS.px(<fuzzint>));
+<new CSSMatrixComponent> = new CSSMatrixComponent(new DOMMatrix(), { is2D:true });
+<new CSSTransformComponent> = <CSSSkewX>;
+<new CSSTransformComponent> = <CSSSkewY>;
+<new CSSTransformComponent> = <CSSMatrixComponent>;
+<new DOMMatrix> = <CSSMatrixComponent>.matrix;
+<CSSMatrixComponent>.matrix = new DOMMatrix();
+<new CSSTransformValue> = new CSSTransformValue([new CSSRotate(CSS.deg(45)), new CSSTranslate(CSS.px(2), CSS.px(3))]);
+<new boolean> = <CSSTransformValue>.is2D;
+<new DOMMatrix> = <CSSTransformValue>.toMatrix();
+<CSSTransformComponent>.toMatrix();
+<new DOMString> = <CSSTransformComponent>.toString();
+
+#CSS rule interfaces with dedicated CSSOM objects
+var fuzzSheet = new CSSStyleSheet();
+fuzzSheet.replaceSync(".outer { color:red; & .inner { color:blue; } background:green; } @position-try --fuzz-position { top:10px; left:20px; } @scope (.outer) { .inner { color:purple; } } @starting-style { .outer { opacity:0; } } @view-transition { navigation:auto; types:fuzz; } @container (min-width:400px) { .card { color:blue; } } @layer fuzz, extra; @layer fuzz { .layered { color:orange; } } @property --fuzz-color { syntax:'<color>'; inherits:false; initial-value:red; } @font-palette-values --fuzz-palette { font-family:serif; base-palette:0; } @font-feature-values serif { @styleset { fuzz-style:1; } } @page { @top-left { content:'fuzz'; } } @custom-media --fuzz-narrow (width < 600px);");
+Array.from(fuzzSheet.cssRules).forEach(function(rule){ if(rule instanceof CSSPositionTryRule){ rule.name; rule.style.cssText; } if(rule instanceof CSSScopeRule){ rule.start; rule.end; rule.cssRules; } if(rule instanceof CSSStartingStyleRule){ rule.cssRules; } if(rule instanceof CSSViewTransitionRule){ rule.navigation; rule.types; } if(rule instanceof CSSContainerRule){ rule.conditionText; rule.conditions; rule.containerName; rule.containerQuery; } if(rule instanceof CSSLayerBlockRule){ rule.name; rule.cssRules; } if(rule instanceof CSSLayerStatementRule){ rule.nameList; } if(rule instanceof CSSPropertyRule){ rule.name; rule.syntax; rule.inherits; rule.initialValue; } if(rule instanceof CSSFontPaletteValuesRule){ rule.name; rule.fontFamily; rule.basePalette; rule.overrideColors; } if(rule instanceof CSSFontFeatureValuesRule){ rule.fontFamily; rule.valueText; } if(rule instanceof CSSMarginRule){ rule.name; rule.style.cssText; } if(rule instanceof CSSCustomMediaRule){ rule.name; rule.query; } if(rule instanceof CSSStyleRule){ rule.selectorText; rule.cssRules; Array.from(rule.cssRules).forEach(function(nestedRule){ if(nestedRule instanceof CSSNestedDeclarations){ nestedRule.style.cssText; } }); } });
+Array.from(fuzzSheet.cssRules).forEach(function(rule){ if(rule instanceof CSSPageRule){ rule.selectorText; Array.from(rule.cssRules).forEach(function(marginRule){ if(marginRule instanceof CSSMarginRule){ marginRule.name; marginRule.style.cssText; } }); } });
+
+#Additional media capture operations
+navigator.mediaDevices.enumerateDevices();
+navigator.mediaDevices.getSupportedConstraints();
+navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true }, video:{ width:{ min:160, ideal:640, max:1920 }, height:{ min:120, ideal:480, max:1080 }, frameRate:{ ideal:30, max:60 } } });
+navigator.mediaDevices.getUserMedia({ audio:{ deviceId:{ exact:"default" } }, video:{ facingMode:{ ideal:"environment" } } }).then(function(stream){ stream.getTracks().forEach(function(track){ track.getSettings(); track.getCapabilities(); track.applyConstraints({ width:320, height:240 }); track.clone().stop(); }); });
+<new any> = <MediaStreamTrack>.getConstraints();
+<new any> = <MediaStreamTrack>.getSettings();
+<new any> = <MediaStreamTrack>.getCapabilities();
+<new any> = <MediaStreamTrack>.applyConstraints({ width:320, height:240 });
+<new any> = <MediaStreamTrack>.applyConstraints({ advanced:[{ exposureMode:"continuous" }] });
+<new MediaStreamTrack> = <MediaStreamTrack>.clone();
+<MediaStreamTrack>.stop();
+!extends ImageCapture EventTarget
+<new ImageCapture> = new ImageCapture(<MediaStreamTrack>);
+<new MediaStreamTrack> = <ImageCapture>.videoStreamTrack;
+<ImageCapture>.takePhoto();
+<new EventHandler> = <ImageCapture>.onphoto;
+<ImageCapture>.onphoto = <EventHandler>;
+<new EventHandler> = <ImageCapture>.onerror;
+<ImageCapture>.onerror = <EventHandler>;
+<new any> = navigator.mediaDevices.getUserMedia({ video:true }).then(function(stream){ const capture = new ImageCapture(stream.getVideoTracks()[0]); capture.takePhoto(); capture.videoStreamTrack.stop(); return capture; }, function(error){ console.error(error); });
+
+#Web Serial, Web USB, and Web NFC
+navigator.serial.getPorts();
+navigator.serial.requestPort({ filters:[{ usbVendorId:<fuzzint>, usbProductId:<fuzzint> }] });
+navigator.usb.getDevices();
+navigator.usb.requestDevice({ filters:[{ vendorId:<fuzzint>, productId:<fuzzint> }] });
+<new NDEFReader> = new NDEFReader();
+<NDEFReader>.scan();
+<NDEFReader>.scan({ signal:<AbortSignal> });
+<NDEFReader>.write(<DOMString>);
+<NDEFReader>.write({ records:[{ recordType:"text", data:<DOMString> }, { recordType:"url", data:"https://example.com/" }] });
+<NDEFReader>.makeReadOnly();
+
+#Navigation API
+!extends Navigation EventTarget
+!extends NavigationCurrentEntryChangeEvent Event
+!extends NavigateEvent Event
+<new Navigation> = window.navigation;
+<new NavigationHistoryEntry> = <Navigation>.currentEntry;
+<new NavigationHistoryEntry[]> = <Navigation>.entries();
+<new NavigationTransition> = <Navigation>.transition;
+<new NavigationActivation> = <Navigation>.activation;
+<new boolean> = <Navigation>.canGoBack;
+<new boolean> = <Navigation>.canGoForward;
+<new any> = <NavigationHistoryEntry>.getState();
+<new DOMString> = <NavigationHistoryEntry>.key;
+<new DOMString> = <NavigationHistoryEntry>.id;
+<new long> = <NavigationHistoryEntry>.index;
+<new boolean> = <NavigationHistoryEntry>.sameDocument;
+<new NavigationHistoryEntry> = <NavigationActivation>.from;
+<new NavigationHistoryEntry> = <NavigationActivation>.entry;
+<new NavigationType> = <NavigationTransition>.navigationType;
+<new NavigationHistoryEntry> = <NavigationTransition>.from;
+<new any> = <NavigationTransition>.finished;
+<new any> = <NavigationTransition>.committed;
+<new NavigationResult> = <Navigation>.navigate("#fuzz-target", { history:"replace", state:{ value:<fuzzint> } });
+<Navigation>.onnavigate = function(e){ e.destination.getState(); e.destination.url; e.destination.key; e.destination.id; e.destination.index; e.destination.sameDocument; e.canIntercept; e.userInitiated; e.hashChange; e.signal.aborted; e.info; e.formData; e.downloadRequest; e.hasUAVisualTransition; e.sourceElement; e.intercept({ focusReset:"manual", scroll:"manual", handler:function(){ return Promise.resolve(); }, precommitHandler:function(controller){ controller.redirect("#domato", { history:"replace" }); controller.addHandler(function(){ return Promise.resolve(); }); return Promise.resolve(); } }); e.scroll(); };
+<new EventHandler> = <Navigation>.onnavigatesuccess;
+<Navigation>.onnavigatesuccess = <EventHandler>;
+<new EventHandler> = <Navigation>.onnavigateerror;
+<Navigation>.onnavigateerror = <EventHandler>;
+<new EventHandler> = <Navigation>.oncurrententrychange;
+<Navigation>.oncurrententrychange = function(event){ event.navigationType; event.from; };
+<new NavigationCurrentEntryChangeEvent> = new NavigationCurrentEntryChangeEvent("currententrychange", { from:<Navigation>.currentEntry, navigationType:"push" });
+<new any> = <NavigationCurrentEntryChangeEvent>.navigationType;
+<new NavigationHistoryEntry> = <NavigationCurrentEntryChangeEvent>.from;
+<new NavigateEvent> = new NavigateEvent("navigate", { destination:<Navigation>.currentEntry, signal:new AbortController().signal, navigationType:"push", canIntercept:true, info:{ fuzz:true } });
+<new NavigationDestination> = <NavigateEvent>.destination;
+<new USVString> = <NavigationDestination>.url;
+<new DOMString> = <NavigationDestination>.key;
+<new DOMString> = <NavigationDestination>.id;
+<new longLong> = <NavigationDestination>.index;
+<new boolean> = <NavigationDestination>.sameDocument;
+<NavigateEvent>.intercept({ handler:function(){ return Promise.resolve(); } });
+<NavigateEvent>.scroll();
+<new any> = <Navigation>.reload({ state:{ value:<DOMString> }, info:<fuzzint> });
+<new any> = <Navigation>.traverseTo(<NavigationHistoryEntry>.key);
+
+#Cookie Store API (secure-context and preference gated in Firefox)
+<new CookieStore> = window.cookieStore;
+<new any> = <CookieStore>.get("fuzz-cookie");
+<new any> = <CookieStore>.get({ name:"fuzz-cookie", url:location.href });
+<new any> = <CookieStore>.getAll();
+<new any> = <CookieStore>.getAll({ name:"fuzz-cookie" });
+<new any> = <CookieStore>.set("fuzz-cookie", <DOMString>);
+<new any> = <CookieStore>.set({ name:"fuzz-cookie", value:<DOMString>, sameSite:"lax", path:"/" });
+<new any> = <CookieStore>.delete("fuzz-cookie");
+<new any> = <CookieStore>.delete({ name:"fuzz-cookie", path:"/" });
+<new EventHandler> = <CookieStore>.onchange;
+<CookieStore>.onchange = <EventHandler>;
+<new CookieStoreManager> = <ServiceWorkerRegistration>.cookies;
+<new any> = <CookieStoreManager>.subscribe([{ name:"fuzz-cookie", url:location.href }]).then(function(){}, function(error){ console.error(error); });
+<new any> = <CookieStoreManager>.getSubscriptions().then(function(subscriptions){ return subscriptions; }, function(error){ console.error(error); });
+<new any> = <CookieStoreManager>.unsubscribe([{ name:"fuzz-cookie", url:location.href }]).then(function(){}, function(error){ console.error(error); });
+
+#HTML Popover, Dialog, and Invoker APIs
+<new DOMString> = <Element>.popover;
+<Element>.popover = "auto";
+<Element>.popover = "manual";
+<Element>.showPopover({ source:<Element> });
+<Element>.togglePopover({ force:true, source:<Element> });
+<new Element> = <HTMLButtonElement>.popoverTargetElement;
+<HTMLButtonElement>.popoverTargetElement = <Element>;
+<new DOMString> = <HTMLButtonElement>.popoverTargetAction;
+<HTMLButtonElement>.popoverTargetAction = "toggle";
+<HTMLButtonElement>.popoverTargetAction = "show";
+<HTMLButtonElement>.popoverTargetAction = "hide";
+<HTMLButtonElement>.commandForElement = <Element>;
+<HTMLButtonElement>.command = "show-popover";
+<HTMLButtonElement>.command = "hide-popover";
+<HTMLButtonElement>.command = "toggle-popover";
+<HTMLButtonElement>.command = "show-modal";
+<HTMLButtonElement>.command = "close";
+<new ToggleEvent> = new ToggleEvent("beforetoggle", { oldState:"closed", newState:"open", source:<Element> });
+<new ToggleEvent> = new ToggleEvent("toggle", { oldState:"open", newState:"closed" });
+<new CommandEvent> = new CommandEvent("command", { command:"show-popover", source:<HTMLButtonElement> });
+<new DOMString> = <HTMLDialogElement>.closedBy;
+<HTMLDialogElement>.closedBy = "any";
+<HTMLDialogElement>.closedBy = "closerequest";
+<HTMLDialogElement>.requestClose(<DOMString>);
+<HTMLDialogElement>.requestClose();
+<HTMLDialogElement>.returnValue = <DOMString>;
+
+#Trusted Types (preference gated in Firefox)
+<new TrustedTypePolicyFactory> = trustedTypes;
+<new TrustedTypePolicy> = <TrustedTypePolicyFactory>.createPolicy("fuzz-policy", { createHTML:function(s){ return s; }, createScript:function(s){ return s; }, createScriptURL:function(s){ return s; } });
+<new TrustedHTML> = <TrustedTypePolicy>.createHTML(<DOMString>);
+<new TrustedScript> = <TrustedTypePolicy>.createScript(<DOMString>);
+<new TrustedScriptURL> = <TrustedTypePolicy>.createScriptURL(<DOMString>);
+<new boolean> = <TrustedTypePolicyFactory>.isHTML(<TrustedHTML>);
+<new boolean> = <TrustedTypePolicyFactory>.isScript(<TrustedScript>);
+<new boolean> = <TrustedTypePolicyFactory>.isScriptURL(<TrustedScriptURL>);
+<new DOMString> = <TrustedTypePolicyFactory>.getPropertyType("script", "text");
+<new DOMString> = <TrustedTypePolicyFactory>.getAttributeType("script", "src");
+<new TrustedHTML> = <TrustedTypePolicyFactory>.emptyHTML;
+<new TrustedScript> = <TrustedTypePolicyFactory>.emptyScript;
+
+#Geometry Interfaces
+<new DOMPoint> = new DOMPoint(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>);
+<new DOMPoint> = DOMPoint.fromPoint({ x:<fuzzfloat>, y:<fuzzfloat>, z:<fuzzfloat>, w:1 });
+<new DOMPointReadOnly> = new DOMPointReadOnly(<fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = new DOMMatrix();
+<new DOMMatrix> = new DOMMatrix([1, 0, 0, 1, <fuzzfloat>, <fuzzfloat>]);
+<new DOMMatrixReadOnly> = DOMMatrixReadOnly.fromMatrix({ a:1, b:0, c:0, d:1, e:<fuzzfloat>, f:<fuzzfloat> });
+<new DOMMatrix> = <DOMMatrix>.translate(<fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.rotate(<fuzzint>, <fuzzint>, <fuzzint>);
+<new DOMMatrix> = <DOMMatrix>.scale(<fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.multiply(new DOMMatrix());
+<new DOMMatrix> = <DOMMatrix>.inverse();
+<new DOMPoint> = <DOMMatrix>.transformPoint(new DOMPoint(<fuzzfloat>, <fuzzfloat>));
+<new Float64Array> = <DOMMatrix>.toFloat64Array();
+<new DOMQuad> = new DOMQuad(new DOMPoint(), new DOMPoint(1, 0), new DOMPoint(1, 1), new DOMPoint(0, 1));
+<new DOMQuad> = DOMQuad.fromRect({ x:<fuzzfloat>, y:<fuzzfloat>, width:<fuzzfloat>, height:<fuzzfloat> });
+<new DOMRectReadOnly> = <DOMQuad>.getBounds();
+<new DOMRectList> = <Element>.getClientRects();
+<new DOMRect> = <Element>.getBoundingClientRect();
+<new DOMRect> = <Range>.getBoundingClientRect();
+
+#Web Audio Worklets
+<new AudioWorklet> = <AudioContext>.audioWorklet;
+<new any> = <AudioWorklet>.addModule(URL.createObjectURL(new Blob(["registerProcessor('fuzz-processor', class extends AudioWorkletProcessor { process(){ return true; } });"], { type:"text/javascript" })));
+<new AudioWorkletNode> = new AudioWorkletNode(<AudioContext>, "fuzz-processor");
+<new AudioWorkletNode> = new AudioWorkletNode(<AudioContext>, "fuzz-processor", { numberOfInputs:1, numberOfOutputs:1, outputChannelCount:[2], parameterData:{ gain:<fuzzfloat> } });
+<new AudioParamMap> = <AudioWorkletNode>.parameters;
+<new MessagePort> = <AudioWorkletNode>.port;
+<MessagePort>.postMessage({ type:"configure", value:<fuzzfloat> });
+<MessagePort>.start();
+<MessagePort>.close();
+<new any> = <AudioContext>.getOutputTimestamp();
+<new any> = <AudioContext>.createMediaStreamTrackSource(<MediaStreamTrack>);
+
+#CSS Highlights API
+<new Highlight> = new Highlight(new Range());
+<new HighlightRegistry> = CSS.highlights;
+<new HighlightRegistry> = <HighlightRegistry>.set("fuzz-highlight", <Highlight>);
+<new Highlight> = <HighlightRegistry>.get("fuzz-highlight");
+<new any> = <HighlightRegistry>.highlightsFromPoint(<fuzzfloat>, <fuzzfloat>);
+<Highlight>.priority = <fuzzint>;
+<Highlight>.type = "spelling-error";
+<Highlight>.add(new Range());
+<Highlight>.delete(new Range());
+<Highlight>.clear();
+
+#Scroll-to-text Fragment Directive (preference gated; mutation APIs are chrome-only)
+<new FragmentDirective> = <Document>.fragmentDirective;
+
+#Server-Sent Events
+#Use a same-origin endpoint so generated samples do not contact an external host.
+<new EventSource> = new EventSource("/domato-events");
+<new EventSource> = new EventSource("/domato-events", { withCredentials:false });
+<new DOMString> = <EventSource>.url;
+<new boolean> = <EventSource>.withCredentials;
+<new unsignedShort> = <EventSource>.readyState;
+<new EventHandler> = <EventSource>.onopen;
+<EventSource>.onopen = <EventHandler>;
+<new EventHandler> = <EventSource>.onmessage;
+<EventSource>.onmessage = <EventHandler>;
+<new EventHandler> = <EventSource>.onerror;
+<EventSource>.onerror = <EventHandler>;
+<EventSource>.close();
+
+#URL Pattern API (preference-gated in Firefox)
+<new URLPattern> = new URLPattern("/products/:productId");
+<new URLPattern> = new URLPattern({ protocol:"https", hostname:"example.com", pathname:"/products/:productId" });
+<new URLPattern> = new URLPattern("/articles/:id", { ignoreCase:true });
+<new boolean> = <URLPattern>.test("/products/42");
+<new boolean> = <URLPattern>.test({ pathname:"/products/42" });
+<new any> = <URLPattern>.exec("/products/42");
+<new DOMString> = <URLPattern>.protocol;
+<new DOMString> = <URLPattern>.hostname;
+<new DOMString> = <URLPattern>.pathname;
+<new boolean> = <URLPattern>.hasRegExpGroups;
+
+#Document Picture-in-Picture (secure-context and preference gated in Firefox)
+<new DocumentPictureInPicture> = window.documentPictureInPicture;
+<new Window> = <DocumentPictureInPicture>.window;
+<new EventHandler> = <DocumentPictureInPicture>.onenter;
+<DocumentPictureInPicture>.onenter = <EventHandler>;
+<DocumentPictureInPicture>.requestWindow({ width:320, height:240 }).then(function(w){ w.document.body; }, function(e){ e.name; });
+
+#CloseWatcher (preference gated in Firefox)
+<new CloseWatcher> = new CloseWatcher();
+<new CloseWatcher> = new CloseWatcher({ signal:(new AbortController()).signal });
+<new EventHandler> = <CloseWatcher>.oncancel;
+<CloseWatcher>.oncancel = <EventHandler>;
+<new EventHandler> = <CloseWatcher>.onclose;
+<CloseWatcher>.onclose = <EventHandler>;
+<CloseWatcher>.requestClose();
+<CloseWatcher>.close();
+<CloseWatcher>.destroy();
+
+#Content Visibility events
+<new ContentVisibilityAutoStateChangeEvent> = new ContentVisibilityAutoStateChangeEvent("contentvisibilityautostatechange");
+<new ContentVisibilityAutoStateChangeEvent> = new ContentVisibilityAutoStateChangeEvent("contentvisibilityautostatechange", { skipped:true });
+<new boolean> = <ContentVisibilityAutoStateChangeEvent>.skipped;
+
+#Device sensor event objects (preference gated in Firefox)
+<new DeviceMotionEvent> = new DeviceMotionEvent("devicemotion", { acceleration:{ x:1, y:2, z:3 }, interval:16 });
+<new DeviceMotionEvent> = new DeviceMotionEvent("devicemotion", { accelerationIncludingGravity:{ x:0, y:9.8, z:0 }, rotationRate:{ alpha:0, beta:1, gamma:2 } });
+<new DeviceAcceleration> = <DeviceMotionEvent>.acceleration;
+<new DeviceAcceleration> = <DeviceMotionEvent>.accelerationIncludingGravity;
+<new DeviceRotationRate> = <DeviceMotionEvent>.rotationRate;
+<new double> = <DeviceMotionEvent>.interval;
+<new double> = <DeviceAcceleration>.x;
+<new double> = <DeviceAcceleration>.y;
+<new double> = <DeviceAcceleration>.z;
+<new double> = <DeviceRotationRate>.alpha;
+<new double> = <DeviceRotationRate>.beta;
+<new double> = <DeviceRotationRate>.gamma;
+<new DeviceOrientationEvent> = new DeviceOrientationEvent("deviceorientation", { alpha:90, beta:45, gamma:-30, absolute:true });
+<new double> = <DeviceOrientationEvent>.alpha;
+<new double> = <DeviceOrientationEvent>.beta;
+<new double> = <DeviceOrientationEvent>.gamma;
+<new boolean> = <DeviceOrientationEvent>.absolute;
+
+#Audio Session API (preference gated in Firefox)
+<new AudioSession> = navigator.audioSession;
+<new DOMString> = <AudioSession>.type;
+<AudioSession>.type = "auto";
+<AudioSession>.type = "ambient";
+<AudioSession>.type = "transient";
+<AudioSession>.type = "transient-solo";
+<AudioSession>.type = "playback";
+<AudioSession>.type = "play-and-record";
+<new DOMString> = <AudioSession>.state;
+<new EventHandler> = <AudioSession>.onstatechange;
+<AudioSession>.onstatechange = <EventHandler>;
+
+#Media Session API
+<new MediaSession> = navigator.mediaSession;
+<new MediaMetadata> = new MediaMetadata({ title:"fuzz title", artist:"fuzz artist", album:"fuzz album", artwork:[{ src:"/fuzz-cover.png", sizes:"96x96", type:"image/png" }] });
+<MediaSession>.metadata = <MediaMetadata>;
+<new DOMString> = <MediaMetadata>.title;
+<MediaMetadata>.title = <DOMString>;
+<MediaMetadata>.artist = <DOMString>;
+<MediaMetadata>.album = <DOMString>;
+<MediaSession>.playbackState = "playing";
+<MediaSession>.playbackState = "paused";
+<MediaSession>.setActionHandler("play", function(){});
+<MediaSession>.setActionHandler("pause", function(){});
+<MediaSession>.setActionHandler("seekbackward", function(){});
+<MediaSession>.setActionHandler("seekforward", function(){});
+<MediaSession>.setActionHandler("previoustrack", function(){});
+<MediaSession>.setActionHandler("nexttrack", function(){});
+<MediaSession>.setActionHandler("seekto", function(){});
+<MediaSession>.setPositionState({ duration:120, playbackRate:1, position:30 });
+<MediaSession>.setPositionState();
+
+#Screen Orientation API
+<new ScreenOrientation> = <Screen>.orientation;
+<new DOMString> = <ScreenOrientation>.type;
+<new unsignedShort> = <ScreenOrientation>.angle;
+<new EventHandler> = <ScreenOrientation>.onchange;
+<ScreenOrientation>.onchange = <EventHandler>;
+<ScreenOrientation>.unlock();
+<ScreenOrientation>.lock("portrait").then(function(){}, function(e){ e.name; });
+
+#Push API (secure-context, service-worker, and permission gated)
+<new PushManager> = window.pushManager;
+<new any> = PushManager.supportedContentEncodings;
+<new any> = <PushManager>.permissionState().then(function(state){ return state; }, function(error){ console.error(error); });
+<new any> = <PushManager>.getSubscription().then(function(subscription){ return subscription; }, function(error){ console.error(error); });
+<PushManager>.subscribe({ applicationServerKey:new Uint8Array([1, 2, 3, 4]) }).then(function(subscription){ subscription.endpoint; subscription.options; subscription.getKey("p256dh"); subscription.toJSON(); }, function(error){ error.name; });
+<PushManager>.getSubscription().then(function(subscription){ if(subscription){ subscription.unsubscribe().then(function(result){ return result; }, function(error){ console.error(error); }); subscription.endpoint; subscription.expirationTime; } }, function(error){ error.name; });
+<new any> = <PushSubscription>.options;
+<new DOMString> = <PushSubscription>.endpoint;
+<new any> = <PushSubscription>.expirationTime;
+<new ArrayBuffer> = <PushSubscription>.getKey("auth");
+<new ArrayBuffer> = <PushSubscription>.getKey("p256dh");
+<PushSubscription>.unsubscribe();
+<new any> = <PushSubscription>.toJSON();
+
+#Media Capabilities API
+<new any> = navigator.mediaCapabilities.decodingInfo({ type:"file", video:{ contentType:"video/webm; codecs=\"vp8\"", width:640, height:480, bitrate:1000000, framerate:30 }, audio:{ contentType:"audio/webm; codecs=\"opus\"", channels:"2", bitrate:128000, samplerate:48000 } }).then(function(info){ info.supported; info.smooth; info.powerEfficient; }, function(error){ error.name; });
+<new any> = navigator.mediaCapabilities.decodingInfo({ type:"media-source", video:{ contentType:"video/mp4; codecs=\"avc1.42E01E\"", width:1280, height:720, bitrate:2500000, framerate:30 } }).then(function(info){ info.supported; }, function(error){ error.name; });
+<new any> = navigator.mediaCapabilities.encodingInfo({ type:"record", video:{ contentType:"video/webm; codecs=\"vp8\"", width:320, height:240, bitrate:500000, framerate:24 } }).then(function(info){ info.supported; info.smooth; info.powerEfficient; }, function(error){ error.name; });
+<new any> = navigator.mediaCapabilities.encodingInfo({ type:"webrtc", audio:{ contentType:"audio/opus", channels:"2", bitrate:64000, samplerate:48000 } }).then(function(info){ info.supported; }, function(error){ error.name; });
+
+#WebCodecs ImageDecoder (secure-context and preference gated)
+<new ImageDecoder> = new ImageDecoder({ type:"image/png", data:new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]) });
+<new ImageDecoder> = new ImageDecoder({ type:"image/gif", data:new Uint8Array([71, 73, 70, 56, 57, 97]) });
+<new DOMString> = <ImageDecoder>.type;
+<new boolean> = <ImageDecoder>.complete;
+<new any> = <ImageDecoder>.completed;
+<new ImageTrackList> = <ImageDecoder>.tracks;
+<ImageDecoder>.tracks.ready.then(function(){ var track=<ImageDecoder>.tracks.selectedTrack; if(track){ track.animated; track.frameCount; track.repetitionCount; track.selected=true; } }, function(error){ console.error(error); });
+<ImageDecoder>.decode({ frameIndex:0, completeFramesOnly:true }).then(function(result){ result.complete; result.image.close(); }, function(error){ console.error(error); });
+<ImageDecoder>.reset();
+<ImageDecoder>.close();
+<new any> = ImageDecoder.isTypeSupported("image/png").then(function(supported){ return supported; }, function(error){ console.error(error); });
+
+#Synchronous OPFS access handles (DedicatedWorker and secure-context only)
+<new Worker> = new Worker(URL.createObjectURL(new Blob(["onmessage=async function(){const root=await navigator.storage.getDirectory();const handle=await root.getFileHandle('fuzz.bin',{create:true});const access=await handle.createSyncAccessHandle();const buffer=new ArrayBuffer(16);access.write(buffer,{at:0});access.read(buffer,{at:0});access.getSize();access.flush();access.truncate(8);access.close();}"], { type:"application/javascript" })));
+<Worker>.postMessage("exercise-sync-access-handle");
+<Worker>.terminate();
+
+#Digital Credentials API (secure-context and preference gated)
+<new boolean> = DigitalCredential.userAgentAllowsProtocol("openid4vp");
+<CredentialsContainer>.get({ digital:{ requests:[{ protocol:"openid4vp", data:{ client_id:"https://example.com", nonce:"fuzz-nonce", response_type:"vp_token" } }] } }).then(function(credential){ credential.protocol; credential.data; credential.toJSON(); }, function(error){ error.name; });
+<CredentialsContainer>.create({ digital:{ requests:[{ protocol:"openid4vci", data:{ credential_type:"example" } }] } }).then(function(credential){ credential.protocol; credential.data; }, function(error){ error.name; });
+
+#Federated Credential Management (FedCM; secure-context and preference gated)
+<CredentialsContainer>.get({ identity:{ providers:[{ configURL:"https://example.com/fedcm.json", clientId:"fuzz-client", nonce:"fuzz-nonce", loginHint:"user@example.com", domainHint:"example.com" }], mode:"passive" } }).then(function(credential){ credential.token; credential.isAutoSelected; credential.configURL; }, function(error){ error.name; });
+<CredentialsContainer>.get({ identity:{ providers:[{ configURL:"https://example.com/fedcm.json", clientId:"fuzz-client" }], mode:"active" } }).then(function(credential){ credential.token; }, function(error){ error.name; });
+<IdentityCredential>.disconnect({ configURL:"https://example.com/fedcm.json", clientId:"fuzz-client", accountHint:"fuzz-account" }).then(function(){}, function(error){ error.name; });
+
+#Service Workers
+<new ServiceWorkerContainer> = navigator.serviceWorker;
+<new ServiceWorker> = <ServiceWorkerContainer>.controller;
+<new EventHandler> = <ServiceWorkerContainer>.oncontrollerchange;
+<ServiceWorkerContainer>.oncontrollerchange = <EventHandler>;
+<new EventHandler> = <ServiceWorkerContainer>.onmessage;
+<ServiceWorkerContainer>.onmessage = <EventHandler>;
+<ServiceWorkerContainer>.startMessages();
+<new any> = <ServiceWorkerContainer>.ready;
+<ServiceWorkerContainer>.getRegistration().then(function(registration){ if(registration){ registration.scope; registration.active; registration.update().then(function(){}, function(error){ console.error(error); }); registration.unregister().then(function(result){ return result; }, function(error){ console.error(error); }); } }, function(error){ console.error(error); });
+<ServiceWorkerContainer>.getRegistrations().then(function(registrations){ registrations.forEach(function(registration){ registration.scope; registration.active; }); }, function(error){ console.error(error); });
+<ServiceWorkerContainer>.register("/domato-service-worker.js", { scope:"/", type:"classic", updateViaCache:"none" }).then(function(registration){ registration.scope; registration.installing; registration.waiting; registration.active; registration.update().then(function(){}, function(error){ console.error(error); }); registration.unregister().then(function(result){ return result; }, function(error){ console.error(error); }); }, function(error){ console.error(error); });
+<ServiceWorkerContainer>.register("/domato-module-worker.js", { scope:"/", type:"module" }).then(function(registration){ registration.active; }, function(error){ console.error(error); });
+<new DOMString> = <ServiceWorker>.scriptURL;
+<new DOMString> = <ServiceWorker>.state;
+<new EventHandler> = <ServiceWorker>.onstatechange;
+<ServiceWorker>.onstatechange = <EventHandler>;
+<ServiceWorker>.postMessage({ type:"fuzz-message", value:1 });
+<ServiceWorker>.postMessage({ type:"fuzz-transfer", value:new ArrayBuffer(8) }, [new ArrayBuffer(8)]);
+<ServiceWorkerRegistration>.showNotification("Domato", { body:"service worker notification", tag:"domato-test" }).then(function(){}, function(error){ console.error(error); });
+<ServiceWorkerRegistration>.getNotifications({ tag:"domato-test" }).then(function(notifications){ notifications.forEach(function(notification){ notification.close(); }); }, function(error){ console.error(error); });
+<new any> = <ServiceWorkerRegistration>.pushManager;
+<new any> = <ServiceWorkerRegistration>.cookies;
