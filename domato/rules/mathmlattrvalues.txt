@@ -11,15 +11,148 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# ============================================================================
+# MathML Attribute Values Grammar for Domato / Fuzzing
+# ============================================================================
+# Based on:
+#   - MathML Core (W3C Candidate Recommendation, 2024-2025)
+#   - MathML 3.0 2nd Edition (legacy attributes still implemented in browsers)
+#   - MDN MathML Reference (https://developer.mozilla.org/en-US/docs/Web/MathML)
+#
+# This file provides an extended set of value generators for MathML attributes
+# to maximize coverage of both modern and legacy browser implementations.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Basic Types
+# ----------------------------------------------------------------------------
+
+# Boolean attributes in MathML (case-insensitive in spec)
+<mathmlattr_boolean_value> = true
+<mathmlattr_boolean_value> = false
+
+# Unsigned integer (as per MathML Core / CSS Values)
+<mathmlattr_unsigned_int_value> = <fuzzint>
+
+# Integer (may be negative, used for scriptlevel, tabindex, etc.)
+<mathmlattr_int_value> = <fuzzint>
+<mathmlattr_int_value> = -<fuzzint>
+<mathmlattr_int_value> = 0
+
+# ----------------------------------------------------------------------------
+# Length and Percentage Types
+# ----------------------------------------------------------------------------
+
 # https://w3c.github.io/mathml-core/#dfn-length-percentage
-<mathmlattr_lengthpercentage_value p=.9> = <fuzzint>px
-<mathmlattr_lengthpercentage_value p=.1> = <percentage>%
+# Modern CSS length units used by MathML Core
+<mathmlattr_length_unit> = px
+<mathmlattr_length_unit> = em
+<mathmlattr_length_unit> = ex
+<mathmlattr_length_unit> = in
+<mathmlattr_length_unit> = cm
+<mathmlattr_length_unit> = mm
+<mathmlattr_length_unit> = pt
+<mathmlattr_length_unit> = pc
+
+# Legacy MathML named spaces (still accepted by some browsers for compatibility)
+<mathmlattr_namedspace> = veryverythinmathspace
+<mathmlattr_namedspace> = verythinmathspace
+<mathmlattr_namedspace> = thinmathspace
+<mathmlattr_namedspace> = mediummathspace
+<mathmlattr_namedspace> = thickmathspace
+<mathmlattr_namedspace> = verythickmathspace
+<mathmlattr_namedspace> = veryverythickmathspace
+<mathmlattr_namedspace> = negativeveryverythinmathspace
+<mathmlattr_namedspace> = negativeverythinmathspace
+<mathmlattr_namedspace> = negativethinmathspace
+<mathmlattr_namedspace> = negativemediummathspace
+<mathmlattr_namedspace> = negativethickmathspace
+<mathmlattr_namedspace> = negativeverythickmathspace
+<mathmlattr_namedspace> = negativeveryverythickmathspace
+
+# A generic length value: integer + unit
+<mathmlattr_length_value> = <fuzzint><mathmlattr_length_unit>
+
+# A legacy length value (unitless numbers or named spaces)
+<mathmlattr_legacy_length_value> = <fuzzint>
+<mathmlattr_legacy_length_value> = <mathmlattr_namedspace>
+
+# Percentage value
+<mathmlattr_percentage_value> = <percentage>%
+
+# Length or percentage combined (most common in MathML Core)
+<mathmlattr_lengthpercentage_value p=.75> = <mathmlattr_length_value>
+<mathmlattr_lengthpercentage_value p=.25> = <mathmlattr_percentage_value>
+
+# For mpadded: legacy syntax with optional +/- prefix and pseudo-units
+<mathmlattr_mpadded_legacy_value> = <mathmlattr_lengthpercentage_value>
+<mathmlattr_mpadded_legacy_value> = +<mathmlattr_lengthpercentage_value>
+<mathmlattr_mpadded_legacy_value> = -<mathmlattr_lengthpercentage_value>
+<mathmlattr_mpadded_legacy_value> = <fuzzint>width
+<mathmlattr_mpadded_legacy_value> = <fuzzint>%width
+<mathmlattr_mpadded_legacy_value> = <fuzzint>height
+<mathmlattr_mpadded_legacy_value> = <fuzzint>%height
+<mathmlattr_mpadded_legacy_value> = <fuzzint>depth
+<mathmlattr_mpadded_legacy_value> = <fuzzint>%depth
+<mathmlattr_mpadded_legacy_value> = +<fuzzint><mathmlattr_length_unit>
+<mathmlattr_mpadded_legacy_value> = -<fuzzint><mathmlattr_length_unit>
+<mathmlattr_mpadded_legacy_value> = <mathmlattr_namedspace>
+<mathmlattr_mpadded_legacy_value> = +<mathmlattr_namedspace>
+<mathmlattr_mpadded_legacy_value> = -<mathmlattr_namedspace>
+
+# ----------------------------------------------------------------------------
+# Color Types
+# ----------------------------------------------------------------------------
+
+# CSS color values for mathcolor / mathbackground / legacy color attrs
+<mathmlattr_color_name> = red
+<mathmlattr_color_name> = green
+<mathmlattr_color_name> = blue
+<mathmlattr_color_name> = black
+<mathmlattr_color_name> = white
+<mathmlattr_color_name> = yellow
+<mathmlattr_color_name> = cyan
+<mathmlattr_color_name> = magenta
+<mathmlattr_color_name> = orange
+<mathmlattr_color_name> = purple
+<mathmlattr_color_name> = teal
+<mathmlattr_color_name> = gray
+<mathmlattr_color_name> = navy
+<mathmlattr_color_name> = lime
+<mathmlattr_color_name> = aqua
+<mathmlattr_color_name> = maroon
+<mathmlattr_color_name> = olive
+<mathmlattr_color_name> = silver
+<mathmlattr_color_name> = transparent
+
+<mathmlattr_color_hex> = #<hexdigit><hexdigit><hexdigit>
+<mathmlattr_color_hex> = #<hexdigit><hexdigit><hexdigit><hexdigit><hexdigit><hexdigit>
+
+<mathmlattr_color_rgb> = rgb(<fuzzint>,<fuzzint>,<fuzzint>)
+<mathmlattr_color_rgba> = rgba(<fuzzint>,<fuzzint>,<fuzzint>,<alpha>)
+<mathmlattr_color_hsl> = hsl(<fuzzint>,<percentage>,<percentage>)
+
+<mathmlattr_color_value> = <mathmlattr_color_name>
+<mathmlattr_color_value> = <mathmlattr_color_hex>
+<mathmlattr_color_value> = <mathmlattr_color_rgb>
+<mathmlattr_color_value> = <mathmlattr_color_rgba>
+<mathmlattr_color_value> = <mathmlattr_color_hsl>
+
+# ----------------------------------------------------------------------------
+# math element
+# ----------------------------------------------------------------------------
 
 # https://w3c.github.io/mathml-core/#the-top-level-math-element
 <mathmlattr_math_display_value> = inline
 <mathmlattr_math_display_value> = block
 
+# ----------------------------------------------------------------------------
+# mathvariant
+# ----------------------------------------------------------------------------
+
 # https://w3c.github.io/mathml-core/#dfn-mathvariant
+# Modern MathML Core only requires "normal" to be supported.
+# All other values are deprecated but still implemented in browsers.
 <mathmlattr_mathvariant_value> = normal
 <mathmlattr_mathvariant_value> = bold
 <mathmlattr_mathvariant_value> = italic
@@ -39,22 +172,456 @@
 <mathmlattr_mathvariant_value> = looped
 <mathmlattr_mathvariant_value> = stretched
 
+# ----------------------------------------------------------------------------
+# scriptlevel
+# ----------------------------------------------------------------------------
+
 # https://w3c.github.io/mathml-core/#dfn-scriptlevel
+# MathML Core defines this as unsigned-integer, but browsers may accept
+# signed integers and the +/- prefix syntax from MathML 3.
 <mathmlattr_scriptlevel_value> = <fuzzint>
+<mathmlattr_scriptlevel_value> = +<fuzzint>
+<mathmlattr_scriptlevel_value> = -<fuzzint>
+
+# ----------------------------------------------------------------------------
+# displaystyle
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#dfn-displaystyle
+<mathmlattr_displaystyle_value> = true
+<mathmlattr_displaystyle_value> = false
+
+# ----------------------------------------------------------------------------
+# dir
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#dfn-dir
+<mathmlattr_dir_value> = ltr
+<mathmlattr_dir_value> = rtl
+
+# ----------------------------------------------------------------------------
+# form
+# ----------------------------------------------------------------------------
 
 # https://w3c.github.io/mathml-core/#dfn-form
 <mathmlattr_form_value> = infix
 <mathmlattr_form_value> = prefix
 <mathmlattr_form_value> = postfix
 
+# ----------------------------------------------------------------------------
+# mfrac
+# ----------------------------------------------------------------------------
+
 # https://w3c.github.io/mathml-core/#fractions-mfrac
-# An interesting value for linethickness is 0px.
+# linethickness: length-percentage, or legacy named values
 <mathmlattr_mfrac_linethickness_value> = <mathmlattr_lengthpercentage_value>
 <mathmlattr_mfrac_linethickness_value> = 0px
+<mathmlattr_mfrac_linethickness_value> = thin
+<mathmlattr_mfrac_linethickness_value> = medium
+<mathmlattr_mfrac_linethickness_value> = thick
+
+# numalign / denomalign
+<mathmlattr_mfrac_align_value> = left
+<mathmlattr_mfrac_align_value> = center
+<mathmlattr_mfrac_align_value> = right
+
+# ----------------------------------------------------------------------------
+# maction
+# ----------------------------------------------------------------------------
 
 # https://www.w3.org/TR/MathML3/chapter3.html#presm.maction
+# MathML Core preserves these as legacy; some browsers implement them.
 <mathmlattr_maction_actiontype_value> = toggle
 <mathmlattr_maction_actiontype_value> = statusline
 <mathmlattr_maction_actiontype_value> = tooltip
-<mathmlattr_maction_actiontype_value> = input
+
 <mathmlattr_maction_selection_value> = <fuzzint>
+
+# ----------------------------------------------------------------------------
+# mo (operator) attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#operator-fence-separator-or-accent-mo
+<mathmlattr_mo_accent_value> = <mathmlattr_boolean_value>
+<mathmlattr_mo_fence_value> = <mathmlattr_boolean_value>
+<mathmlattr_mo_form_value> = <mathmlattr_form_value>
+<mathmlattr_mo_largeop_value> = <mathmlattr_boolean_value>
+<mathmlattr_mo_lspace_value> = <mathmlattr_lengthpercentage_value>
+<mathmlattr_mo_maxsize_value> = <mathmlattr_lengthpercentage_value>
+<mathmlattr_mo_minsize_value> = <mathmlattr_lengthpercentage_value>
+<mathmlattr_mo_movablelimits_value> = <mathmlattr_boolean_value>
+<mathmlattr_mo_rspace_value> = <mathmlattr_lengthpercentage_value>
+<mathmlattr_mo_separator_value> = <mathmlattr_boolean_value>
+<mathmlattr_mo_stretchy_value> = <mathmlattr_boolean_value>
+<mathmlattr_mo_symmetric_value> = <mathmlattr_boolean_value>
+
+# ----------------------------------------------------------------------------
+# mtable attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#table-or-matrix-mtable
+# align: basic values + optional row number (legacy)
+<mathmlattr_mtable_align_value> = axis
+<mathmlattr_mtable_align_value> = baseline
+<mathmlattr_mtable_align_value> = bottom
+<mathmlattr_mtable_align_value> = center
+<mathmlattr_mtable_align_value> = top
+<mathmlattr_mtable_align_value> = axis <fuzzint>
+<mathmlattr_mtable_align_value> = baseline <fuzzint>
+<mathmlattr_mtable_align_value> = bottom <fuzzint>
+<mathmlattr_mtable_align_value> = center <fuzzint>
+<mathmlattr_mtable_align_value> = top <fuzzint>
+
+# frame
+<mathmlattr_mtable_frame_value> = none
+<mathmlattr_mtable_frame_value> = solid
+<mathmlattr_mtable_frame_value> = dashed
+
+# columnlines / rowlines: space-separated list of none|solid|dashed
+<mathmlattr_mtable_line_value> = none
+<mathmlattr_mtable_line_value> = solid
+<mathmlattr_mtable_line_value> = dashed
+
+# columnalign / rowalign / cell align: space-separated list
+<mathmlattr_mtable_cell_halign_value> = left
+<mathmlattr_mtable_cell_halign_value> = center
+<mathmlattr_mtable_cell_halign_value> = right
+
+<mathmlattr_mtable_cell_valign_value> = axis
+<mathmlattr_mtable_cell_valign_value> = baseline
+<mathmlattr_mtable_cell_valign_value> = bottom
+<mathmlattr_mtable_cell_valign_value> = center
+<mathmlattr_mtable_cell_valign_value> = top
+
+# spacing values (space-separated lengths, we provide single value here)
+<mathmlattr_mtable_spacing_value> = <mathmlattr_length_value>
+<mathmlattr_mtable_spacing_value> = <mathmlattr_lengthpercentage_value>
+
+# framespacing: "length length" (legacy, two lengths)
+<mathmlattr_mtable_framespacing_value> = <mathmlattr_length_value> <mathmlattr_length_value>
+<mathmlattr_mtable_framespacing_value> = <mathmlattr_lengthpercentage_value> <mathmlattr_lengthpercentage_value>
+
+# width
+<mathmlattr_mtable_width_value> = <mathmlattr_lengthpercentage_value>
+
+# ----------------------------------------------------------------------------
+# mtd (table cell) attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#entry-in-table-or-matrix-mtd
+<mathmlattr_mtd_columnspan_value> = <fuzzint>
+<mathmlattr_mtd_rowspan_value> = <fuzzint>
+
+# cell-level overrides
+<mathmlattr_mtd_columnalign_value> = left
+<mathmlattr_mtd_columnalign_value> = center
+<mathmlattr_mtd_columnalign_value> = right
+
+<mathmlattr_mtd_rowalign_value> = axis
+<mathmlattr_mtd_rowalign_value> = baseline
+<mathmlattr_mtd_rowalign_value> = bottom
+<mathmlattr_mtd_rowalign_value> = center
+<mathmlattr_mtd_rowalign_value> = top
+
+# ----------------------------------------------------------------------------
+# mtr (table row) attributes
+# ----------------------------------------------------------------------------
+
+# row-level overrides (space-separated lists, single value shown)
+<mathmlattr_mtr_columnalign_value> = left
+<mathmlattr_mtr_columnalign_value> = center
+<mathmlattr_mtr_columnalign_value> = right
+
+<mathmlattr_mtr_rowalign_value> = axis
+<mathmlattr_mtr_rowalign_value> = baseline
+<mathmlattr_mtr_rowalign_value> = bottom
+<mathmlattr_mtr_rowalign_value> = center
+<mathmlattr_mtr_rowalign_value> = top
+
+# ----------------------------------------------------------------------------
+# mpadded attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#adjust-space-around-content-mpadded
+<mathmlattr_mpadded_depth_value> = <mathmlattr_mpadded_legacy_value>
+<mathmlattr_mpadded_height_value> = <mathmlattr_mpadded_legacy_value>
+<mathmlattr_mpadded_lspace_value> = <mathmlattr_mpadded_legacy_value>
+<mathmlattr_mpadded_voffset_value> = <mathmlattr_mpadded_legacy_value>
+<mathmlattr_mpadded_width_value> = <mathmlattr_mpadded_legacy_value>
+
+# ----------------------------------------------------------------------------
+# mspace attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#space-mspace
+<mathmlattr_mspace_depth_value> = <mathmlattr_length_value>
+<mathmlattr_mspace_height_value> = <mathmlattr_length_value>
+<mathmlattr_mspace_width_value> = <mathmlattr_length_value>
+# Some browsers also accept legacy lengths:
+<mathmlattr_mspace_depth_value> = <mathmlattr_legacy_length_value>
+<mathmlattr_mspace_height_value> = <mathmlattr_legacy_length_value>
+<mathmlattr_mspace_width_value> = <mathmlattr_legacy_length_value>
+
+# ----------------------------------------------------------------------------
+# munderover / munder / mover attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#underscripts-and-overscripts-munder-mover-munderover
+<mathmlattr_accent_value> = <mathmlattr_boolean_value>
+<mathmlattr_accentunder_value> = <mathmlattr_boolean_value>
+
+# ----------------------------------------------------------------------------
+# msub / msup / msubsup / mmultiscripts attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#subscripts-and-superscripts-msub-msup-msubsup
+<mathmlattr_subscriptshift_value> = <mathmlattr_lengthpercentage_value>
+<mathmlattr_superscriptshift_value> = <mathmlattr_lengthpercentage_value>
+# Legacy lengths also accepted by some engines:
+<mathmlattr_subscriptshift_value> = <mathmlattr_legacy_length_value>
+<mathmlattr_superscriptshift_value> = <mathmlattr_legacy_length_value>
+
+# ----------------------------------------------------------------------------
+# ms (string literal) attributes
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#string-literal-ms
+<mathmlattr_ms_lquote_value> = "
+<mathmlattr_ms_lquote_value> = &quot;
+<mathmlattr_ms_lquote_value> = &ldquo;
+<mathmlattr_ms_lquote_value> = &lsquo;
+<mathmlattr_ms_lquote_value> = &laquo;
+<mathmlattr_ms_lquote_value> = &bdquo;
+
+<mathmlattr_ms_rquote_value> = "
+<mathmlattr_ms_rquote_value> = &quot;
+<mathmlattr_ms_rquote_value> = &rdquo;
+<mathmlattr_ms_rquote_value> = &rsquo;
+<mathmlattr_ms_rquote_value> = &raquo;
+<mathmlattr_ms_rquote_value> = &rsquo;
+
+# ----------------------------------------------------------------------------
+# semantics / annotation / annotation-xml
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#semantics-and-presentation
+<mathmlattr_annotation_encoding_value> = application/x-tex
+<mathmlattr_annotation_encoding_value> = application/mathml+xml
+<mathmlattr_annotation_encoding_value> = application/mathml-presentation+xml
+<mathmlattr_annotation_encoding_value> = application/mathml-content+xml
+<mathmlattr_annotation_encoding_value> = image/svg+xml
+<mathmlattr_annotation_encoding_value> = text/html
+<mathmlattr_annotation_encoding_value> = application/xml
+<mathmlattr_annotation_encoding_value> = MathML-Presentation
+
+# ----------------------------------------------------------------------------
+# menclose (legacy MathML 3, not in MathML Core but polyfilled/implemented)
+# ----------------------------------------------------------------------------
+
+# https://www.w3.org/TR/MathML3/chapter3.html#presm.menclose
+<mathmlattr_menclose_notation_single_value> = longdiv
+<mathmlattr_menclose_notation_single_value> = actuarial
+<mathmlattr_menclose_notation_single_value> = radical
+<mathmlattr_menclose_notation_single_value> = box
+<mathmlattr_menclose_notation_single_value> = roundedbox
+<mathmlattr_menclose_notation_single_value> = circle
+<mathmlattr_menclose_notation_single_value> = left
+<mathmlattr_menclose_notation_single_value> = right
+<mathmlattr_menclose_notation_single_value> = top
+<mathmlattr_menclose_notation_single_value> = bottom
+<mathmlattr_menclose_notation_single_value> = madruwb
+
+# The notation attribute accepts a space-separated list of the above.
+# For grammar simplicity we provide a few common combinations:
+<mathmlattr_menclose_notation_value> = <mathmlattr_menclose_notation_single_value>
+<mathmlattr_menclose_notation_value> = box circle
+<mathmlattr_menclose_notation_value> = left right
+<mathmlattr_menclose_notation_value> = top bottom
+<mathmlattr_menclose_notation_value> = actuarial bottom
+<mathmlattr_menclose_notation_value> = longdiv left
+
+# ----------------------------------------------------------------------------
+# mfenced (legacy MathML 3, deprecated in Core but still parsed by browsers)
+# ----------------------------------------------------------------------------
+
+# https://www.w3.org/TR/MathML3/chapter3.html#presm.mfenced
+<mathmlattr_mfenced_open_value> = (
+<mathmlattr_mfenced_open_value> = [
+<mathmlattr_mfenced_open_value> = {
+<mathmlattr_mfenced_open_value> = &lt;
+<mathmlattr_mfenced_open_value> = &verbar;
+<mathmlattr_mfenced_open_value> = &Vert;
+<mathmlattr_mfenced_open_value> = &lang;
+<mathmlattr_mfenced_open_value> = &rang;
+
+<mathmlattr_mfenced_close_value> = )
+<mathmlattr_mfenced_close_value> = ]
+<mathmlattr_mfenced_close_value> = }
+<mathmlattr_mfenced_close_value> = &gt;
+<mathmlattr_mfenced_close_value> = &verbar;
+<mathmlattr_mfenced_close_value> = &Vert;
+<mathmlattr_mfenced_close_value> = &lang;
+<mathmlattr_mfenced_close_value> = &rang;
+
+<mathmlattr_mfenced_separators_value> = ,
+<mathmlattr_mfenced_separators_value> = ;
+<mathmlattr_mfenced_separators_value> = |
+<mathmlattr_mfenced_separators_value> = ,;
+
+# ----------------------------------------------------------------------------
+# mstyle legacy deprecated attributes (still accepted by some UAs)
+# ----------------------------------------------------------------------------
+
+# https://www.w3.org/TR/MathML3/chapter3.html#presm.mstyle
+<mathmlattr_mstyle_background_value> = <mathmlattr_color_value>
+<mathmlattr_mstyle_color_value> = <mathmlattr_color_value>
+<mathmlattr_mstyle_fontfamily_value> = serif
+<mathmlattr_mstyle_fontfamily_value> = sans-serif
+<mathmlattr_mstyle_fontfamily_value> = monospace
+<mathmlattr_mstyle_fontfamily_value> = cursive
+<mathmlattr_mstyle_fontfamily_value> = fantasy
+<mathmlattr_mstyle_fontfamily_value> = Arial
+<mathmlattr_mstyle_fontfamily_value> = Times
+<mathmlattr_mstyle_fontfamily_value> = Courier
+
+<mathmlattr_mstyle_fontsize_value> = <mathmlattr_length_value>
+<mathmlattr_mstyle_fontsize_value> = small
+<mathmlattr_mstyle_fontsize_value> = medium
+<mathmlattr_mstyle_fontsize_value> = large
+<mathmlattr_mstyle_fontsize_value> = x-small
+<mathmlattr_mstyle_fontsize_value> = x-large
+
+<mathmlattr_mstyle_fontstyle_value> = normal
+<mathmlattr_mstyle_fontstyle_value> = italic
+<mathmlattr_mstyle_fontstyle_value> = oblique
+
+<mathmlattr_mstyle_fontweight_value> = normal
+<mathmlattr_mstyle_fontweight_value> = bold
+<mathmlattr_mstyle_fontweight_value> = bolder
+<mathmlattr_mstyle_fontweight_value> = lighter
+<mathmlattr_mstyle_fontweight_value> = 100
+<mathmlattr_mstyle_fontweight_value> = 200
+<mathmlattr_mstyle_fontweight_value> = 300
+<mathmlattr_mstyle_fontweight_value> = 400
+<mathmlattr_mstyle_fontweight_value> = 500
+<mathmlattr_mstyle_fontweight_value> = 600
+<mathmlattr_mstyle_fontweight_value> = 700
+<mathmlattr_mstyle_fontweight_value> = 800
+<mathmlattr_mstyle_fontweight_value> = 900
+
+# scriptsizemultiplier: number (e.g., 0.71)
+<mathmlattr_mstyle_scriptsizemultiplier_value> = 0.<fuzzint>
+<mathmlattr_mstyle_scriptsizemultiplier_value> = 1.<fuzzint>
+<mathmlattr_mstyle_scriptsizemultiplier_value> = <fuzzint>.<fuzzint>
+
+# scriptminsize: length
+<mathmlattr_mstyle_scriptminsize_value> = <mathmlattr_length_value>
+<mathmlattr_mstyle_scriptminsize_value> = <mathmlattr_lengthpercentage_value>
+
+# ----------------------------------------------------------------------------
+# Global MathML attributes (common to all elements)
+# ----------------------------------------------------------------------------
+
+# https://w3c.github.io/mathml-core/#global-attributes
+<mathmlattr_global_mathsize_value> = <mathmlattr_length_value>
+<mathmlattr_global_mathsize_value> = small
+<mathmlattr_global_mathsize_value> = normal
+<mathmlattr_global_mathsize_value> = big
+
+<mathmlattr_global_mathcolor_value> = <mathmlattr_color_value>
+<mathmlattr_global_mathbackground_value> = <mathmlattr_color_value>
+
+# tabindex
+<mathmlattr_global_tabindex_value> = <fuzzint>
+<mathmlattr_global_tabindex_value> = -<fuzzint>
+<mathmlattr_global_tabindex_value> = 0
+
+# class (space-separated tokens, single token shown)
+<mathmlattr_global_class_value> = <identifier>
+
+# id
+<mathmlattr_global_id_value> = <identifier>
+
+# href (URI, simplified)
+<mathmlattr_global_href_value> = #<identifier>
+<mathmlattr_global_href_value> = https://example.com
+<mathmlattr_global_href_value> = javascript:void(0)
+
+# event handlers (on* attributes) - value is typically JS, we provide generic
+<mathmlattr_global_event_value> = alert(1)
+<mathmlattr_global_event_value> = console.log(event)
+<mathmlattr_global_event_value> = return false
+
+# autofocus (boolean-like in HTML; in MathML global set it is listed as attr)
+<mathmlattr_global_autofocus_value> = <mathmlattr_boolean_value>
+<mathmlattr_global_autofocus_value> = autofocus
+
+# nonce
+<mathmlattr_global_nonce_value> = <identifier>
+
+# style (inline CSS, simplified)
+<mathmlattr_global_style_value> = color:red
+<mathmlattr_global_style_value> = font-size:2em
+<mathmlattr_global_style_value> = display:none
+<mathmlattr_global_style_value> = visibility:hidden
+<mathmlattr_global_style_value> = position:absolute
+<mathmlattr_global_style_value> = background:blue
+
+# data-* (custom data attributes)
+<mathmlattr_global_data_value> = <identifier>
+
+# ----------------------------------------------------------------------------
+# Token-element specific (mi, mn, mtext, mo, ms)
+# ----------------------------------------------------------------------------
+
+# mathsize on token elements accepts the same values as global mathsize
+<mathmlattr_token_mathsize_value> = <mathmlattr_global_mathsize_value>
+
+# ----------------------------------------------------------------------------
+# Linebreak attributes (legacy MathML 3, informative in Core)
+# ----------------------------------------------------------------------------
+
+# https://www.w3.org/TR/MathML3/chapter3.html#presm.linebreak
+<mathmlattr_linebreak_value> = auto
+<mathmlattr_linebreak_value> = newline
+<mathmlattr_linebreak_value> = nobreak
+<mathmlattr_linebreak_value> = goodbreak
+<mathmlattr_linebreak_value> = badbreak
+
+<mathmlattr_linebreakstyle_value> = before
+<mathmlattr_linebreakstyle_value> = after
+<mathmlattr_linebreakstyle_value> = duplicate
+<mathmlattr_linebreakstyle_value> = infixlinebreakstyle
+
+<mathmlattr_lineleading_value> = <mathmlattr_length_value>
+<mathmlattr_lineleading_value> = <mathmlattr_lengthpercentage_value>
+
+# ----------------------------------------------------------------------------
+# Additional legacy / edge-case values for robust fuzzing
+# ----------------------------------------------------------------------------
+
+# Very large / very small lengths (edge cases)
+<mathmlattr_length_value> = 0<mathmlattr_length_unit>
+<mathmlattr_length_value> = 1<mathmlattr_length_unit>
+<mathmlattr_length_value> = 100<mathmlattr_length_unit>
+<mathmlattr_length_value> = 999<mathmlattr_length_unit>
+<mathmlattr_length_value> = 9999<mathmlattr_length_unit>
+
+# Extreme percentages
+<mathmlattr_percentage_value> = 0%
+<mathmlattr_percentage_value> = 100%
+<mathmlattr_percentage_value> = 999%
+
+# Empty / whitespace-sensitive values (for parser testing)
+<mathmlattr_whitespace_value> =
+<mathmlattr_whitespace_value> = 	
+<mathmlattr_whitespace_value> = 
+
+
+# Invalid / malformed values to test error handling
+<mathmlattr_invalid_length_value> = <fuzzint>
+<mathmlattr_invalid_length_value> = abc
+<mathmlattr_invalid_length_value> = <fuzzint>px<fuzzint>
+<mathmlattr_invalid_color_value> = <fuzzint>
+<mathmlattr_invalid_color_value> = rgb(<fuzzint>)
+<mathmlattr_invalid_color_value> = #<fuzzint>
