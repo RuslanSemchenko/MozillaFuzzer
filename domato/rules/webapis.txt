@@ -881,7 +881,7 @@ document.exitFullscreen();
 <new any> = <Blob>.arrayBuffer();
 <new DOMString> = <File>.name;
 <new long> = <File>.lastModified;
-<new URL> = new URL("https://example.com/path?query=value#fragment");
+<new URL> = new URL("https://example.com/path?query=value<hash>fragment");
 <new URLSearchParams> = new URLSearchParams("a=1&b=two");
 <URLSearchParams>.append("key", <DOMString>);
 <URLSearchParams>.set("key", <DOMString>);
@@ -1050,8 +1050,8 @@ navigator.usb.requestDevice({ filters:[{ vendorId:<fuzzint>, productId:<fuzzint>
 <new NavigationHistoryEntry> = <NavigationTransition>.from;
 <new any> = <NavigationTransition>.finished;
 <new any> = <NavigationTransition>.committed;
-<new NavigationResult> = <Navigation>.navigate("#fuzz-target", { history:"replace", state:{ value:<fuzzint> } });
-<Navigation>.onnavigate = function(e){ e.destination.getState(); e.destination.url; e.destination.key; e.destination.id; e.destination.index; e.destination.sameDocument; e.canIntercept; e.userInitiated; e.hashChange; e.signal.aborted; e.info; e.formData; e.downloadRequest; e.hasUAVisualTransition; e.sourceElement; e.intercept({ focusReset:"manual", scroll:"manual", handler:function(){ return Promise.resolve(); }, precommitHandler:function(controller){ controller.redirect("#domato", { history:"replace" }); controller.addHandler(function(){ return Promise.resolve(); }); return Promise.resolve(); } }); e.scroll(); };
+<new NavigationResult> = <Navigation>.navigate("<hash>fuzz-target", { history:"replace", state:{ value:<fuzzint> } });
+<Navigation>.onnavigate = function(e){ e.destination.getState(); e.destination.url; e.destination.key; e.destination.id; e.destination.index; e.destination.sameDocument; e.canIntercept; e.userInitiated; e.hashChange; e.signal.aborted; e.info; e.formData; e.downloadRequest; e.hasUAVisualTransition; e.sourceElement; e.intercept({ focusReset:"manual", scroll:"manual", handler:function(){ return Promise.resolve(); }, precommitHandler:function(controller){ controller.redirect("<hash>domato", { history:"replace" }); controller.addHandler(function(){ return Promise.resolve(); }); return Promise.resolve(); } }); e.scroll(); };
 <new EventHandler> = <Navigation>.onnavigatesuccess;
 <Navigation>.onnavigatesuccess = <EventHandler>;
 <new EventHandler> = <Navigation>.onnavigateerror;
@@ -1364,3 +1364,300 @@ navigator.usb.requestDevice({ filters:[{ vendorId:<fuzzint>, productId:<fuzzint>
 <ServiceWorkerRegistration>.getNotifications({ tag:"domato-test" }).then(function(notifications){ notifications.forEach(function(notification){ notification.close(); }); }, function(error){ console.error(error); });
 <new any> = <ServiceWorkerRegistration>.pushManager;
 <new any> = <ServiceWorkerRegistration>.cookies;
+
+#==================== work_webapis.txt.md gap closure ====================
+# One block per interface family from the "## present" list of
+# results/audit/work_webapis.txt.md. Promises are settled with .then because a
+# js.txt line lives in a synchronous try/catch and await is a syntax error.
+
+!extends DOMMatrix DOMMatrixReadOnly
+
+#--- CSS typed-OM unit factories (27 CSS.<unit> statics) ---
+var domatoCssRelativeUnits = [CSS.lh(<fuzzfloat>), CSS.rcap(<fuzzfloat>), CSS.rch(<fuzzfloat>), CSS.rex(<fuzzfloat>), CSS.ric(<fuzzfloat>), CSS.rlh(<fuzzfloat>), CSS.vb(<fuzzfloat>)];
+var domatoCssSmallUnits = [CSS.svb(<fuzzfloat>), CSS.svh(<fuzzfloat>), CSS.svi(<fuzzfloat>), CSS.svmax(<fuzzfloat>), CSS.svmin(<fuzzfloat>), CSS.svw(<fuzzfloat>)];
+var domatoCssLargeUnits = [CSS.lvb(<fuzzfloat>), CSS.lvh(<fuzzfloat>), CSS.lvi(<fuzzfloat>), CSS.lvmax(<fuzzfloat>), CSS.lvmin(<fuzzfloat>), CSS.lvw(<fuzzfloat>)];
+var domatoCssDynamicUnits = [CSS.dvb(<fuzzfloat>), CSS.dvi(<fuzzfloat>), CSS.dvmax(<fuzzfloat>), CSS.dvmin(<fuzzfloat>), CSS.cqmax(<fuzzfloat>), CSS.cqmin(<fuzzfloat>), CSS.dppx(<fuzzfloat>), CSS.kHz(<fuzzfloat>)];
+var domatoCssUnitMath = CSS.lh(<fuzzfloat>).mul(CSS.kHz(<fuzzfloat>)).add(CSS.dvmax(<fuzzfloat>));
+
+#--- DOMMatrix self-mutators and statics, DOMMatrixReadOnly, DOMQuad ---
+<new DOMMatrix> = <DOMMatrix>.invertSelf();
+<new DOMMatrix> = <DOMMatrix>.multiplySelf(<DOMMatrixReadOnly>);
+<new DOMMatrix> = <DOMMatrix>.preMultiplySelf(<DOMMatrixReadOnly>);
+<new DOMMatrix> = <DOMMatrix>.rotateAxisAngleSelf(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.rotateFromVectorSelf(<fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.rotateSelf(<fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.scale3dSelf(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.scaleSelf(<fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.skewXSelf(<fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.skewYSelf(<fuzzfloat>);
+<new DOMMatrix> = <DOMMatrix>.translateSelf(<fuzzfloat>, <fuzzfloat>);
+<new DOMMatrix> = DOMMatrix.fromFloat32Array(new Float32Array([1, 0, 0, 1, <fuzzfloat>, <fuzzfloat>]));
+<new DOMMatrix> = DOMMatrix.fromFloat64Array(new Float64Array([1, 0, 0, 1, <fuzzfloat>, <fuzzfloat>]));
+<new DOMMatrix> = DOMMatrix.setMatrixValue("matrix(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>)");
+<new DOMMatrixReadOnly> = DOMMatrixReadOnly.fromFloat32Array(new Float32Array([1, 0, 0, 1, <fuzzfloat>, <fuzzfloat>]));
+<new DOMMatrixReadOnly> = DOMMatrixReadOnly.fromFloat64Array(new Float64Array([<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>]));
+<new DOMMatrixReadOnly> = <DOMMatrixReadOnly>.rotateAxisAngle(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>);
+<new Float32Array> = <DOMMatrixReadOnly>.toFloat32Array();
+<new Float32Array> = <DOMMatrix>.toFloat32Array();
+<new DOMQuad> = DOMQuad.fromQuad({ p1:new DOMPoint(<fuzzfloat>, <fuzzfloat>), p2:new DOMPoint(<fuzzfloat>, <fuzzfloat>), p3:new DOMPoint(<fuzzfloat>, <fuzzfloat>), p4:new DOMPoint(<fuzzfloat>, <fuzzfloat>) });
+<new DOMQuad> = DOMQuad.fromQuad(<DOMQuad>);
+
+#--- Window: timers, microtasks, scrolling, chrome-less extensions ---
+var domatoIntervalId = setInterval(function(){ }, <int min=100 max=5000>);
+var domatoTimeoutId = setTimeout(function(){ }, <int min=100 max=5000>);
+clearInterval(domatoIntervalId);
+clearTimeout(domatoTimeoutId);
+clearTimeout(setTimeout(function(){ }, <int min=100 max=5000>));
+queueMicrotask(function(){ });
+queueMicrotask(function(){ console.log("domato-microtask"); });
+reportError(new Error("domato-reported-error"));
+reportError(<DOMString>);
+var domatoDefaultStyle = <Window>.getDefaultComputedStyle(<Element>, <DOMString>);
+if (domatoDefaultStyle) { domatoDefaultStyle.display; domatoDefaultStyle.position; }
+<Window>.scrollByLines(<fuzzint>, { behavior:"instant" });
+<Window>.scrollByPages(<fuzzint>, { behavior:"instant" });
+<Window>.updateCommands(<DOMString>);
+<Window>.dump(<DOMString>);
+<Window>.setResizable(<boolean>);
+
+#--- console ---
+console.debug(<DOMString>);
+console.warn(<DOMString>, <fuzzint>);
+console.assert(<boolean>, "domato-assert", <fuzzint>);
+console.countReset("domato-counter");
+console.dirxml(<Element>);
+console.dirxml(<Document>);
+console.groupCollapsed("domato-group", <DOMString>);
+console.groupEnd();
+console.timeEnd("domato-timer");
+console.timeLog("domato-timer", <DOMString>);
+console.trace("domato-trace", <DOMString>);
+console.profileEnd("domato-profile");
+var domatoConsoleGroup = console.group("domato-group"); console.groupEnd();
+
+#--- Document ---
+<Document>.ariaNotify(<DOMString>, { priority:"high" });
+<Document>.enableStyleSheetsForSet(<DOMString>);
+<new any> = <Document>.hasStorageAccess().then(function(hasAccess){ return hasAccess; }, function(error){ console.error(error); });
+<new any> = <Document>.requestStorageAccess().then(function(){ }, function(error){ console.error(error); });
+<new any> = <Document>.mozCancelFullScreen().then(function(){ }, function(error){ console.error(error); });
+<Document>.mozSetImageElement(<DOMString>, <Element>);
+<Document>.releaseCapture();
+<Document>.moveBefore(<Node>, <Node>);
+var domatoInertDoc = <DOMImplementation>.createHTMLDocument("domato");
+domatoInertDoc.writeln("<lt>div id=domato-inert<gt>");
+domatoInertDoc.body.appendChild(domatoInertDoc.createElement("p"));
+domatoInertDoc.close();
+<new DocumentFragment> = <Document>.createDocumentFragment();
+Document.parseHTML("<lt>b<gt>domato<lt>/b<gt>", { sanitizer:<Sanitizer> });
+Document.parseHTML(<DOMString>);
+Document.parseHTMLUnsafe("<lt>i<gt>domato<lt>/i<gt>", { sanitizer:<Sanitizer> });
+Document.parseHTMLUnsafe(<TrustedHTML>);
+
+#--- Element ---
+<Element>.ariaNotify(<DOMString>, { priority:"normal" });
+var domatoAttributeNames = <Element>.getAttributeNames();
+<Element>.toggleAttribute(<DOMString>, <boolean>);
+<Element>.toggleAttribute(<DOMString>);
+<new boolean> = <Element>.mozMatchesSelector(<DOMString>);
+<new boolean> = <Element>.mozMatchesSelector("[id]");
+<Element>.setCapture(<boolean>);
+<Element>.releaseCapture();
+<Element>.moveBefore(<Node>, <Node>);
+<new any> = <Element>.mozRequestFullScreen({ fullscreen:<DOMString> }).then(function(){ }, function(error){ console.error(error); });
+<new any> = <Element>.mozRequestFullScreen().then(function(){ }, function(error){ console.error(error); });
+<DocumentFragment>.moveBefore(<Node>, null);
+
+#--- Sanitizer configuration API ---
+<new boolean> = <Sanitizer>.allowElement("b");
+<new boolean> = <Sanitizer>.allowElement({ localName:<DOMString>, namespaceURI:"http://www.w3.org/1999/xhtml" });
+<new boolean> = <Sanitizer>.removeElement("script");
+<new boolean> = <Sanitizer>.replaceElementWithChildren("marquee");
+<new boolean> = <Sanitizer>.allowAttribute("href");
+<new boolean> = <Sanitizer>.allowAttribute({ localName:<DOMString>, elements:[<DOMString>, <DOMString>] });
+<new boolean> = <Sanitizer>.removeAttribute("style");
+<new boolean> = <Sanitizer>.setComments(<boolean>);
+<new boolean> = <Sanitizer>.setDataAttributes(<boolean>);
+<new boolean> = <Sanitizer>.setJavascriptURLs(<boolean>);
+<new boolean> = <Sanitizer>.removeUnsafe();
+<new DocumentFragment> = <Sanitizer>.sanitize(<Element>);
+
+#--- HTML collection / form / slot / picker APIs ---
+var domatoNamedCollection = <HTMLCollection>.namedItem(<DOMString>);
+var domatoNamedOptions = <HTMLSelectElement>.namedItem(<DOMString>);
+<HTMLSelectElement>.showPicker();
+if (<HTMLInputElement>.type == "text" || <HTMLInputElement>.type == "search" || <HTMLInputElement>.type == "date" || <HTMLInputElement>.type == "time") { <HTMLInputElement>.showPicker(); }
+<HTMLFormElement>.requestSubmit();
+<HTMLFormElement>.requestSubmit(<HTMLButtonElement>);
+<HTMLSlotElement>.assign(<Element>);
+<HTMLSlotElement>.assign();
+var domatoAssignedElements = <HTMLSlotElement>.assignedElements({ flatten:<boolean> });
+var domatoAssignedNodes = <HTMLSlotElement>.assignedNodes({ flatten:<boolean> });
+var domatoSetCookieHeaders = <Headers>.getSetCookie();
+
+#--- Media elements ---
+<HTMLMediaElement>.fastSeek(<fuzzfloat>);
+<new any> = <HTMLMediaElement>.mozGetMetadata();
+<new MediaStream> = <HTMLMediaElement>.mozCaptureStream();
+<new MediaStream> = <HTMLMediaElement>.mozCaptureStreamUntilEnded();
+<new any> = <HTMLMediaElement>.setMediaKeys(null).then(function(){ }, function(error){ console.error(error); });
+<new any> = <HTMLVideoElement>.setMediaKeys(null).then(function(){ }, function(error){ console.error(error); });
+var domatoPlaybackQuality = <HTMLVideoElement>.getVideoPlaybackQuality();
+if (domatoPlaybackQuality) { domatoPlaybackQuality.totalVideoFrames; domatoPlaybackQuality.droppedVideoFrames; domatoPlaybackQuality.corruptedVideoFrames; }
+var domatoFrameCallbackId = <HTMLVideoElement>.requestVideoFrameCallback(function(domatoNow, domatoMetadata){ domatoMetadata.mediaTime; domatoMetadata.expectedDisplayTime; domatoMetadata.presentedFrames; domatoMetadata.droppedFrames; domatoMetadata.missingFrames; domatoMetadata.width; domatoMetadata.height; });
+<HTMLVideoElement>.cancelVideoFrameCallback(<fuzzint>);
+<HTMLVideoElement>.cancelVideoFrameCallback(domatoFrameCallbackId);
+
+#--- Legacy init* methods on events created with createEvent ---
+<new TimeEvent> = <Document>.createEvent("TimeEvent");
+<new MouseScrollEvent> = <Document>.createEvent("MouseScrollEvent");
+<new ScrollAreaEvent> = <Document>.createEvent("ScrollAreaEvent");
+<new StorageEvent> = <Document>.createEvent("StorageEvent");
+<new DragEvent> = <Document>.createEvent("DragEvent");
+<new DeviceMotionEvent> = <Document>.createEvent("DeviceMotionEvent");
+<new DeviceOrientationEvent> = <Document>.createEvent("DeviceOrientationEvent");
+<TimeEvent>.initTimeEvent(<DOMString>, <Window>, <fuzzint>);
+<MouseScrollEvent>.initMouseScrollEvent(<DOMString>, <boolean>, <boolean>, <Window>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <boolean>, <boolean>, <boolean>, <boolean>, <fuzzint>, <EventTarget>, <fuzzint>);
+<ScrollAreaEvent>.initScrollAreaEvent(<DOMString>, <boolean>, <boolean>, <Window>, <fuzzint>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>);
+<DragEvent>.initDragEvent(<DOMString>, <boolean>, <boolean>, <Window>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <boolean>, <boolean>, <boolean>, <boolean>, <fuzzint>, <EventTarget>, <DataTransfer>);
+<DeviceMotionEvent>.initDeviceMotionEvent(<DOMString>, <boolean>, <boolean>, { alpha:<fuzzfloat>, beta:<fuzzfloat>, gamma:<fuzzfloat> }, { x:<fuzzfloat>, y:<fuzzfloat>, z:<fuzzfloat> }, { alpha:<fuzzfloat>, beta:<fuzzfloat>, gamma:<fuzzfloat> }, <fuzzfloat>);
+<DeviceOrientationEvent>.initDeviceOrientationEvent(<DOMString>, <boolean>, <boolean>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <boolean>);
+<StorageEvent>.initStorageEvent(<DOMString>, <boolean>, <boolean>, <DOMString>, <DOMString>, <DOMString>, <DOMString>, <Storage>);
+<MouseEvent>.initNSMouseEvent(<DOMString>, <boolean>, <boolean>, <Window>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <boolean>, <boolean>, <boolean>, <boolean>, <fuzzint>, <EventTarget>, <fuzzfloat>, <fuzzint>);
+<PointerEvent>.getPredictedEvents();
+
+#--- NamedNodeMap, DataTransfer and the legacy FileSystemEntry chain ---
+var domatoNamedItem = <NamedNodeMap>.getNamedItem(<DOMString>);
+var domatoNamedItemNS = <NamedNodeMap>.getNamedItemNS("http://www.w3.org/1999/xhtml", <DOMString>);
+var domatoTransfer = new DataTransfer();
+domatoTransfer.addElement(<Element>);
+domatoTransfer.items.add(new File(["domato"], "domato.txt", { type:"text/plain" }));
+var domatoTransferEntry = domatoTransfer.items[0].webkitGetAsEntry();
+if (domatoTransferEntry) { domatoTransferEntry.getParent(function(domatoParent){ if (domatoParent) { var domatoReader = domatoParent.createReader(); domatoReader.readEntries(function(domatoEntries){ domatoEntries.forEach(function(domatoEntry){ domatoEntry.name; }); }, function(domatoEntryError){ console.error(domatoEntryError); }); } }, function(domatoParentError){ console.error(domatoParentError); }); }
+var domatoFileSystemEntry = window.FileSystemEntry;
+if (domatoFileSystemEntry) { domatoFileSystemEntry.prototype.getParent; window.FileSystemDirectoryEntry.prototype.createReader; window.FileSystemDirectoryReader.prototype.readEntries; }
+if (window.Directory) { window.Directory.prototype.getFiles; }
+
+#--- Navigator and friends ---
+<new boolean> = <Navigator>.javaEnabled();
+<new boolean> = <Navigator>.taintEnabled();
+<new DOMString> = <Navigator>.getAutoplayPolicy("audiocontext");
+<new DOMString> = <Navigator>.getAutoplayPolicy("mediaelement");
+<new DOMString> = <Navigator>.getAutoplayPolicy(<HTMLMediaElement>);
+<new any> = <Navigator>.registerProtocolHandler("web+domato", "<hash>domato-handler");
+<new any> = <Navigator>.requestMediaKeySystemAccess("org.w3.clearkey", [{ initDataTypes:["cenc"], label:"domato" }]).then(function(domatoKeyAccess){ var domatoKeys = domatoKeyAccess.createMediaKeys(); return domatoKeys; }, function(error){ console.error(error); });
+var domatoLogin = window.navigator.login;
+if (domatoLogin) { domatoLogin.setStatus("logged-in"); domatoLogin.setStatus("logged-out"); }
+
+#--- Storage, Performance, History, Location, Screen, Selection ---
+<new Storage> p=0.4 = <Window>.localStorage;
+<new Storage> = <Window>.sessionStorage;
+<Storage>.setItem("domato-key", <DOMString>);
+<Storage>.getItem("domato-key");
+<Storage>.removeItem("domato-key");
+<new Performance> = <Window>.performance;
+<Performance>.clearResourceTimings();
+<Performance>.setResourceTimingBufferSize(<fuzzint>);
+<History>.go(<int min=1 max=2>);
+<Window>.location.assign("<hash>domato-location");
+window.location.assign("<hash>domato-window-location");
+var domatoOrientationLocked = <Screen>.mozLockOrientation("landscape-primary");
+<Screen>.mozLockOrientation(["portrait-primary", "landscape-secondary"]);
+<Screen>.mozUnlockOrientation();
+var domatoComposedRanges = <Selection>.getComposedRanges();
+<Selection>.removeRange(<Range>);
+<new boolean> = <AbortSignal>.throwIfAborted();
+<new any> = <Scheduler>.yield({ signal:<AbortSignal> }).then(function(domatoYieldOptions){ return domatoYieldOptions; }, function(error){ console.error(error); });
+<new TaskController> p=0.4 = new TaskController({ priority:"background" });
+<TaskController>.setPriority("high");
+<TaskController>.setPriority(<DOMString>);
+<new boolean> = URL.canParse(<DOMString>);
+<new boolean> = URL.canParse("/domato-relative", window.location.href);
+
+#--- Real HTMLSlotElement receiver (assignedSlot is usually null) ---
+var domatoSlotHost = document.createElement("div"); var domatoRealSlot = document.createElement("slot"); domatoSlotHost.appendChild(domatoRealSlot); document.body.appendChild(domatoSlotHost); domatoRealSlot.assign(<Element>); domatoRealSlot.assignedElements({ flatten:true }); domatoRealSlot.assignedNodes({ flatten:true });
+
+#--- Plugin / MimeType legacy collections ---
+var domatoPluginArray = <Document>.plugins;
+domatoPluginArray.namedItem("domato-plugin");
+if (domatoPluginArray[0]) { domatoPluginArray[0].namedItem(<DOMString>); }
+var domatoMimeTypes = <Document>.mimeTypes;
+domatoMimeTypes.namedItem("text/plain");
+domatoMimeTypes.item(<fuzzint>);
+
+#--- WebRTC: certificate, legacy stream API, identity ---
+<new any> = RTCPeerConnection.generateCertificate({ name:"ECDSA", namedCurve:"P-256" }).then(function(domatoCert){ domatoCert.getFingerprints().forEach(function(domatoFingerprint){ domatoFingerprint.algorithm; domatoFingerprint.value; }); return domatoCert; }, function(error){ console.error(error); });
+<new any> = <RTCPeerConnection>.addStream(<MediaStream>);
+var domatoLocalStreams = <RTCPeerConnection>.getLocalStreams();
+var domatoRemoteStreams = <RTCPeerConnection>.getRemoteStreams();
+<RTCPeerConnection>.setIdentityProvider("domato-idp", { protocol:"default", usernameHint:<DOMString>, peerIdentity:<DOMString> });
+<new any> = <RTCPeerConnection>.getIdentityAssertion().then(function(domatoAssertion){ return domatoAssertion; }, function(error){ console.error(error); });
+<new RTCRtpSender> = <RTCRtpTransceiver>.sender;
+<new RTCRtpReceiver> = <RTCRtpTransceiver>.receiver;
+<new RTCDTMFSender> p=0.3 = <RTCRtpSender>.dtmf;
+<new any> = <RTCRtpSender>.getParameters();
+<new any> = <RTCRtpSender>.setParameters(<RTCRtpSender>.getParameters());
+<new any> = <RTCRtpSender>.replaceTrack(null);
+<RTCRtpSender>.setStreams(<MediaStream>);
+<new any> = <RTCRtpReceiver>.getParameters();
+<new any> = <RTCRtpReceiver>.getContributingSources();
+<new any> = <RTCRtpReceiver>.getSynchronizationSources();
+<new any> = <RTCRtpTransceiver>.setCodecPreferences([]);
+var domatoDtmfSender = <RTCRtpSender>.dtmf; if (domatoDtmfSender) { domatoDtmfSender.insertDTMF("1w2w3", <int min=50 max=500>, { gapDuration:<int min=50 max=500> }); }
+
+#--- WebRTC: one self-contained sender/receiver/transport chain (no STUN, host candidates only) ---
+var domatoChainPc = new RTCPeerConnection({ iceServers:[] }); var domatoChainTr = domatoChainPc.addTransceiver("audio"); var domatoChainSender = domatoChainTr.sender; var domatoChainReceiver = domatoChainTr.receiver; var domatoChainParams = domatoChainSender.getParameters(); if (domatoChainParams.encodings) { domatoChainParams.encodings.forEach(function(domatoEncoding){ domatoEncoding.active; domatoEncoding.maxBitrate; domatoEncoding.maxFramerate; }); } domatoChainSender.setParameters(domatoChainParams); domatoChainSender.replaceTrack(null); domatoChainSender.setStreams(new MediaStream()); domatoChainReceiver.getParameters(); domatoChainReceiver.getContributingSources(); domatoChainReceiver.getSynchronizationSources(); domatoChainTr.setCodecPreferences([]); var domatoChainDtmf = domatoChainSender.dtmf; if (domatoChainDtmf) { domatoChainDtmf.insertDTMF("1w2w3", <int min=50 max=500>); } domatoChainPc.createOffer().then(function(domatoOffer){ return domatoChainPc.setLocalDescription(domatoOffer); }, function(domatoOfferError){ console.error(domatoOfferError); }).then(function(){ var domatoChainTransport = domatoChainTr.sender.transport; if (domatoChainTransport) { domatoChainTransport.getRemoteCertificates(); var domatoChainIce = domatoChainTransport.iceTransport; if (domatoChainIce) { domatoChainIce.getSelectedCandidatePair(); } } }, function(domatoSdpError){ console.error(domatoSdpError); });
+var domatoFrameProto = window.RTCEncodedAudioFrame; if (domatoFrameProto) { domatoFrameProto.prototype.getMetadata; window.RTCEncodedVideoFrame.prototype.getMetadata; }
+
+#--- Web Serial mock devices (dom.webserial.testing.enabled) and a real port chain ---
+<new boolean> = <Serial>.simulateDeviceConnection("domato-mock-port", "domato/mock/path", <fuzzint>, <fuzzint>);
+<Serial>.simulateDeviceDisconnection("domato-mock-port");
+<Serial>.removeAllMockDevices();
+<Serial>.resetToDefaultMockDevices();
+<new any> = <Serial>.getPorts().then(function(domatoPorts){ domatoPorts.forEach(function(domatoPort){ domatoPort.getInfo(); domatoPort.setSignals({ dataTerminalReady:true, requestToSend:false }).then(function(domatoSignals){ domatoSignals.dataTerminalReady; return domatoPort.getSignals(); }).then(function(domatoReadSignals){ domatoReadSignals.clearToSend; return domatoPort.forget(); }).then(function(){ }, function(domatoPortError){ console.error(domatoPortError); }); }); }, function(error){ console.error(error); });
+
+#--- IndexedDB: self-contained open/upgrade/read cycle ---
+<new IDBKeyRange> = IDBKeyRange.only(<DOMString>);
+<new IDBKeyRange> p=0.3 = IDBKeyRange.bound(<fuzzint>, <fuzzint>, <boolean>, <boolean>);
+var domatoIdbLower = IDBKeyRange.lowerBound(<fuzzint>, <boolean>);
+var domatoIdbUpper = IDBKeyRange.upperBound(<DOMString>, <boolean>);
+var domatoIdbOpen = <IDBFactory>.open("domato-idb", 1);
+domatoIdbOpen.onupgradeneeded = function(domatoUpgradeEvent){ try { var domatoUpgradeDb = domatoUpgradeEvent.target.result; var domatoUpgradeStore = domatoUpgradeDb.createObjectStore("domato-store", { keyPath:"id", autoIncrement:true }); domatoUpgradeStore.createIndex("domato-name", "name", { unique:false }); } catch (domatoUpgradeError) { console.error(domatoUpgradeError); } };
+domatoIdbOpen.onsuccess = function(domatoOpenEvent){ try { var domatoReadTx = domatoOpenEvent.target.result.transaction("domato-store", "readonly"); var domatoReadStore = domatoReadTx.objectStore("domato-store"); domatoReadStore.getAll(IDBKeyRange.bound(0, <fuzzint>, false, false), { count:<int min=1 max=10>, direction:"prev" }); domatoReadStore.getAllKeys(IDBKeyRange.lowerBound(<fuzzint>, false), <int min=1 max=10>); domatoReadStore.mozGetAll(IDBKeyRange.only(<fuzzint>), <int min=1 max=10>); var domatoReadIndex = domatoReadStore.index("domato-name"); domatoReadIndex.getAll(IDBKeyRange.only(<DOMString>), <int min=1 max=10>); domatoReadIndex.getAllKeys(IDBKeyRange.upperBound(<DOMString>, true), { count:<int min=1 max=10>, direction:"prevunique" }); domatoReadIndex.getAllRecords(IDBKeyRange.bound(<DOMString>, <DOMString>, false, false), <int min=1 max=10>); domatoReadIndex.mozGetAllKeys(IDBKeyRange.only(<DOMString>), <int min=1 max=10>); var domatoCursorRequest = domatoReadIndex.openCursor(); domatoCursorRequest.onsuccess = function(domatoCursorEvent){ try { var domatoCursor = domatoCursorEvent.target.result; if (domatoCursor) { domatoCursor.continuePrimaryKey(<DOMString>, <fuzzint>); } } catch (domatoCursorError) { console.error(domatoCursorError); } }; } catch (domatoReadError) { console.error(domatoReadError); } };
+var domatoWriteReq = <IDBFactory>.open("domato-idb", 1); domatoWriteReq.onupgradeneeded = function(domatoWEvent){ try { domatoWEvent.target.result.createObjectStore("domato-store", { keyPath:"id", autoIncrement:true }).createIndex("domato-name", "name"); } catch (domatoWError) { console.error(domatoWError); } }; domatoWriteReq.onsuccess = function(domatoWEvent){ try { var domatoWriteStore = domatoWEvent.target.result.transaction("domato-store", "readwrite").objectStore("domato-store"); domatoWriteStore.put({ id:<fuzzint>, name:<DOMString> }); domatoWriteStore.getAllRecords(IDBKeyRange.bound(0, <fuzzint>), <int min=1 max=10>); } catch (domatoWriteError) { console.error(domatoWriteError); } };
+var domatoCommitReq = <IDBFactory>.open("domato-commit-" + Date.now(), 1); domatoCommitReq.onupgradeneeded = function(domatoCEvent){ try { domatoCEvent.target.result.createObjectStore("domato-commit-store"); domatoCEvent.target.transaction.commit(); } catch (domatoCError) { console.error(domatoCError); } };
+<new any> = <IDBFactory>.databases().then(function(domatoDbList){ domatoDbList.forEach(function(domatoDbInfo){ domatoDbInfo.name; domatoDbInfo.version; }); }, function(error){ console.error(error); });
+var domatoIdbCmp = <IDBFactory>.cmp(<DOMString>, <DOMString>);
+var domatoIdbCmp2 = <IDBFactory>.cmp(IDBKeyRange.only(<fuzzint>), IDBKeyRange.only(<fuzzint>));
+
+#--- XMLHttpRequest against the sapphire server only (relative URL) ---
+var domatoXhr = new XMLHttpRequest(); domatoXhr.open("GET", "/domato-xhr", true); domatoXhr.overrideMimeType("text/plain"); domatoXhr.setRequestHeader("X-Domato-Header", <DOMString>); domatoXhr.onload = function(){ try { domatoXhr.getAllResponseHeaders(); domatoXhr.getResponseHeader("Content-Type"); } catch (domatoXhrError) { console.error(domatoXhrError); } }; domatoXhr.onerror = function(domatoXhrError){ console.error(domatoXhrError); }; domatoXhr.send(null);
+var domatoAsyncXhr = new XMLHttpRequest(); domatoAsyncXhr.open("POST", "/domato-xhr", true); domatoAsyncXhr.overrideMimeType(<DOMString>); domatoAsyncXhr.setRequestHeader("X-Domato-Async", <DOMString>); domatoAsyncXhr.timeout = <int min=100 max=2000>; domatoAsyncXhr.onload = function(){ try { domatoAsyncXhr.getAllResponseHeaders(); domatoAsyncXhr.getResponseHeader("Content-Length"); } catch (domatoAsyncError) { console.error(domatoAsyncError); } }; domatoAsyncXhr.onerror = function(domatoAsyncNetError){ console.error(domatoAsyncNetError); }; domatoAsyncXhr.send("domato-body");
+
+#--- Streams: readers, writers and BYOB ---
+var domatoDefaultStream = new ReadableStream({ start:function(domatoStartController){ domatoStartController.close(); } }); var domatoDefaultReader = domatoDefaultStream.getReader(); domatoDefaultReader.read().then(function(domatoChunk){ domatoChunk.value; domatoChunk.done; }, function(domatoReadError){ console.error(domatoReadError); }); domatoDefaultReader.releaseLock();
+var domatoByteStream = new Response("domato-bytes").body; var domatoByobReader = domatoByteStream.getReader({ mode:"byob" }); domatoByobReader.read(new Uint8Array(<int min=1 max=16>)).then(function(domatoByobChunk){ domatoByobChunk.done; domatoByobReader.releaseLock(); }, function(domatoByobError){ console.error(domatoByobError); });
+var domatoByobStream = new ReadableStream({ type:"bytes", autoAllocateChunkSize:<int min=1 max=16>, pull:function(domatoByobController){ try { var domatoByobRequest = domatoByobController.byobRequest; if (domatoByobRequest) { domatoByobRequest.respond(<int min=1 max=8>); var domatoNewView = new Uint8Array(domatoByobRequest.view.byteLength); domatoByobRequest.respondWithNewView(domatoNewView); } } catch (domatoPumpError) { console.error(domatoPumpError); } } }); domatoByobStream.getReader({ mode:"byob" }).read(new Uint8Array(<int min=1 max=16>)).then(function(domatoPulled){ domatoPulled.done; }, function(domatoPullError){ console.error(domatoPullError); });
+var domatoWritable = new WritableStream({ write:function(domatoChunk){ domatoChunk; } }); var domatoStreamWriter = domatoWritable.getWriter(); domatoStreamWriter.releaseLock();
+var domatoWriterReq = new WritableStream({ write:function(domatoText){ domatoText; } }).getWriter(); domatoWriterReq.write(<DOMString>).then(function(){ domatoWriterReq.releaseLock(); }, function(domatoWriteError){ console.error(domatoWriteError); });
+
+#--- EME and MSE ---
+var domatoEmeAccess = navigator.requestMediaKeySystemAccess("org.w3.clearkey", [{ initDataTypes:["cenc"], label:"domato", audioCapabilities:[{ contentType:"audio/mp4; codecs=mp4a.40.2" }] }]); domatoEmeAccess.then(function(domatoKeySystemAccess){ domatoKeySystemAccess.createMediaKeys().then(function(domatoKeys){ domatoKeys.setServerCertificate(new Uint8Array([1, 2, 3, 4])).then(function(domatoSetCert){ return domatoSetCert; }, function(domatoCertError){ console.error(domatoCertError); }); domatoKeys.getStatusForPolicy({ persistentState:"optional", distinctivenessRequired:"not-allowed", minHdcpVersion:"2.0" }); var domatoSession = domatoKeys.createSession("temporary"); domatoSession.generateRequest("cenc", new Uint8Array([1, 2, 3, 4])).then(function(domatoInitType){ return domatoInitType; }, function(domatoRequestError){ console.error(domatoRequestError); }); }, function(domatoKeysError){ console.error(domatoKeysError); }); }, function(domatoAccessError){ console.error(domatoAccessError); });
+var domatoMediaSource = new MediaSource(); domatoMediaSource.addEventListener("sourceopen", function(){ try { var domatoSourceBuffer = domatoMediaSource.addSourceBuffer('video/mp4; codecs="avc1.42E01E"'); if (domatoSourceBuffer) { domatoSourceBuffer.changeType('video/mp4; codecs="avc1.42E02F"'); } domatoMediaSource.duration = <float min=1 max=60>; domatoMediaSource.setLiveSeekableRange(<float min=0 max=10>, <float min=10 max=20>); domatoMediaSource.clearLiveSeekableRange(); } catch (domatoMseError) { console.error(domatoMseError); } }); <HTMLVideoElement>.src = URL.createObjectURL(domatoMediaSource);
+
+#--- Cache, CustomElementRegistry, Navigation, Audio filters ---
+<new any> = <CacheStorage>.open("domato-cache").then(function(domatoCache){ return domatoCache.matchAll(new Request("/domato-cache-entry")); }, function(domatoCacheError){ console.error(domatoCacheError); }).then(function(domatoCacheMatches){ if (domatoCacheMatches) { domatoCacheMatches.forEach(function(domatoCachedResponse){ domatoCachedResponse.url; }); } }, function(domatoMatchError){ console.error(domatoMatchError); });
+var domatoDefinedElement = customElements.get("domato-counter-element"); if (!domatoDefinedElement) { customElements.define("domato-counter-element", class extends HTMLElement { }); }
+<new DOMString> = <CustomElementRegistry>.getName(customElements.get("domato-counter-element"));
+<CustomElementRegistry>.getName(<CustomElementConstructor>);
+<CustomElementRegistry>.upgrade(<Element>);
+<CustomElementRegistry>.upgrade(domatoSlotHost, <fuzzfloat>);
+<Navigation>.updateCurrentEntry({ state:{ value:<fuzzint> } });
+<new NavigationPreloadManager> p=0.3 = <Navigation>.preload;
+var domatoPreload = <Navigation>.preload; if (domatoPreload) { domatoPreload.enable().then(function(){ return domatoPreload.setHeaderValue("domato-preload"); }).then(function(){ }, function(domatoPreloadError){ console.error(domatoPreloadError); }); }
+var domatoResponseFrequency = new Float32Array(<int min=1 max=8>); var domatoMagnitude = new Float32Array(domatoResponseFrequency.length); var domatoPhase = new Float32Array(domatoResponseFrequency.length); <BiquadFilterNode>.getFrequencyResponse(domatoResponseFrequency, domatoMagnitude, domatoPhase);
+var domatoIirFrequency = new Float32Array(<int min=1 max=8>); var domatoIirMagnitude = new Float32Array(domatoIirFrequency.length); var domatoIirPhase = new Float32Array(domatoIirFrequency.length); <IIRFilterNode>.getFrequencyResponse(domatoIirFrequency, domatoIirMagnitude, domatoIirPhase);
+var domatoChannelCopy = new Float32Array(<int min=1 max=8>); <AudioBuffer>.copyFromChannel(domatoChannelCopy, <int min=0 max=1>, <int min=0 max=1>); <AudioBuffer>.copyToChannel(domatoChannelCopy, <int min=0 max=1>, <int min=0 max=1>);
+var domatoTrackCues = <TextTrack>.cues; if (domatoTrackCues) { domatoTrackCues.getCueById("domato-cue"); }
+<new DOMString> = <AuthenticatorAttestationResponse>.getPublicKeyAlgorithm();
+var domatoAttestationProto = window.AuthenticatorAttestationResponse; if (domatoAttestationProto) { domatoAttestationProto.prototype.getPublicKeyAlgorithm; }

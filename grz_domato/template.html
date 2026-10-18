@@ -1,0 +1,199 @@
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<style>
+/*begincss*/
+<cssfuzzer>
+/*endcss*/
+</style>
+<script>
+
+function freememory() {
+  try { CollectGarbage(); } catch(err) { }
+  try { FuzzingFunctions.garbageCollect(); } catch(err) { }
+  try { FuzzingFunctions.cycleCollect(); } catch(err) { }
+  try { window.gc(); } catch(err) { }
+}
+
+var runcount = {'jsfuzzer':0, 'eventhandler1':0, 'eventhandler2':0, 'eventhandler3':0, 'eventhandler4':0, 'eventhandler5':0}
+
+var fuzzervars = {};
+
+function GetVariable(fuzzervars, var_type) { if(fuzzervars[var_type]) { return fuzzervars[var_type]; } else { return null; }}
+
+function SetVariable(fuzzervars, var_name, var_type) { fuzzervars[var_type] = var_name; }
+
+function jsfuzzer() {
+
+runcount["jsfuzzer"]++; if(runcount["jsfuzzer"] > 2) { return; }
+
+<jsfuzzer>
+
+}
+
+function eventhandler1() {
+
+runcount["eventhandler1"]++; if(runcount["eventhandler1"] > 2) { return; }
+
+<jsfuzzer>
+
+}
+
+function eventhandler2() {
+
+runcount["eventhandler2"]++; if(runcount["eventhandler2"] > 2) { return; }
+
+<jsfuzzer>
+
+}
+
+function eventhandler3() {
+
+runcount["eventhandler3"]++; if(runcount["eventhandler3"] > 2) { return; }
+
+<jsfuzzer>
+
+}
+
+function eventhandler4() {
+
+runcount["eventhandler4"]++; if(runcount["eventhandler4"] > 2) { return; }
+
+<jsfuzzer>
+
+}
+
+function eventhandler5() {
+
+runcount["eventhandler5"]++; if(runcount["eventhandler5"] > 2) { return; }
+
+<jsfuzzer>
+
+}
+
+function fuzzall() {
+  for (var i = 0; i < window.__apiFuzzers.length; i++) {
+    try { window.__apiFuzzers[i](); } catch (e) { }
+  }
+  jsfuzzer();
+}
+
+window.__apiFuzzers = [];
+
+</script>
+<script>
+
+window.__apiFuzzers.push(function canvasFuzzer() {
+
+var canvas = document.createElement('canvas');
+canvas.id = "canvas";
+canvas.width = 200;
+canvas.height = 200;
+canvas.style.position = "absolute";
+document.getElementsByTagName("body")[0].appendChild(canvas);
+
+var ctx = canvas.getContext('2d');
+if (!ctx) { return; }
+
+<canvasfuzz>
+
+});
+
+</script>
+<script>
+
+window.__apiFuzzers.push(function webglFuzzer() {
+
+var glcanvas = document.createElement('canvas');
+glcanvas.width = 100;
+glcanvas.height = 100;
+document.getElementsByTagName("body")[0].appendChild(glcanvas);
+
+// webgl2 before webgl: probed on this build, getContext('webgl') and
+// getContext('experimental-webgl') both return null while 'webgl2' hands back a
+// WebGL2RenderingContext. Asking for the WebGL1 names first loses the whole API.
+var gl = glcanvas.getContext('webgl2') || glcanvas.getContext('webgl') || glcanvas.getContext('experimental-webgl');
+if (!gl) { return; }
+
+// Repeating getContext on one canvas returns the same object, so gl1 === gl2 === gl.
+// That is deliberate: webgl.txt pairs its gl symbol freely with its program, texture
+// and buffer symbols, and one shared context keeps those combinations legal instead of
+// making every line an INVALID_OPERATION from using another context's object.
+// (No grammar placeholder belongs in a comment here: the adapter replaces only the
+// first occurrence of each, so a second one would swallow the generated code.)
+var gl1 = gl;
+var gl2 = gl;
+
+// the grammar names these identifiers rather than creating them, so they have to
+// exist before the generated WebGL lines run
+var preambleSource = "void main() {}";
+var vShader3 = gl1.createShader(gl1.VERTEX_SHADER);
+gl1.shaderSource(vShader3, preambleSource);
+gl1.compileShader(vShader3);
+var vShader4 = gl2.createShader(gl2.VERTEX_SHADER);
+gl2.shaderSource(vShader4, preambleSource);
+gl2.compileShader(vShader4);
+var fShader3 = gl1.createShader(gl1.FRAGMENT_SHADER);
+gl1.shaderSource(fShader3, preambleSource);
+gl1.compileShader(fShader3);
+var fShader4 = gl2.createShader(gl2.FRAGMENT_SHADER);
+gl2.shaderSource(fShader4, preambleSource);
+gl2.compileShader(fShader4);
+var program1 = gl1.createProgram();
+gl1.attachShader(program1, vShader3);
+gl1.attachShader(program1, fShader3);
+gl1.linkProgram(program1);
+var program2 = gl2.createProgram();
+gl2.attachShader(program2, vShader4);
+gl2.attachShader(program2, fShader4);
+gl2.linkProgram(program2);
+gl1.useProgram(program1);
+var tex1 = gl1.createTexture();
+var tex2 = gl2.createTexture();
+var buffer1 = gl1.createBuffer();
+var buffer2 = gl2.createBuffer();
+
+<glfuzz>
+
+});
+
+</script>
+<script>
+
+window.__apiFuzzers.push(async function webgpuFuzzer() {
+
+if (!navigator.gpu) { return; }
+
+var adapter = null;
+var device = null;
+
+try {
+  adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) { return; }
+  device = await adapter.requestDevice();
+} catch (e) { return; }
+
+if (!device) { return; }
+
+const Shader0 = device.createShaderModule({ code: `<shader0>` });
+const Shader1 = device.createShaderModule({ code: `<shader1>` });
+const Shader2 = device.createShaderModule({ code: `<shader2>` });
+const Shader3 = device.createShaderModule({ code: `<shader3>` });
+const Shader4 = device.createShaderModule({ code: `<shader4>` });
+const Shader5 = device.createShaderModule({ code: `<shader5>` });
+const Shader6 = device.createShaderModule({ code: `<shader6>` });
+const Shader7 = device.createShaderModule({ code: `<shader7>` });
+const Shader8 = device.createShaderModule({ code: `<shader8>` });
+const Shader9 = device.createShaderModule({ code: `<shader9>` });
+
+<webgpufuzz>
+
+});
+
+</script>
+</head>
+<body onload=fuzzall()>
+<input id="button" type="range" min="1" max="12">
+<!--beginhtml--><htmlfuzzer><!--endhtml-->
+</body>
+</html>

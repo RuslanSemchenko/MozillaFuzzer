@@ -16,3 +16,6 @@ domato = "grz_domato:DomatoAdapter"
 
 [tool.setuptools.packages.find]
 include = ["grz_domato*"]
+
+[tool.setuptools.package-data]
+grz_domato = ["template.html"]

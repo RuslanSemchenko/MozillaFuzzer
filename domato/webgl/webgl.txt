@@ -511,6 +511,112 @@
 <glExtStr> = 'WEBGL_draw_buffers'
 <glExtStr> = 'WEBGL_lose_context'
 
+<glIType> = gl.BYTE
+<glIType> = gl.SHORT
+<glIType> = gl.INT
+<glIType> = gl.UNSIGNED_BYTE
+<glIType> = gl.UNSIGNED_SHORT
+<glIType> = gl.UNSIGNED_INT
+
+<glQueryT> = gl.ANY_SAMPLES_PASSED
+<glQueryT> = gl.ANY_SAMPLES_PASSED_CONSERVATIVE
+<glQueryT> = gl.TRANSFORM_FEEDBACK
+
+<glQueryP> = gl.QUERY_RESULT
+<glQueryP> = gl.QUERY_RESULT_AVAILABLE
+<glQueryP> = gl.CURRENT_QUERY
+
+<glSyncF> = 0
+<glSyncF> = gl.SYNC_FLUSH_COMMANDS_BIT
+
+<glSyncP> = gl.SYNC_STATUS
+<glSyncP> = gl.SYNC_CONDITION
+<glSyncP> = gl.SYNC_FLAGS
+
+<glTFBuf> = gl.INTERLEAVED_ATTRIBS
+<glTFBuf> = gl.SEPARATE_ATTRIBS
+
+<glProgP> = gl.LINK_STATUS
+<glProgP> = gl.VALIDATE_STATUS
+<glProgP> = gl.ATTACHED_SHADERS
+<glProgP> = gl.ACTIVE_UNIFORMS
+<glProgP> = gl.ACTIVE_ATTRIBUTES
+<glProgP> = gl.ACTIVE_UNIFORM_BLOCKS
+<glProgP> = gl.TRANSFORM_FEEDBACK_VARYINGS
+<glProgP> = gl.TRANSFORM_FEEDBACK_BUFFER_MODE
+<glProgP> = gl.DELETE_STATUS
+
+<glShadP> = gl.COMPILE_STATUS
+<glShadP> = gl.DELETE_STATUS
+<glShadP> = gl.SHADER_TYPE
+
+<glRBP> = gl.RENDERBUFFER_WIDTH
+<glRBP> = gl.RENDERBUFFER_HEIGHT
+<glRBP> = gl.RENDERBUFFER_INTERNAL_FORMAT
+<glRBP> = gl.RENDERBUFFER_RED_SIZE
+<glRBP> = gl.RENDERBUFFER_GREEN_SIZE
+<glRBP> = gl.RENDERBUFFER_BLUE_SIZE
+<glRBP> = gl.RENDERBUFFER_ALPHA_SIZE
+<glRBP> = gl.RENDERBUFFER_DEPTH_SIZE
+<glRBP> = gl.RENDERBUFFER_STENCIL_SIZE
+<glRBP> = gl.RENDERBUFFER_SAMPLES
+
+<glIfP> = gl.SAMPLES
+<glIfP> = 0x9380
+<glIfP> = 0x82B4
+
+<glIndexedP> = gl.TRANSFORM_FEEDBACK_BUFFER_BINDING
+<glIndexedP> = gl.TRANSFORM_FEEDBACK_BUFFER_START
+<glIndexedP> = gl.TRANSFORM_FEEDBACK_BUFFER_SIZE
+<glIndexedP> = gl.UNIFORM_BUFFER_BINDING
+<glIndexedP> = gl.UNIFORM_BUFFER_START
+<glIndexedP> = gl.UNIFORM_BUFFER_SIZE
+<glIndexedP> = gl.VERTEX_ARRAY_BINDING
+<glIndexedP> = gl.BLEND_SRC_RGB
+<glIndexedP> = gl.BLEND_DST_RGB
+<glIndexedP> = gl.BLEND_SRC_ALPHA
+<glIndexedP> = gl.BLEND_DST_ALPHA
+
+<glActiveUP> = gl.UNIFORM_TYPE
+<glActiveUP> = gl.UNIFORM_SIZE
+<glActiveUP> = gl.UNIFORM_BLOCK_INDEX
+<glActiveUP> = gl.UNIFORM_OFFSET
+<glActiveUP> = gl.UNIFORM_ARRAY_STRIDE
+<glActiveUP> = gl.UNIFORM_MATRIX_STRIDE
+<glActiveUP> = gl.UNIFORM_IS_ROW_MAJOR
+
+<glBlockUP> = gl.UNIFORM_BLOCK_BINDING
+<glBlockUP> = gl.UNIFORM_BLOCK_DATA_SIZE
+<glBlockUP> = gl.UNIFORM_BLOCK_ACTIVE_UNIFORMS
+<glBlockUP> = gl.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES
+<glBlockUP> = gl.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER
+<glBlockUP> = gl.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER
+
+<glClearB> = gl.COLOR
+<glClearB> = gl.DEPTH
+<glClearB> = gl.STENCIL
+
+<glDrawB> = gl.COLOR_ATTACHMENT0
+<glDrawB> = gl.COLOR_ATTACHMENT1
+<glDrawB> = gl.COLOR_ATTACHMENT2
+<glDrawB> = gl.COLOR_ATTACHMENT3
+<glDrawB> = gl.NONE
+
+<glSampP> = gl.TEXTURE_MAG_FILTER
+<glSampP> = gl.TEXTURE_MIN_FILTER
+<glSampP> = gl.TEXTURE_WRAP_S
+<glSampP> = gl.TEXTURE_WRAP_T
+<glSampP> = gl.TEXTURE_WRAP_R
+<glSampP> = gl.TEXTURE_MIN_LOD
+<glSampP> = gl.TEXTURE_MAX_LOD
+<glSampP> = gl.TEXTURE_COMPARE_MODE
+<glSampP> = gl.TEXTURE_COMPARE_FUNC
+
+<glSrc> = "void main() {}"
+<glSrc> = "void main() {gl_FragColor = vec4(<glint>);}"
+<glSrc> = "attribute vec4 a; void main() {gl_Position = a;}"
+<glSrc> = "void main() {gl_FragColor = vec4(<GLclampf>, <GLclampf_>, <GLclampf>, <GLclampf_>);}"
+
 <this> = this
 
 <root root=true> = <lines count=50>
@@ -581,10 +687,10 @@ var <tex> = <gl>.createTexture();
 <gl>.flush();
 <gl>.frontFace(<glFront>);
 <gl>.generateMipmap(<glMip>);
-const info1 = <gl>.getActiveAttrib(<program>, <GLclampf>);
-const info2 = <gl>.getActiveAttrib(<program>, <GLclampf>);
-const ifo1 = <gl>.getActiveUniform(<program>, <GLclampf>);
-const ifo2 = <gl>.getActiveUniform(<program>, <GLclampf>);
+var info1 = <gl>.getActiveAttrib(<program>, <GLclampf>);
+var info2 = <gl>.getActiveAttrib(<program>, <GLclampf>);
+var ifo1 = <gl>.getActiveUniform(<program>, <GLclampf>);
+var ifo2 = <gl>.getActiveUniform(<program>, <GLclampf>);
 <gl>.getAttachedShaders(<program>);
 <gl>.getAttribLocation(<program>, <nm>);
 <gl>.getBufferParameter(<gbuff>, <glOp>);
@@ -651,5 +757,105 @@ var ext = <gl>.getExtension(<glExtStr>);
 var vara = <gl>.getFramebufferAttachmentParameter(<glTr>, <glAttachment>, <glAttachmentObj>);
 var varb = <gl>.getFramebufferAttachmentParameter(<glTr>, <glAttachment>, <glAttachmentObj>);
 if (!<gl>.isContextLost()) {var info = <gl>.getProgramInfoLog(<program>);}
+
+# WebGL2 vertex array objects (create/bind/delete/isVertexArray) and the integer
+# vertex attrib family. vao1/vao2 are var-declared, so hoisting makes them
+# undefined rather than a ReferenceError in lines that run before their creator.
+var vao1 = <gl>.createVertexArray(); <gl>.isVertexArray(vao1); <gl>.bindVertexArray(vao1); <gl>.bindVertexArray(null); <gl>.deleteVertexArray(vao1); <gl>.isVertexArray(vao1);
+var vao2 = <gl>.createVertexArray(); <gl>.bindVertexArray(vao2); <gl>.enableVertexAttribArray(<TexInt>); <gl>.vertexAttribIPointer(<TexInt>, <glint>, <glIType>, <TexInt>, <TexInt>); <gl>.vertexAttribDivisor(<TexInt>, <TexInt>);
+<gl>.bindVertexArray(vao2); <gl>.drawArraysInstanced(<glMd>, <TexInt>, <TexInt>, <TexInt>); <gl>.vertexAttribDivisor(<TexInt>, <glint>); <gl>.getVertexAttrib(<TexInt>, gl.VERTEX_ATTRIB_ARRAY_DIVISOR); <gl>.bindVertexArray(null);
+<gl>.vertexAttribI4i(<TexInt>, <glint>, <glint>, <glint>, <glint>); <gl>.vertexAttribI4ui(<TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>);
+<gl>.vertexAttribI4iv(<TexInt>, new Int32Array([<glint>, <glint>, <glint>, <glint>])); <gl>.vertexAttribI4uiv(<TexInt>, new Uint32Array([<TexInt>, <TexInt>, <TexInt>, <TexInt>]));
+<gl>.vertexAttribI4iv(<TexInt>, [<glint>, <glint>, <glint>, <glint>]); <gl>.vertexAttribI4uiv(<TexInt>, [<TexInt>, <TexInt>, <TexInt>, <TexInt>]); <gl>.vertexAttribIPointer(<TexInt>, <glint>, <glIType>, <TexInt>, <TexInt>);
+
+# instanced and ranged draws
+<gl>.drawArraysInstanced(<glMd>, <TexInt>, <glint>, <TexInt>); <gl>.drawElementsInstanced(<glMd>, <glint>, <glType>, <TexInt>, <TexInt>); <gl>.drawRangeElements(<glMd>, <TexInt>, <TexInt>, <glint>, <glType>, <TexInt>);
+var <buffer> = <gl>.createBuffer(); <gl>.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, <buffer>); <gl>.drawElementsInstanced(<glMd>, <TexInt>, <glType>, <TexInt>, <TexInt>); <gl>.drawRangeElements(<glMd>, <TexInt>, <TexInt>, <TexInt>, <glType>, <TexInt>);
+
+# occlusion / transform feedback queries
+var qry1 = <gl>.createQuery(); <gl>.isQuery(qry1); <gl>.beginQuery(<glQueryT>, qry1); <gl>.getQuery(<glQueryT>, gl.CURRENT_QUERY); <gl>.endQuery(<glQueryT>); <gl>.getQueryParameter(qry1, <glQueryP>); <gl>.deleteQuery(qry1);
+var qry2 = <gl>.createQuery(); <gl>.beginQuery(gl.ANY_SAMPLES_PASSED, qry2); <gl>.getQuery(gl.ANY_SAMPLES_PASSED, gl.CURRENT_QUERY); <gl>.getQueryParameter(qry2, gl.QUERY_RESULT); <gl>.endQuery(gl.ANY_SAMPLES_PASSED); <gl>.getQueryParameter(qry2, gl.QUERY_RESULT_AVAILABLE); <gl>.isQuery(qry2); <gl>.deleteQuery(qry2);
+var qry3 = <gl>.createQuery(); <gl>.beginQuery(gl.TRANSFORM_FEEDBACK, qry3); <gl>.endQuery(gl.TRANSFORM_FEEDBACK); <gl>.getQuery(gl.TRANSFORM_FEEDBACK, <glQueryP>); <gl>.getQueryParameter(qry3, <glQueryP>); <gl>.deleteQuery(qry3);
+
+# sync objects. clientWaitSync/waitSync take a 64-bit timeout; the plain Number
+# form and the BigInt form are both emitted because the binding accepts one of
+# them depending on the build, and a small timeout keeps the GPU wait bounded.
+var sync1 = <gl>.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, <glSyncF>); <gl>.isSync(sync1); <gl>.getSyncParameter(sync1, <glSyncP>); <gl>.clientWaitSync(sync1, <glSyncF>, <int min=0 max=1000>); <gl>.waitSync(sync1, 0, <int min=0 max=1000>); <gl>.deleteSync(sync1);
+var sync2 = <gl>.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, gl.SYNC_FLUSH_COMMANDS_BIT); <gl>.clientWaitSync(sync2, gl.SYNC_FLUSH_COMMANDS_BIT, <TexInt>n); <gl>.waitSync(sync2, gl.SYNC_FLUSH_COMMANDS_BIT, <TexInt>n); <gl>.getSyncParameter(sync2, <glSyncP>); <gl>.deleteSync(sync2);
+var sync3 = <gl>.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0); <gl>.isSync(sync3); <gl>.getSyncParameter(sync3, gl.SYNC_STATUS); <gl>.waitSync(sync3, 0, gl.TIMEOUT_IGNORED); <gl>.clientWaitSync(sync3, 0, <TexInt>); <gl>.deleteSync(sync3);
+
+# transform feedback
+var tfb1 = <gl>.createTransformFeedback(); <gl>.isTransformFeedback(tfb1); <gl>.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tfb1); <gl>.beginTransformFeedback(gl.POINTS); <gl>.pauseTransformFeedback(); <gl>.resumeTransformFeedback(); <gl>.endTransformFeedback(); <gl>.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null); <gl>.deleteTransformFeedback(tfb1);
+var tfb2 = <gl>.createTransformFeedback(); <gl>.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tfb2); <gl>.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, <TexInt>, <buffer>); <gl>.beginTransformFeedback(<glMd>); <gl>.drawArrays(<glMd>, <TexInt>, <TexInt>); <gl>.endTransformFeedback(); <gl>.deleteTransformFeedback(tfb2);
+<gl>.transformFeedbackVaryings(<program>, [<nm>, <nm>], <glTFBuf>); <gl>.linkProgram(<program>); <gl>.getTransformFeedbackVarying(<program>, <TexInt>); <gl>.getProgramParameter(<program>, gl.TRANSFORM_FEEDBACK_BUFFER_MODE);
+<gl>.pauseTransformFeedback(); <gl>.resumeTransformFeedback(); <gl>.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tfb1); <gl>.getTransformFeedbackVarying(<program>, <glint>); <gl>.isTransformFeedback(tfb1);
+
+# sampler objects
+var smp1 = <gl>.createSampler(); <gl>.isSampler(smp1); <gl>.bindSampler(<TexInt>, smp1); <gl>.samplerParameteri(smp1, <glSampP>, <glgll>); <gl>.samplerParameterf(smp1, <glSampP>, <GLclampf>); <gl>.getSamplerParameter(smp1, <glSampP>); <gl>.deleteSampler(smp1); <gl>.bindSampler(<TexInt>, null);
+var smp2 = <gl>.createSampler(); <gl>.samplerParameteri(smp2, gl.TEXTURE_MIN_FILTER, gl.LINEAR); <gl>.samplerParameteri(smp2, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); <gl>.samplerParameterf(smp2, gl.TEXTURE_MIN_LOD, <GLclampf>); <gl>.getSamplerParameter(smp2, <glSampP>); <gl>.activeTexture(gl.TEXTURE<TexInt>); <gl>.bindTexture(<gTexture>, <tex>); <gl>.bindSampler(<TexInt>, smp2);
+var smp3 = <gl>.createSampler(); <gl>.bindSampler(<TexInt>, smp3); <gl>.getSamplerParameter(smp3, <glSampP>); <gl>.samplerParameteri(smp3, <glSampP>, <glgll>); <gl>.samplerParameterf(smp3, <glSampP>, <glint>); <gl>.isSampler(smp3); <gl>.deleteSampler(smp3); <gl>.bindSampler(<TexInt>, null);
+
+# uniform blocks
+<gl>.getUniformBlockIndex(<program>, <nm>); <gl>.uniformBlockBinding(<program>, <TexInt>, <TexInt>); <gl>.bindBufferBase(gl.UNIFORM_BUFFER, <TexInt>, <buffer>); <gl>.bindBufferRange(gl.UNIFORM_BUFFER, <TexInt>, <buffer>, <TexInt>, <TexInt>);
+var ubi = <gl>.getUniformBlockIndex(<program>, <nm>); <gl>.getActiveUniformBlockName(<program>, <TexInt>); <gl>.getActiveUniformBlockParameter(<program>, ubi, <glBlockUP>); <gl>.uniformBlockBinding(<program>, ubi, <TexInt>); <gl>.getIndexedParameter(gl.UNIFORM_BUFFER_BINDING, <TexInt>);
+var idxs = <gl>.getUniformIndices(<program>, [<nm>, <nm>]); <gl>.getActiveUniforms(<program>, [<TexInt>, <TexInt>], <glActiveUP>); <gl>.getActiveUniformBlockParameter(<program>, <TexInt>, <glBlockUP>); <gl>.getActiveUniforms(<program>, idxs, <glActiveUP>);
+<gl>.getIndexedParameter(<glIndexedP>, <glint>); <gl>.getIndexedParameter(gl.TRANSFORM_FEEDBACK_BUFFER_BINDING, <TexInt>); <gl>.getInternalformatParameter(gl.RENDERBUFFER, <gliFormat>, <glIfP>);
+
+# framebuffers: draw/read buffer selection, invalidation, blitting
+var fbo1 = <gl>.createFramebuffer(); <gl>.isFramebuffer(fbo1); <gl>.bindFramebuffer(<fbuff>, fbo1); <gl>.drawBuffers([gl.COLOR_ATTACHMENT0, <glDrawB>]); <gl>.readBuffer(<glDrawB>); <gl>.invalidateFramebuffer(<fbuff>, [<glAttachment>]); <gl>.deleteFramebuffer(fbo1);
+var fbo2 = <gl>.createFramebuffer(); <gl>.bindFramebuffer(gl.FRAMEBUFFER, fbo2); <gl>.invalidateSubFramebuffer(gl.DRAW_FRAMEBUFFER, [<glAttachment>, gl.COLOR_ATTACHMENT1], <TexInt>, <TexInt>, <TexInt>, <TexInt>); <gl>.blitFramebuffer(<TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <glMask>, <glgll>); <gl>.deleteFramebuffer(fbo2);
+var fbo3 = <gl>.createFramebuffer(); var <tex> = <gl>.createTexture(); <gl>.bindFramebuffer(<fbuff>, fbo3); <gl>.framebufferTextureLayer(<fbuff>, <glAttachment>, <tex>, <TexInt>, <TexInt>); <gl>.readBuffer(gl.COLOR_ATTACHMENT0); <gl>.drawBuffers([gl.COLOR_ATTACHMENT0]);
+<gl>.readBuffer(gl.NONE); <gl>.drawBuffers([gl.NONE]); <gl>.invalidateFramebuffer(gl.FRAMEBUFFER, [gl.DEPTH_ATTACHMENT, gl.STENCIL_ATTACHMENT]); <gl>.invalidateSubFramebuffer(gl.READ_FRAMEBUFFER, [gl.COLOR_ATTACHMENT0], <glint>, <glint>, <TexInt>, <TexInt>);
+
+# buffer binding points, copies and readback
+var <buffer> = <gl>.createBuffer(); <gl>.bindBufferBase(<gbuff>, <TexInt>, <buffer>); <gl>.bindBufferRange(<gbuff>, <TexInt>, <buffer>, <TexInt>, <TexInt>);
+var <buffer> = <gl>.createBuffer(); <gl>.bindBuffer(gl.COPY_READ_BUFFER, <buffer>); <gl>.bufferData(gl.COPY_READ_BUFFER, new Float32Array([<glint>, <glint>, <glint>, <glint>]), <glOp>); <gl>.bindBufferBase(gl.COPY_WRITE_BUFFER, <TexInt>, <buffer>); <gl>.copyBufferSubData(gl.COPY_READ_BUFFER, gl.COPY_WRITE_BUFFER, <TexInt>, <TexInt>, <TexInt>);
+var <buffer> = <gl>.createBuffer(); <gl>.bindBuffer(gl.PIXEL_PACK_BUFFER, <buffer>); <gl>.bufferData(gl.PIXEL_PACK_BUFFER, <TexInt>, <glOp>); <gl>.getBufferSubData(gl.PIXEL_PACK_BUFFER, <TexInt>, new Int32Array(<TexInt>), <TexInt>, <TexInt>);
+<gl>.getBufferSubData(<gbuff>, <TexInt>, new Uint8Array(<TexInt>), <TexInt>, <TexInt>); <gl>.copyBufferSubData(gl.COPY_READ_BUFFER, gl.COPY_WRITE_BUFFER, <TexInt>, <TexInt>, <glint>);
+
+# clearBuffer family
+<gl>.clearBufferfv(<glClearB>, <TexInt>, new Float32Array([<glint>, <glint>, <glint>, <glint>])); <gl>.clearBufferiv(<glClearB>, <TexInt>, new Int32Array([<glint>, <glint>, <glint>, <glint>]));
+<gl>.clearBufferuiv(<glClearB>, <TexInt>, new Uint32Array([<TexInt>, <TexInt>, <TexInt>, <TexInt>])); <gl>.clearBufferfi(<glClearB>, <TexInt>, <GLclampf>, <TexInt>);
+<gl>.clearBufferfv(<glClearB>, <TexInt>, [<GLclampf>, <GLclampf_>, <GLclampf>, <GLclampf_>]); <gl>.clearBufferiv(<glClearB>, <TexInt>, [<glint>, <glint>, <glint>, <glint>]); <gl>.clearBufferuiv(<glClearB>, <TexInt>, [<TexInt>, <TexInt>, <TexInt>, <TexInt>]); <gl>.clearBufferfi(gl.DEPTH, <TexInt>, <GLclampf>, <glBin>);
+
+# texture storage: immutable levels, 3D images, copies, compressed data
+var <tex> = <gl>.createTexture(); <gl>.bindTexture(<gTexture>, <tex>); <gl>.texStorage2D(<gTexture>, <TexInt>, <gliFormat>, <TexInt>, <TexInt>); <gl>.texStorage3D(<gTexture>, <TexInt>, <gliFormat>, <TexInt>, <TexInt>, <TexInt>); <gl>.getTexParameter(<gTexture>, gl.TEXTURE_IMMUTABLE_FORMAT);
+var <tex> = <gl>.createTexture(); <gl>.bindTexture(gl.TEXTURE_3D, <tex>); <gl>.texImage3D(gl.TEXTURE_3D, <TexInt>, <gliFormat>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <glEn>, <glStts>, new Uint8Array(<TexInt>)); <gl>.texSubImage3D(gl.TEXTURE_3D, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <glEn>, <glStts>, new Uint8Array(<TexInt>), <TexInt>);
+var <tex> = <gl>.createTexture(); <gl>.bindTexture(<gTexture>, <tex>); <gl>.texSubImage2D(<gTexture>, <TexInt>, <TexInt>, <TexInt>, <glEn>, <glStts>, new Uint8Array(<TexInt>)); <gl>.texSubImage2D(<gTexture>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <glEn>, <glStts>, new Uint8Array(<TexInt>), <TexInt>);
+var <tex> = <gl>.createTexture(); <gl>.bindTexture(<gTexture>, <tex>); <gl>.copyTexImage2D(<gTexture>, <TexInt>, <gliFormat>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>); <gl>.copyTexSubImage2D(<gTexture>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>); <gl>.copyTexSubImage3D(<gTexture>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>);
+var <tex> = <gl>.createTexture(); <gl>.bindTexture(<gTexture>, <tex>); <gl>.compressedTexImage2D(<gTexture>, <TexInt>, <gliFormat>, <TexInt>, <TexInt>, <TexInt>, new Uint8Array(<TexInt>), <TexInt>); <gl>.compressedTexSubImage2D(<gTexture>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <gliFormat>, new Uint8Array(<TexInt>));
+var <tex> = <gl>.createTexture(); <gl>.bindTexture(gl.TEXTURE_3D, <tex>); <gl>.compressedTexImage3D(gl.TEXTURE_3D, <TexInt>, <gliFormat>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, new Uint8Array(<TexInt>), <TexInt>); <gl>.compressedTexSubImage3D(gl.TEXTURE_3D, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <gliFormat>, new Uint8Array(<TexInt>), <TexInt>, <TexInt>);
+<gl>.compressedTexImage2D(<gTexture>, <TexInt>, <gliFormat>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>); <gl>.compressedTexSubImage3D(<gTexture>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>, <gliFormat>, <TexInt>, <TexInt>);
+
+# multisample renderbuffers
+var rbo1 = <gl>.createRenderbuffer(); <gl>.bindRenderbuffer(gl.RENDERBUFFER, rbo1); <gl>.renderbufferStorageMultisample(gl.RENDERBUFFER, <TexInt>, <gliFormat>, <TexInt>, <TexInt>); <gl>.getRenderbufferParameter(gl.RENDERBUFFER, <glRBP>); <gl>.getInternalformatParameter(gl.RENDERBUFFER, <gliFormat>, <glIfP>); <gl>.deleteRenderbuffer(rbo1);
+<gl>.renderbufferStorageMultisample(gl.RENDERBUFFER, <TexInt>, gl.DEPTH_COMPONENT24, <TexInt>, <TexInt>); <gl>.getRenderbufferParameter(<gl>.RENDERBUFFER, <glRBP>); <gl>.getInternalformatParameter(gl.RENDERBUFFER, <gliFormat>, <glIfP>);
+
+# shader compile/query. <glSrc> carries no # or angle brackets: both would
+# break the grammar line parser rather than the shader.
+var sh1 = <gl>.createShader(<cShader>); <gl>.shaderSource(sh1, <glSrc>); <gl>.compileShader(sh1); <gl>.isShader(sh1); <gl>.getShaderParameter(sh1, <glShadP>); <gl>.getShaderInfoLog(sh1); <gl>.deleteShader(sh1);
+<gl>.shaderSource(<shader>, <glSrc>); <gl>.compileShader(<shader>); <gl>.isShader(<shader>); <gl>.getShaderParameter(<shader>, <glShadP>); <gl>.getShaderInfoLog(<shader>); <gl>.getShaderSource(<shader>);
+
+# program link/query, including fragment data locations
+var prg1 = <gl>.createProgram(); <gl>.isProgram(prg1); <gl>.attachShader(prg1, <shader>); <gl>.linkProgram(prg1); <gl>.getProgramParameter(prg1, <glProgP>); <gl>.getFragDataLocation(prg1, <nm>); <gl>.getProgramInfoLog(prg1); <gl>.deleteProgram(prg1);
+var prg2 = <gl>.createProgram(); <gl>.attachShader(prg2, <shader>); <gl>.bindAttribLocation(prg2, <TexInt>, <nm>); <gl>.transformFeedbackVaryings(prg2, [<nm>], <glTFBuf>); <gl>.linkProgram(prg2); <gl>.useProgram(prg2); <gl>.getProgramParameter(prg2, <glProgP>); <gl>.isProgram(prg2); <gl>.deleteProgram(prg2);
+<gl>.isProgram(<program>); <gl>.isShader(<shader>); <gl>.getProgramParameter(<program>, <glProgP>); <gl>.getShaderParameter(<shader>, <glShadP>); <gl>.getFragDataLocation(<program>, <nm>); <gl>.getProgramInfoLog(<program>); <gl>.getShaderInfoLog(<shader>);
+
+# unsigned integer uniforms and the non-square matrix uniforms WebGL2 adds
+var loc = <gl>.getUniformLocation(<program>, <nm>); <gl>.uniform1ui(loc, <TexInt>); <gl>.uniform2ui(loc, <TexInt>, <TexInt>); <gl>.uniform3ui(loc, <TexInt>, <TexInt>, <TexInt>); <gl>.uniform4ui(loc, <TexInt>, <TexInt>, <TexInt>, <TexInt>);
+var loc = <gl>.getUniformLocation(<program>, <nm>); <gl>.uniform1uiv(loc, new Uint32Array([<TexInt>])); <gl>.uniform2uiv(loc, new Uint32Array([<TexInt>, <TexInt>])); <gl>.uniform3uiv(loc, [<TexInt>, <TexInt>, <TexInt>]); <gl>.uniform4uiv(loc, new Uint32Array([<TexInt>, <TexInt>, <TexInt>, <TexInt>]));
+var loc = <gl>.getUniformLocation(<program>, <nm>); <gl>.uniformMatrix2x3fv(loc, <bool>, new Float32Array([<glint>,<glint>,<glint>,<glint>,<glint>,<glint>])); <gl>.uniformMatrix3x2fv(loc, <bool>, [<glint>,<glint>,<glint>,<glint>,<glint>,<glint>]);
+var loc = <gl>.getUniformLocation(<program>, <nm>); <gl>.uniformMatrix2x4fv(loc, <bool>, new Float32Array([<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>])); <gl>.uniformMatrix4x2fv(loc, <bool>, [<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>]);
+var loc = <gl>.getUniformLocation(<program>, <nm>); <gl>.uniformMatrix3x4fv(loc, <bool>, new Float32Array([<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>])); <gl>.uniformMatrix4x3fv(loc, <bool>, [<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>,<glint>]);
+
+# stencil per-face state, polygon offset, extension listing
+<gl>.enable(gl.STENCIL_TEST); <gl>.stencilMaskSeparate(<glMode>, <glBin>); <gl>.stencilOpSeparate(<glMode>, <glMgg>, <_glMgg>, <glMgg_>); <gl>.stencilMaskSeparate(<glMode>, <sint>);
+<gl>.stencilFuncSeparate(<glMode>, <glFun>, <TexInt>, <glBin>); <gl>.stencilOpSeparate(<glMode>, gl.KEEP, gl.REPLACE, gl.INCR_WRAP); <gl>.stencilMask(<glBin>);
+<gl>.enable(gl.POLYGON_OFFSET_FILL); <gl>.polygonOffset(<float min=-100 max=100>, <float min=-100 max=100>); <gl>.polygonOffset(<GLclampf>, <glint>);
+var exts = <gl>.getSupportedExtensions(); <gl>.getExtension(<glExtStr>); <gl>.getParameter(gl.MAX_VERTEX_UNIFORM_BLOCKS);
+
+# extensions whose members stay unprobed: only the receiver is obtained, and
+# only for names this build may hand back. No member is called on the result.
+var ext2 = <gl>.getExtension('EXT_clip_control') || <gl>.getExtension('EXT_polygon_offset_clamp') || <gl>.getExtension('WEBGL_provoking_vertex') || <gl>.getExtension('OES_draw_buffers_indexed') || <gl>.getExtension('WEBGL_explicit_present');
 
 !end lines

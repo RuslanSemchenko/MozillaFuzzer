@@ -1937,7 +1937,7 @@
 <cssproperty> = filter: opacity(<fuzzfloat>)
 <cssproperty> = filter: saturate(<fuzzfloat>)
 <cssproperty> = filter: sepia(<fuzzfloat>)
-<cssproperty> = filter: url(#<DOMString>)
+<cssproperty> = filter: url(<hash><DOMString>)
 <cssproperty> = filter: blur(<fuzzint>px) brightness(<fuzzfloat>) contrast(<fuzzfloat>)
 <cssproperty> = backdrop-filter: blur(<fuzzint>px)
 <cssproperty> = backdrop-filter: brightness(<fuzzfloat>)
@@ -1986,7 +1986,7 @@
 <cssproperty> = clip-path: circle(<fuzzint>px at <fuzzint>px <fuzzint>px)
 <cssproperty> = clip-path: ellipse(<fuzzint>px <fuzzint>px at <fuzzint>px <fuzzint>px)
 <cssproperty> = clip-path: polygon(<fuzzint>px <fuzzint>px, <fuzzint>px <fuzzint>px, <fuzzint>px <fuzzint>px)
-<cssproperty> = clip-path: url(#<DOMString>)
+<cssproperty> = clip-path: url(<hash><DOMString>)
 <cssproperty> = clip-path: path("M <fuzzint> <fuzzint> L <fuzzint> <fuzzint> L <fuzzint> <fuzzint> Z")
 <cssproperty> = clip-rule: nonzero
 <cssproperty> = clip-rule: evenodd

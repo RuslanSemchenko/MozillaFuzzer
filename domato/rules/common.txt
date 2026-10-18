@@ -62,7 +62,7 @@
 <color> = black
 <color> = transparent
 <color> = currentcolor
-<color> = #<hex><hex><hex><hex><hex><hex>
+<color> = <hash><hex><hex><hex><hex><hex><hex>
 <color> = rgb(<int min=0 max=255>, <int min=0 max=255>, <int min=0 max=255>)
 <color> = rgba(<int min=0 max=255>, <int min=0 max=255>, <int min=0 max=255>, <float min=0 max=1>)
 <color> = hsl(<int min=0 max=360>deg <percentage>% <percentage>%)

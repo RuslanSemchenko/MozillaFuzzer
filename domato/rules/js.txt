@@ -5595,6 +5595,12 @@ document.all[<int min=0 max=100>%document.all.length].appendChild(<Element>);
 <new float> = <SVGPathElement>.getTotalLength();
 <new SVGPoint> = <SVGPathElement>.getPointAtLength(<fuzzint>);
 <new long> = <SVGPathElement>.getPathSegAtLength(<fuzzint>);
+<new SVGPathSegment> = <SVGPathElement>.getPathSegmentAtLength(<fuzzint>);
+<new SVGPathSegmentSequence> = <SVGPathElement>.getPathData();
+<new SVGPathSegmentSequence> = <SVGPathElement>.getPathData({normalize: <boolean>});
+<SVGPathElement>.setPathData([{type: "M", values: [<fuzzint>, <fuzzint>]}, {type: "L", values: [<fuzzint>, <fuzzint>]}, {type: "Z", values: []}]);
+<SVGPathElement>.setPathData([{type: "M", values: [<fuzzint>, <fuzzint>]}, {type: "C", values: [<fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>, <fuzzint>]}]);
+<SVGPathElement>.setPathData(<SVGPathSegmentSequence>);
 
 #SVGTSpanElement
 !extends SVGTSpanElement SVGTextPositioningElement

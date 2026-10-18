@@ -137,11 +137,11 @@
 <mathmlattr_color_name> = silver
 <mathmlattr_color_name> = transparent
 
-<mathmlattr_color_hex> = #<hexdigit><hexdigit><hexdigit>
-<mathmlattr_color_hex> = #<hexdigit><hexdigit><hexdigit><hexdigit><hexdigit><hexdigit>
+<mathmlattr_color_hex> = <hash><hex><hex><hex>
+<mathmlattr_color_hex> = <hash><hex><hex><hex><hex><hex><hex>
 
 <mathmlattr_color_rgb> = rgb(<fuzzint>,<fuzzint>,<fuzzint>)
-<mathmlattr_color_rgba> = rgba(<fuzzint>,<fuzzint>,<fuzzint>,<alpha>)
+<mathmlattr_color_rgba> = rgba(<fuzzint>,<fuzzint>,<fuzzint>,<float min=0 max=1>)
 <mathmlattr_color_hsl> = hsl(<fuzzint>,<percentage>,<percentage>)
 
 <mathmlattr_color_value> = <mathmlattr_color_name>
@@ -555,7 +555,7 @@
 <mathmlattr_global_id_value> = <identifier>
 
 # href (URI, simplified)
-<mathmlattr_global_href_value> = #<identifier>
+<mathmlattr_global_href_value> = <hash><identifier>
 <mathmlattr_global_href_value> = https://example.com
 <mathmlattr_global_href_value> = javascript:void(0)
 
@@ -636,4 +636,4 @@
 <mathmlattr_invalid_length_value> = <fuzzint>px<fuzzint>
 <mathmlattr_invalid_color_value> = <fuzzint>
 <mathmlattr_invalid_color_value> = rgb(<fuzzint>)
-<mathmlattr_invalid_color_value> = #<fuzzint>
+<mathmlattr_invalid_color_value> = <hash><fuzzint>

@@ -704,7 +704,8 @@ await <GPUQueue>.onSubmittedWorkDone();
 
 #~~~~~~~~~~~~~~~~GPUShaderModule~~~~~~~~~~~~~~~~#
 <GPUShaderModule>.label = <USVString>
-<new GPUCompilationInfo> = await <GPUShaderModule>.compilationInfo();
+<new GPUCompilationInfo> = await <GPUShaderModule>.getCompilationInfo();
+<new GPUCompilationMessage> = <GPUCompilationInfo>.messages[<BindInt>];
 
 #~~~~~~~~~~~~~~~~GPUTexture~~~~~~~~~~~~~~~~#
 <GPUTexture>.label = <USVString>
