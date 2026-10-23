@@ -122,7 +122,8 @@ class DomatoAdapter(Adapter):
     def _build_webgpu_grammar(self):
         """Build the WebGPU grammar.
 
-        webgpu.txt has no rules for <entrypoint> and leans on <BindInt> being
+        webgpu.txt has no rules for the stage entry-point symbols (<computeEntryPoint>,
+        <vertexEntryPoint>, <fragmentEntryPoint>) and leans on <BindInt> being
         extended, and both are derived from the shader sources, so the grammar
         can only be parsed once the shaders for a case are known."""
         shaders = [random.choice(self._shader_sources) for _ in range(_N_SHADERS)]

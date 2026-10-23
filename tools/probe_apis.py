@@ -15,8 +15,12 @@ constructor (statics such as DOMMatrix.fromFloat32Array), on the namespace
 object (CSS, console) and on a live instance where one is free to take.
 
 Usage (run it yourself - it opens a Firefox window):
-  py -3.14 tools/probe_apis.py
-  py -3.14 tools/probe_apis.py --bucket all --only Document Window
+  python3 tools/probe_apis.py
+  python3 tools/probe_apis.py --bucket all --only Document Window
+
+Use the built binary, not the distro package: the Debian /usr/lib/firefox is a release
+build with navigator.gpu compiled off, so a WebGPU probe run against it is a verdict
+about the wrong browser.
 """
 from __future__ import annotations
 
@@ -33,10 +37,13 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 FIREFOX = Path(
-    r"C:\mozilla-source\firefox\obj-x86_64-pc-windows-msvc\dist\bin\firefox.exe"
+    "/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox"
 )
-# IDL names that are WebGL extension object bags rather than page globals
-EXTENSION_PREFIXES = ("EXT_", "OES_", "WEBGL_", "ANGLE_", "MOZ_WEBGL_", "WEBKIT_WEBGL_")
+# IDL names that are WebGL extension object bags rather than page globals. This is the
+# set of extension interfaces declared in WebGLRenderingContext.webidl: ANGLE_*, EXT_*,
+# OES_*, OVR_*, WEBGL_*, WEBKIT_WEBGL_* and the Firefox-only MOZ_debug. Missing one puts
+# the interface in `unprobeable` instead of giving it an answer.
+EXTENSION_PREFIXES = ("EXT_", "OES_", "OVR_", "WEBGL_", "ANGLE_", "MOZ_", "WEBKIT_WEBGL_")
 PAGE = """<!doctype html><meta charset=utf-8><title>rules probe</title><body><script>
 const out = {env: {}, probed: [], unprobeable: [], errors: []};
 // Interfaces whose members can also land as own-properties of a live object.
@@ -81,9 +88,13 @@ function exists(obj, member) {
 // itself for namespaces such as CSS and console.
 // WebGL extensions have no window global at all - the IDL interface names the
 // object that getExtension() hands back - so those are probed on the object.
-function probe(iface, members, isExtension) {
+function probe(iface, members, isExtension, windowGlobal) {
   const global = window[iface];
   const scopes = [];
+  // a type the IDL exposes to Window is looked up by name, so "no such property" is
+  // an answer; only a type with no window-side receiver is a question this page
+  // cannot ask, and that is the difference between not-exposed and unprobeable
+  let asked = !!global || !!windowGlobal;
   if (global && global.prototype) {
     scopes.push(["prototype", global.prototype], ["static", global]);
   } else if (global) {
@@ -95,6 +106,9 @@ function probe(iface, members, isExtension) {
       if (!ctx) {
         continue;
       }
+      // reaching a context means the question was asked, whatever comes back:
+      // getExtension() returning null IS the answer about an extension object
+      asked = true;
       let ext = null;
       try {
         ext = ctx.getExtension(iface);
@@ -115,6 +129,7 @@ function probe(iface, members, isExtension) {
     }
   }
   if (instance) {
+    asked = true;
     scopes.push(["instance", instance]);
   }
   for (const member of members) {
@@ -127,7 +142,7 @@ function probe(iface, members, isExtension) {
     }
     out.probed.push({iface, member, state});
   }
-  if (!scopes.length && members.length) {
+  if (!asked && members.length) {
     // structured, so audit_rules.py does not have to read prose to know that
     // these members' not-exposed rows mean nothing
     out.unprobeable.push(iface);
@@ -137,7 +152,7 @@ function probe(iface, members, isExtension) {
 
 const targets = %TARGETS%;
 for (const target of targets) {
-  probe(target.iface, target.members, !!target.ext);
+  probe(target.iface, target.members, !!target.ext, !!target.windowGlobal);
 }
 
 try {
@@ -180,12 +195,16 @@ try {
 
 def build_page(targets: list[dict]) -> str:
     """Render the probe page with the interface list inlined."""
-    rendered = ",".join(
-        f'{{iface: {json.dumps(target["iface"])}, members: {json.dumps(sorted(target["members"]))}, '
-        f'ext: {json.dumps(bool(target.get("ext")))}}}'
+    payload = [
+        {
+            "iface": target["iface"],
+            "members": sorted(target["members"]),
+            "ext": bool(target.get("ext")),
+            "windowGlobal": bool(target.get("windowGlobal")),
+        }
         for target in targets
-    )
-    return PAGE.replace("%TARGETS%", f"[{rendered}]")
+    ]
+    return PAGE.replace("%TARGETS%", json.dumps(payload))
 
 
 def write_prefs(profile: Path, variant: str) -> None:
@@ -250,6 +269,28 @@ def collect(page_targets: list[dict], firefox: Path, profile: Path, timeout: int
     return result["data"]
 
 
+def window_global(attrs: dict) -> bool:
+    """Whether the IDL says this type has a window-side global to look up by name.
+
+    A binding the build compiled out is simply absent from `window`, and that absence
+    is the verdict - `FuzzingFunctions` is the case in point, since the namespace only
+    exists in an --enable-fuzzing build. A type the IDL never exposes to Window
+    (worker-only, LegacyNoInterfaceObject, WebGL extension objects, prompt-handed
+    objects) has no receiver here at all, and its rows mean nothing.
+    """
+    if attrs.get("LegacyNoInterfaceObject") or attrs.get("ChromeOnly") or attrs.get("SystemPrincipal"):
+        return False
+    exposed = attrs.get("Exposed")
+    if not exposed:
+        return True
+    values = [
+        item.strip().strip("()")
+        for group in (exposed if isinstance(exposed, list) else [exposed])
+        for item in str(group).split(",")
+    ]
+    return any(item in ("*", "Window") for item in values)
+
+
 def selected_members(entry: dict, bucket: str) -> list[str]:
     if bucket == "probe":
         return list(entry["needs_probe"])
@@ -261,6 +302,11 @@ def selected_members(entry: dict, bucket: str) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--coverage", default="results/audit/coverage.json")
+    parser.add_argument(
+        "--inventory",
+        default="results/audit/idl_inventory.json",
+        help="extract_idl.py output, for the extended attributes coverage.json does not carry",
+    )
     parser.add_argument("--out", default="results/audit/probe.json")
     parser.add_argument(
         "--bucket",
@@ -278,12 +324,19 @@ def main() -> int:
     coverage = Path(args.coverage)
     if not coverage.is_absolute():
         coverage = ROOT / coverage
+    inventory = Path(args.inventory)
+    if not inventory.is_absolute():
+        inventory = ROOT / inventory
+    if not inventory.exists():
+        raise SystemExit(f"no {inventory} - run tools/extract_idl.py first")
+    idl = json.load(open(inventory, encoding="utf-8"))["types"]
     report = json.load(open(coverage, encoding="utf-8"))
     targets = []
     for entry in report:
         members = selected_members(entry, args.bucket)
         if not members or (args.only and entry["name"] not in args.only):
             continue
+        attrs = idl.get(entry["name"], {}).get("attrs", {})
         targets.append(
             {
                 "iface": entry["name"],
@@ -291,6 +344,7 @@ def main() -> int:
                 # an extension interface has no global: the name is the query
                 # string that getExtension() answers
                 "ext": entry["name"].startswith(EXTENSION_PREFIXES),
+                "windowGlobal": window_global(attrs),
             }
         )
     if not targets:

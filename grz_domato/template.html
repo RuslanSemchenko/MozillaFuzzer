@@ -109,9 +109,11 @@ glcanvas.width = 100;
 glcanvas.height = 100;
 document.getElementsByTagName("body")[0].appendChild(glcanvas);
 
-// webgl2 before webgl: probed on this build, getContext('webgl') and
-// getContext('experimental-webgl') both return null while 'webgl2' hands back a
-// WebGL2RenderingContext. Asking for the WebGL1 names first loses the whole API.
+// webgl2 asked for first: probe_apis.py's env line on this build answers
+// getContext('webgl2') -> WebGL2RenderingContext and both getContext('webgl') and
+// getContext('experimental-webgl') -> WebGLRenderingContext, so no name is lost here.
+// The order only decides which one this variable holds - a WebGL2 context is the
+// superset, and the WebGL1-only extensions get their own context below.
 var gl = glcanvas.getContext('webgl2') || glcanvas.getContext('webgl') || glcanvas.getContext('experimental-webgl');
 if (!gl) { return; }
 
@@ -127,6 +129,7 @@ var gl2 = gl;
 // the grammar names these identifiers rather than creating them, so they have to
 // exist before the generated WebGL lines run
 var preambleSource = "void main() {}";
+var img = glcanvas;
 var vShader3 = gl1.createShader(gl1.VERTEX_SHADER);
 gl1.shaderSource(vShader3, preambleSource);
 gl1.compileShader(vShader3);
@@ -152,6 +155,25 @@ var tex1 = gl1.createTexture();
 var tex2 = gl2.createTexture();
 var buffer1 = gl1.createBuffer();
 var buffer2 = gl2.createBuffer();
+
+// ANGLE_instanced_arrays, OES_vertex_array_object and WEBGL_draw_buffers only
+// exist on a WebGL1 context: their equivalents are core in WebGL2, where
+// getExtension() returns null for those names. A second canvas gives the rules
+// for them a receiver that actually has them, without touching gl1/gl2.
+var glw1canvas = document.createElement('canvas');
+glw1canvas.width = 100;
+glw1canvas.height = 100;
+document.getElementsByTagName("body")[0].appendChild(glw1canvas);
+var glw1 = glw1canvas.getContext('webgl') || glw1canvas.getContext('experimental-webgl');
+
+// WEBGL_lose_context.loseContext() holds the context lost until the next tick,
+// so it gets a throwaway canvas of its own: losing gl or glw1 would silence
+// every later line of this block that draws from it.
+var glxcanvas = document.createElement('canvas');
+glxcanvas.width = 32;
+glxcanvas.height = 32;
+document.getElementsByTagName("body")[0].appendChild(glxcanvas);
+var glx = glxcanvas.getContext('webgl2') || glxcanvas.getContext('webgl') || glxcanvas.getContext('experimental-webgl');
 
 <glfuzz>
 

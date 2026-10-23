@@ -62,8 +62,172 @@ SKIP_KINDS = ("typedef", "callback")
 # Queue entries whose gap is real but whose fix is a decision, not a rule to write.
 NOTES = {
     "FuzzingFunctions": (
-        "reachable only because Grizzly sets fuzzing.enabled; crash/killGPUProcess/memoryPressure "
-        "end the session and must never be emitted"
+        "the whole namespace is compiled out unless the build is configured --enable-fuzzing, "
+        "and this checkout's mozconfig is an ASan debug build without it - libxul.so has no "
+        "FuzzingFunctions binding, so probe_apis.py finds no global and every generated call "
+        "would be a ReferenceError. Re-check on a fuzzing build before writing rules for it."
+    ),
+    "PermissionsPolicy": (
+        "LegacyNoInterfaceObject whose only content receiver is document.featurePolicy, and that "
+        "attribute is [Pref=dom.security.permissionsPolicy.webidl.enabled] - default false in "
+        "StaticPrefList.yaml:5075 and not set by Grizzly's prefs"
+    ),
+    "IntlUtils": (
+        "LegacyNoInterfaceObject whose only receiver is window.intlUtils, [Func=IsChromeOrUAWidget] "
+        "in Window.webidl:933 - not exposed to content, so every call would throw"
+    ),
+    "GetUserMediaRequest": (
+        "the object is handed to a permission-prompt handler; content has no receiver to read "
+        "getAudioOutputOptions() from"
+    ),
+    "Navigator": (
+        "mozGetUserMedia is present on the prototype, but a call asks the user for camera and "
+        "microphone - a permission prompt the harness cannot answer, so AGENTS.md's 'Never add' "
+        "refuses it the same way it refuses a blocking dialog"
+    ),
+    "OVR_multiview2": (
+        "getExtension('OVR_multiview2') returns null on both the webgl and webgl2 contexts of "
+        "this build (probe_apis.py), so the extension object does not exist here - not a gap"
+    ),
+    "Window": (
+        "confirm is present:instance and is a blocking dialog that AGENTS.md refuses; alert/print "
+        "are parsed-but-unreachable dead text; the 12 [Func]-gated members were probed and are "
+        "not-exposed in this build"
+    ),
+    "GamepadPose": (
+        "the only content receiver is navigator.getGamepads(), which is an empty list in the "
+        "harness - no device is attached and the XRInputSource path needs an XR device too, so a "
+        "pose read would dereference undefined on every iteration"
+    ),
+    "FileSystemEntry": (
+        "legacy FileSystem API: window.requestFileSystem and navigator.webkitRequestFileSystem "
+        "are both undefined on this build (evaluated in the page), so no FileSystemEntry can be "
+        "obtained - the interface exists only as a prototype"
+    ),
+    "MediaKeys": (
+        "EME: navigator.requestMediaKeySystemAccess is the only producer and it rejects without a "
+        "CDM in this debug build"
+    ),
+    "MediaKeySystemAccess": (
+        "handed back by a rejected requestMediaKeySystemAccess promise on this build - no receiver"
+    ),
+    "MediaKeySession": (
+        "produced only by MediaKeys.createSession(), and there is no MediaKeys without a CDM; "
+        "MediaKeySession itself has no content constructor"
+    ),
+    "MediaKeyError": (
+        "legacy EME class, illegal constructor on this build"
+    ),
+    "PopupBlockedEvent": (
+        "illegal constructor, and its receiver only exists when window.open() is blocked - "
+        "AGENTS.md refuses opening windows because the harness cannot close them"
+    ),
+    "RTCIceTransport": (
+        "reachable only through a negotiated connection: transceiver.transport and pc.sctp are "
+        "both null right after addTransceiver() on this build (evaluated), so there is no "
+        "RTCDtlsTransport to ask for the iceTransport"
+    ),
+    "RTCSctpTransport": (
+        "pc.sctp is null until the DTLS/SCTP association exists, which needs setRemoteDescription "
+        "and therefore signaling"
+    ),
+    "RTCDTMFSender": (
+        "sender.dtmf is null for the same reason, and RTCPeerConnection has no addSender() on this "
+        "build (TypeError), so no sender can be made on its own"
+    ),
+    "RTCIceCandidatePair": (
+        "the class exists but no content path hands out a pair: local/remote live on events the "
+        "ICE agent dispatches, and the constructor takes no dictionary"
+    ),
+    "RTCCertificate": (
+        "RTCCertificate.generateCertificate is undefined on this build, so a certificate cannot be "
+        "made and its expires read has no receiver"
+    ),
+    "CSPViolationReportBody": (
+        "a ReportBody only arrives inside a ReportingObserver callback for a real violation, and "
+        "`new Report(...)` is not exposed to content (ReferenceError), so no receiver is "
+        "constructible"
+    ),
+    "IntegrityViolationReportBody": (
+        "same as CSPViolationReportBody: report bodies are browser-created, and the constructor "
+        "test in the page showed Report is undefined in content"
+    ),
+    "FetchObserver": (
+        "created internally per fetch; there is no content constructor to make one"
+    ),
+    "CryptoKey": (
+        "subtle.importKey/generateKey are Promise-based and js.txt statements are synchronous, so "
+        "a key can only be read inside a .then callback"
+    ),
+    "WebTransport": (
+        "needs a live HTTP/3 connection to a host outside server_map, which AGENTS.md refuses"
+    ),
+    "WebTransportDatagramDuplexStream": (
+        "the datagram stream only exists on a connected WebTransport"
+    ),
+    "IDBTransaction": (
+        "the grammar's <new IDBDatabase> creator is indexedDB.open(), which returns an "
+        "IDBOpenDBRequest (verified: constructor is IDBOpenDBRequest), so every transaction line "
+        "dereferences a request. Fixing the creator to read the database inside the onsuccess "
+        "callback is the work; this is not a missing binding"
+    ),
+    "IDBIndex": (
+        "same broken IDBDatabase receiver as IDBTransaction"
+    ),
+    "SourceBuffer": (
+        "MediaSource.addSourceBuffer() throws InvalidStateError until sourceopen fires, and "
+        "sourceopen only happens once the MediaSource is attached through a blob URL (the "
+        "srcObject setter rejects a MediaSource)"
+    ),
+    "CSSImportRule": (
+        "insertRule('@import ...') on a constructed CSSStyleSheet is refused ('An invalid or "
+        "illegal string was specified') and the harness page has no stylesheets, so no import "
+        "rule object is reachable"
+    ),
+    "MediaStreamAudioSourceNode": (
+        "createMediaStreamSource(new MediaStream()) throws InvalidStateError - an empty stream has "
+        "no audio track, and a real track needs getUserMedia, which asks the user"
+    ),
+    "AudioWorkletNode": (
+        "constructing one before a module is loaded raises InvalidStateError, and addModule() is "
+        "async; ac.createWorkletNode is undefined on this build"
+    ),
+    "PictureInPictureEvent": (
+        "the constructor requires a PictureInPictureWindow, which only exists once a video is in "
+        "picture-in-picture - passing a plain object throws"
+    ),
+    "TaskPriorityChangeEvent": (
+        "the constructor needs a real TaskSignal as previousTaskSignal and rejects the string form"
+    ),
+    "PaintRequest": (
+        "Firefox-internal paint-event object, only handed to a paint-event listener in chrome "
+        "context"
+    ),
+    "GamepadEvent": (
+        "gamepad is a required non-nullable Gamepad in GamepadInit and Gamepad has no content "
+        "constructor: navigator.getGamepads() is an empty list in the harness, so "
+        "new GamepadEvent(...) has nothing to put in the dictionary. The audit only counted this "
+        "member while a dead <XRInputSource>.gamepad line spelled the name"
+    ),
+    "LegacyMozTCPSocket": (
+        "not exposed on this build: navigator.mozTCPSocket is undefined and "
+        "'LegacyMozTCPSocket' in window is false (check_reads.py), gated by "
+        "TCPSocket::ShouldTCPSocketExist plus dom.tcpsocket_in_child.enabled=false in "
+        "StaticPrefList.yaml:5791 and absent from Grizzly's browser-fuzzing.yml. The whole TCP "
+        "family (TCPSocket, TCPServerSocket, TCPSocketEvent, TCPSocketErrorEvent, "
+        "TCPServerSocketEvent) went out of the grammar with it"
+    ),
+    "MediaStreamError": (
+        "LegacyNoInterfaceObject + ExceptionClass: `MediaStreamError` is not defined in content at "
+        "all (evaluated - ReferenceError), so the only instance is the rejection reason the legacy "
+        "navigator.mozGetUserMedia error callback receives, and that callback is refused because it "
+        "raises a camera/microphone prompt"
+    ),
+    "Node": (
+        "accessibleNode is [Func=mozilla::dom::AccessibleNode::IsAOMEnabled] and the AOM pref "
+        "(accessibility.AOM.enabled) is in neither StaticPrefList.yaml defaults nor Grizzly's "
+        "browser-fuzzing.yml - the property is absent on a content Node (evaluated: undefined); "
+        "containingShadowRoot is [Func=IsChromeOrUAWidget], chrome/XUL only"
     ),
 }
 
@@ -115,11 +279,18 @@ def all_text(grammar) -> str:
 
 
 def load_prefs(source_root: Path) -> dict[str, bool]:
-    """Pref name -> enabled, from StaticPrefList.yaml defaults."""
+    """Pref name -> enabled, from StaticPrefList.yaml defaults.
+
+    Missing is fatal, not empty: pref_enabled reads an unknown pref as off, so a
+    silent empty table would report every [Pref]-gated member of the IDL as
+    unreachable and take real work out of the queue without saying so.
+    """
     path = source_root / "modules" / "libpref" / "init" / "StaticPrefList.yaml"
-    prefs: dict[str, bool] = {}
     if not path.exists():
-        return prefs
+        raise SystemExit(
+            f"no StaticPrefList.yaml under {source_root} - pass --source <firefox checkout>"
+        )
+    prefs: dict[str, bool] = {}
     name = None
     value = None
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -299,7 +470,7 @@ def write_work_orders(report: list[dict], probe_path: Path, out_dir: Path) -> li
 
     legend = [
         "Members still missing, split by what tools/probe_apis.py answered about them.",
-        "Re-derive with `py -3.14 tools/audit_rules.py` after both it and probe_apis.py ran.",
+        "Re-derive with `python3 tools/audit_rules.py` after both it and probe_apis.py ran.",
         "",
         "- present: the browser has the binding. This is the work list.",
         "- not-exposed: the browser does not have it, so every generated call would throw",
@@ -329,7 +500,7 @@ def write_work_orders(report: list[dict], probe_path: Path, out_dir: Path) -> li
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", default=r"C:\mozilla-source\firefox")
+    parser.add_argument("--source", default="/home/ruslan/firefox", help="Firefox checkout (StaticPrefList.yaml)")
     parser.add_argument("--inventory", default="results/audit/idl_inventory.json")
     parser.add_argument("--out", default="results/audit/coverage.json")
     parser.add_argument("--queue", default="results/audit/QUEUE.md")
@@ -384,6 +555,11 @@ def main() -> int:
         if entry["kind"] == "interface mixin" and name in folded:
             continue
         blocked = gate_reason(entry, prefs, fuzzing)
+        # [Func]/[Trial] on the interface gates every member, and only the browser
+        # can answer it - a member of a gated interface is a probe question, never work.
+        interface_needs_probe = any(
+            entry["attrs"].get(key) for key in ("Func", "Trial")
+        )
         # const members are numeric aliases a fuzzer reaches through the API
         # itself, so they are counted apart and never queued as work
         standard, gated, chrome_only, pref_off, consts = [], [], [], [], []
@@ -397,7 +573,7 @@ def main() -> int:
                 pref_enabled(p, prefs, fuzzing) for p in _as_list(attrs["Pref"])
             ):
                 pref_off.append(member)
-            elif attrs.get("Func"):
+            elif attrs.get("Func") or interface_needs_probe:
                 gated.append(member)
             else:
                 standard.append(member)

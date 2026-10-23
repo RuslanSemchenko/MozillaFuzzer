@@ -21,9 +21,21 @@ _KINDS = r"interface\ mixin|interface|namespace|dictionary|callback\ interface|c
 _DECL = re.compile(rf"({_ATTR_BLOCK})({_KINDS})\s+([A-Za-z0-9_]+)")
 _MEMBER_ATTR = re.compile(r"^\s*((?:\[[^\]]*\]\s*)+)")
 _ATTR_SPLIT = re.compile(r"\s*,\s*(?![^\[\(]*[\]\)])")
-_ATTRIBUTE = re.compile(r"\b(?:readonly\s+|inherit\s+)?attribute\s+\S.*?\s+([A-Za-z0-9_]+)\s*(?:\[([^\]]*)\])?\s*;")
+# The trailing ';' is optional because parse_file() splits the body on ';' before
+# matching, so an anchored one never matches and drops every attribute: the
+# inventory silently held only methods and consts. `readonly attribute (A or B)? x`
+# then fell through to _OPERATION, which read `attribute` as the member name.
+_ATTRIBUTE = re.compile(
+    r"\b(?:readonly\s+|inherit\s+)?attribute\s+(?:[^;]*?\s)?([A-Za-z0-9_]+)"
+    r"\s*(?:\[[^\]]*\])?\s*(?:;|\Z)"
+)
 _OPERATION = re.compile(r"(?:^|\s)(?:static\s+|stringifier\s+|getter\s+|setter\s+|deleter\s+|creator\s+)*([A-Za-z0-9_<>?\[\]]+(?:\s+nullable)?|any|void|undefined)\s+([A-Za-z0-9_]+)\s*\(")
 _CONSTRUCTOR = re.compile(r"\bconstructor\s*\(")
+# A special operation declares how [] / String() behave, not a callable name:
+# `getter nsISupports (DOMString name)` has no member called nsISupports. Matching
+# its return type as a member put impossible work in the queue (UTF8String,
+# CSSUnparsedSegment, GleanMetric).
+_SPECIAL_OP = re.compile(r"^(?:static\s+)?(?:getter|setter|deleter|stringifier|legacycaller)\b")
 _CONST = re.compile(r"\bconst\s+\S.*?\s+([A-Za-z0-9_]+)\s*=")
 _REL = re.compile(r"([A-Za-z0-9_]+)\s+(?:includes|implements)\s+([A-Za-z0-9_]+)\s*;")
 _ENUM_VALUE = re.compile(r'^\s*"([^"]+)"')
@@ -137,6 +149,8 @@ def parse_file(path: Path) -> dict:
                 if lead:
                     member = member[lead.end() :].strip()
                 for pattern, mkind, group in ((_ATTRIBUTE, "attribute", 1), (_OPERATION, "method", 2), (_CONST, "const", 1)):
+                    if pattern is _OPERATION and _SPECIAL_OP.match(member):
+                        continue
                     found = pattern.search(member)
                     if found:
                         slot = entry["members"].setdefault(found.group(group), {"kinds": set(), "attrs": {}})
@@ -157,13 +171,16 @@ def parse_file(path: Path) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", default=r"C:\mozilla-source\firefox", help="Firefox source root")
+    parser.add_argument("--source", default="/home/ruslan/firefox", help="Firefox source root")
     parser.add_argument("--dir", action="append", default=None, help="IDL directory, relative to --source")
     parser.add_argument("--out", default="results/audit/idl_inventory.json")
     args = parser.parse_args()
 
     root = Path(args.source)
     dirs = args.dir or ["dom/webidl"]
+    missing = [rel for rel in dirs if not (root / rel).is_dir()]
+    if missing:
+        raise SystemExit(f"no IDL directory {', '.join(missing)} under {root} - pass --source <firefox checkout>")
     types: dict[str, dict] = {}
     includes: dict[str, list[str]] = {}
     files = 0

@@ -12,8 +12,8 @@ never appears in a case. That is why this check is fail-closed on every
 Domato diagnostic and on any placeholder left in the output.
 
 Usage:
-  py -3.14 tools/check_rules.py
-  py -3.14 tools/check_rules.py --samples 20 --keep
+  python3 tools/check_rules.py
+  python3 tools/check_rules.py --samples 20 --keep
 """
 from __future__ import annotations
 
@@ -87,6 +87,50 @@ def unresolved_symbols(grammar, origin: str) -> list[str]:
     ]
 
 
+def recursive_only_creators(grammar, origin: str) -> list[str]:
+    """Symbols whose every creator names the type it creates.
+
+    Domato resolves `<Foo>` by drawing a `<Foo>` creator, and a `<new Foo>` rule only
+    registers its variable *after* the whole rule has been expanded (grammar.py:479-488,
+    new_vars are added at the end of _expand_rule). So a creator that names `<Foo>` in its
+    own right-hand side recurses - which is fine while some other creator for `<Foo>`
+    exists to fall back on, and is 'Maximum recursion level reached while creating object
+    of type Foo' (grammar.py:356) when it does not. That warning is only ever printed for
+    the second case, and a rule that never resolves is coverage the rules file claims and
+    the generated case does not have.
+
+    Fix: give the type one creator that does not name itself, and put the uses of `<Foo>`
+    on separate statement lines.
+    """
+    problems = []
+    for symbol, rules in sorted(grammar._creators.items()):
+        if not rules:
+            continue
+        # a statement rule's parts start with the <new Foo> tag it creates, so only an
+        # unmarked <Foo> tag counts as naming the symbol rather than creating it
+        if not all(
+            any(
+                part["type"] != "text"
+                and part["tagname"] == symbol
+                and not part.get("new")
+                for part in rule["parts"]
+            )
+            for rule in rules
+        ):
+            continue
+        texts = []
+        for rule in rules:
+            texts.append("".join(
+                part["text"] if part["type"] == "text" else f"<{part['tagname']}>"
+                for part in rule["parts"]
+            )[:110])
+        problems.append(
+            f"{origin}: nothing can produce <{symbol}> without recursing - "
+            + " | ".join(texts)
+        )
+    return problems
+
+
 def unfilled(html: str) -> list[str]:
     """Placeholders that survived into a generated case."""
     found = [f"<{name}>" for name in PLACEHOLDERS if f"<{name}>" in html]
@@ -140,21 +184,47 @@ def strip_js_literals(source: str) -> str:
 def js_hazards(html: str) -> list[str]:
     """Generated script bodies that cannot parse.
 
-    grammar.py cuts everything after a literal # in a rule line, so a rule writes a
-    hash sign as Domato's <hash> constant type. That is only safe inside a string:
-    in expression position the generated # is a syntax error, and one syntax error
-    takes the whole <script> down rather than the one line that caused it."""
+    One syntax error takes a whole <script> down rather than the one line that caused
+    it, so a case with a syntax error in the DOM block loses its Canvas/WebGL/WebGPU
+    blocks too - silently, because the generator only ever *looks* like it produced
+    code. Every pattern below is a class that has actually done this:
+
+      #            grammar.py cuts everything after a literal # in a rule line, so a
+                   rule writes a hash sign as Domato's <hash> constant type. That is
+                   only safe inside a string: in expression position it parses as a
+                   comment and the rest of the line becomes a syntax error.
+      p=0.3        an attribute meant for <new Foo p=0.3> written after the closing
+                   bracket is emitted as literal text inside a var declaration.
+      ""x""        a value tag that already expands to a quoted string wrapped in
+                   another pair of quotes, e.g. "<DOMString>" -> ""1"".
+    """
+    code_hazards = (
+        (r"#", "a # outside a string literal"),
+        (r"\bp=\d", "a leaked rule attribute (write p= inside <...>)"),
+    )
+    raw_hazards = (
+        (r'""[A-Za-z0-9]', "doubled quotes around a value tag"),
+    )
     problems = []
     for script in re.finditer(r"<script[^>]*>(.*?)</script>", html, re.I | re.S):
         body = script.group(1)
         code = strip_js_literals(body)
-        for match in re.finditer(r"#", code):
-            start = max(0, match.start() - 60)
-            problems.append(
-                "generated JS has a # outside a string literal: "
-                f"...{body[start:match.start() + 20].strip()}..."
-            )
-            break
+        for pattern, label in code_hazards:
+            match = re.search(pattern, code)
+            if match:
+                start = max(0, match.start() - 60)
+                problems.append(
+                    f"generated JS has {label}: "
+                    f"...{body[start:match.start() + 20].strip()}..."
+                )
+        for pattern, label in raw_hazards:
+            match = re.search(pattern, body)
+            if match:
+                start = max(0, match.start() - 60)
+                problems.append(
+                    f"generated JS has {label}: "
+                    f"...{body[start:match.start() + 20].strip()}..."
+                )
     return problems
 
 
@@ -182,6 +252,7 @@ def main() -> int:
         }
         for origin, grammar in grammars.items():
             problems += unresolved_symbols(grammar, origin)
+            problems += recursive_only_creators(grammar, origin)
 
         for index in range(args.samples):
             case = TestCase("/test.html", "domato")
