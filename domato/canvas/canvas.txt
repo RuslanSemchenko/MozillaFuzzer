@@ -37,6 +37,11 @@
 <repeatstr> = String.fromCharCode(<int min=0 max=127>)
 <repeatstr> = String.fromCharCode(<int min=0 max=127>).repeat(<repeatcount>)
 
+<resizeQuality> = "pixelated"
+<resizeQuality> = "low"
+<resizeQuality> = "medium"
+<resizeQuality> = "high"
+
 <fillRule> = "nonzero"
 <fillRule> = "evenodd"
 
@@ -63,6 +68,42 @@
 <txtDirection> = "ltr"
 <txtDirection> = "rtl"
 <txtDirection> = "inherit"
+
+# CanvasRenderingContext2D.webidl:20-23 - the four text-layout enums, every value spelled out.
+<fontKerning> = "auto"
+<fontKerning> = "normal"
+<fontKerning> = "none"
+
+<fontStretch> = "normal"
+<fontStretch> = "ultra-condensed"
+<fontStretch> = "extra-condensed"
+<fontStretch> = "condensed"
+<fontStretch> = "semi-condensed"
+<fontStretch> = "semi-expanded"
+<fontStretch> = "expanded"
+<fontStretch> = "extra-expanded"
+<fontStretch> = "ultra-expanded"
+
+<fontVariantCaps> = "normal"
+<fontVariantCaps> = "small-caps"
+<fontVariantCaps> = "all-small-caps"
+<fontVariantCaps> = "petite-caps"
+<fontVariantCaps> = "all-petite-caps"
+<fontVariantCaps> = "unicase"
+<fontVariantCaps> = "titling-caps"
+
+<textRendering> = "auto"
+<textRendering> = "optimizeSpeed"
+<textRendering> = "optimizeLegibility"
+<textRendering> = "geometricPrecision"
+
+# letterSpacing/wordSpacing are UTF8String, not doubles: a bare number is rejected and the
+# attribute keeps its previous value, so every rule here is a CSS-style length.
+<spacingLength> = "0px"
+<spacingLength> = "<int min=0 max=8>px"
+<spacingLength> = "-<int min=1 max=4>px"
+<spacingLength> = "<float min=0 max=1>em"
+<spacingLength> = "normal"
 
 <repetition> = "repeat" 
 <repetition> = "repeat-x" 
@@ -308,5 +349,70 @@ ctx.direction = <txtDirection>;
 <m>.a = <canvasint>; <m>.b = <canvasint>;
 <m>.c = <canvasint>; <m>.d = <canvasint>;
 <m>.e = <canvasint>; <m>.f = <canvasint>;
+
+
+# Context lifecycle and the offscreen/bitmap-renderer side of Canvas.
+#
+# The receivers here are Domato typed variables, not literal text: grammar.py:297 draws 90% of
+# statements from the lines that reference a variable of a type already in context
+# (_interesting_line_prob = 0.9), so a rule whose receiver is literal `ctx` is drawn about a
+# tenth as often as `<ctx2d>.reset()`.
+<new ctx2d> = ctx;
+<ctx2d>.getContextAttributes();
+<ctx2d>.getContextAttributes().alpha; <ctx2d>.getContextAttributes().colorSpace; <ctx2d>.getContextAttributes().willReadFrequently;
+<ctx2d>.isContextLost();
+<ctx2d>.reset();
+
+# Sized small on purpose: the constructor is [EnforceRange] unsigned long, and a line that
+# throws before getContext never reaches the member the case is about.
+<new offcanvas> = new OffscreenCanvas(<int min=1 max=128>, <int min=1 max=128>);
+<new offcanvas> = new OffscreenCanvas(<canvasint>, <canvasint>);
+<offcanvas>.width = <canvasint>;
+<offcanvas>.height = <canvasint>;
+<new offctx> = <offcanvas>.getContext('2d', { alpha: <boolean>, desynchronized: <boolean>, willReadFrequently: <boolean> });
+<offctx>.commit();
+<offctx>.isContextLost();
+<offctx>.reset();
+<offctx>.fillRect(<int min=0 max=64>, <int min=0 max=64>, <int min=0 max=64>, <int min=0 max=64>);
+<offcanvas>.convertToBlob({ type: <imageFormat>, quality: <float min=0 max=1> }).then(function(blob){ return blob.size; }, function(error){ console.log(error.message); });
+<offcanvas>.toBlob(<imageFormat>, <float min=0 max=1>).then(function(blob){ return blob.type; }, function(error){ console.log(error.message); });
+
+# ImageBitmap produced by a real draw, then measured, handed to a bitmap renderer, or closed.
+<new bitmap> = <offcanvas>.transferToImageBitmap();
+<new offctx> = <offcanvas>.getContext('2d'); <offctx>.fillRect(0, 0, 32, 32); <new bitmap> = <offcanvas>.transferToImageBitmap();
+<bitmap>.width; <bitmap>.height;
+<bitmap>.close();
+<new renderctx> = <offcanvas>.getContext('bitmaprenderer');
+<new renderctx> = document.createElement('canvas').getContext('bitmaprenderer');
+<renderctx>.transferFromImageBitmap(null);
+<renderctx>.transferFromImageBitmap(<bitmap>);
+<renderctx>.transferImageBitmap(<bitmap>);
+<renderctx>.canvas;
+createImageBitmap(<ctx2d>, <int min=0 max=32>, <int min=0 max=32>, <int min=1 max=32>, <int min=1 max=32>, { imageOrientation: "flipY", premultiplyAlpha: "none", colorSpaceConversion: "none", resizeWidth: <int min=1 max=64>, resizeHeight: <int min=1 max=64>, resizeQuality: <resizeQuality> }).then(function(imageBitmapArgument){ return imageBitmapArgument.width; }, function(error){ console.log(error.message); });
+createImageBitmap(<img>, { resizeWidth: <int min=1 max=64>, resizeHeight: <int min=1 max=64>, resizeQuality: <resizeQuality> }).then(function(imageBitmapArgument){ imageBitmapArgument.close(); }, function(error){ console.log(error.message); });
+
+# Text-layout attributes (CanvasRenderingContext2D.webidl:337-342) and the twelve TextMetrics
+# reads (same file, 394-431). The attributes exist on both contexts; the four dom.textMetrics.*
+# prefs are default-true in StaticPrefList.yaml:5689-5707, so the reads return doubles rather
+# than undefined. Reads are grouped per line because a statement pool this size only reaches a
+# typed receiver once the declaring line has been drawn.
+<ctx2d>.fontKerning = <fontKerning>; <ctx2d>.fontStretch = <fontStretch>; <ctx2d>.fontVariantCaps = <fontVariantCaps>; <ctx2d>.textRendering = <textRendering>;
+<ctx2d>.letterSpacing = <spacingLength>; <ctx2d>.wordSpacing = <spacingLength>;
+<ctx2d>.fontKerning; <ctx2d>.fontStretch; <ctx2d>.fontVariantCaps; <ctx2d>.textRendering; <ctx2d>.letterSpacing; <ctx2d>.wordSpacing;
+<ctx2d>.fontStretch = "ultra-condensed"; <ctx2d>.fillText(<fuzzstring>, <canvasint>, <canvasint>);
+<offctx>.fontKerning = <fontKerning>; <offctx>.fontStretch = <fontStretch>; <offctx>.fontVariantCaps = <fontVariantCaps>; <offctx>.textRendering = <textRendering>;
+<offctx>.letterSpacing = <spacingLength>; <offctx>.wordSpacing = <spacingLength>;
+<offctx>.fontKerning; <offctx>.fontStretch; <offctx>.fontVariantCaps; <offctx>.textRendering; <offctx>.letterSpacing; <offctx>.wordSpacing;
+<new metrics> = <ctx2d>.measureText(<fuzzstring>);
+<new metrics> = ctx.measureText(<fuzzstring>); <metrics>.fontBoundingBoxAscent;
+<metrics>.width; <metrics>.actualBoundingBoxLeft; <metrics>.actualBoundingBoxRight;
+<metrics>.actualBoundingBoxAscent; <metrics>.actualBoundingBoxDescent;
+<metrics>.fontBoundingBoxAscent; <metrics>.fontBoundingBoxDescent;
+<metrics>.emHeightAscent; <metrics>.emHeightDescent;
+<metrics>.hangingBaseline; <metrics>.alphabeticBaseline; <metrics>.ideographicBaseline;
+console.log(<metrics>.width + <metrics>.fontBoundingBoxAscent + <metrics>.alphabeticBaseline);
+<new offmetrics> = <offctx>.measureText(<fuzzstring>);
+<offmetrics>.width; <offmetrics>.actualBoundingBoxRight; <offmetrics>.fontBoundingBoxDescent; <offmetrics>.ideographicBaseline;
+<new ctx2d> = ctx; <ctx2d>.letterSpacing = "2px"; <new metrics> = <ctx2d>.measureText("domato"); <metrics>.emHeightAscent;
 
 !end lines

@@ -14,6 +14,16 @@
 
 <newline> = <cr><lf>
 
+# Applied with beforeoutput=domatoJsString at sites that interpolate a CSS value into
+# a JavaScript string literal: a CSS value is free to contain a double quote and so is
+# <string>, and either one ends the literal early. The SyntaxError that follows takes
+# the whole <script>, the Canvas/WebGL/WebGPU blocks included.
+!begin function domatoJsString
+ret_val = ret_val.replace("\\", "")
+ret_val = ret_val.replace('"', "'")
+ret_val = ret_val.replace("\n", "").replace("\r", "")
+!end function
+
 <interestingint> = 32768
 <interestingint> = 65535
 <interestingint> = 65536

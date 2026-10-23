@@ -164,8 +164,13 @@
 <shader> = fShader3
 <shader> = fShader4
 
-<cShader> = VERTEX_SHADER
-<cShader> = FRAGMENT_SHADER
+<cShader> = gl.VERTEX_SHADER
+<cShader> = gl.FRAGMENT_SHADER
+
+# PredefinedColorSpace (WebGLRenderingContext.webidl:37). A bare word is rejected and the
+# attribute keeps its old value, so only the two spelled-out enum strings are emitted.
+<colorSpace> = "srgb"
+<colorSpace> = "display-p3"
 
 <nm> = 'vColor'
 <nm> = 'vDepth'
@@ -617,6 +622,28 @@
 <glSrc> = "attribute vec4 a; void main() {gl_Position = a;}"
 <glSrc> = "void main() {gl_FragColor = vec4(<GLclampf>, <GLclampf_>, <GLclampf>, <GLclampf_>);}"
 
+# Extension receivers. getExtension() hands back the same object for repeated
+# calls on one context, so inlining the lookup into every line costs nothing and
+# keeps each line self-contained; a name this build does not support returns null
+# and the per-line guard swallows the member access.
+# <glw1> is a WebGL1 context: ANGLE_instanced_arrays, OES_vertex_array_object and
+# WEBGL_draw_buffers are absent from WebGL2, where their API is core.
+# <glx> exists so WEBGL_lose_context cannot take gl1/gl2 down with it.
+<glw1> = glw1
+<glx> = glx
+<extAngle> = <glw1>.getExtension('ANGLE_instanced_arrays')
+<extVaoOES> = <glw1>.getExtension('OES_vertex_array_object')
+<extDrawBuf> = <glw1>.getExtension('WEBGL_draw_buffers')
+<extDrawIdxOES> = <gl>.getExtension('OES_draw_buffers_indexed')
+<extClip> = <gl>.getExtension('EXT_clip_control')
+<extClamp> = <gl>.getExtension('EXT_polygon_offset_clamp')
+<extTimer> = <gl>.getExtension('EXT_disjoint_timer_query')
+<extAstc> = <gl>.getExtension('WEBGL_compressed_texture_astc')
+<extDebug> = <gl>.getExtension('WEBGL_debug_shaders')
+<extLose> = <glx>.getExtension('WEBGL_lose_context')
+<extProvoke> = <gl>.getExtension('WEBGL_provoking_vertex')
+<extPresent> = <gl>.getExtension('WEBGL_explicit_present')
+
 <this> = this
 
 <root root=true> = <lines count=50>
@@ -857,5 +884,103 @@ var exts = <gl>.getSupportedExtensions(); <gl>.getExtension(<glExtStr>); <gl>.ge
 # extensions whose members stay unprobed: only the receiver is obtained, and
 # only for names this build may hand back. No member is called on the result.
 var ext2 = <gl>.getExtension('EXT_clip_control') || <gl>.getExtension('EXT_polygon_offset_clamp') || <gl>.getExtension('WEBGL_provoking_vertex') || <gl>.getExtension('OES_draw_buffers_indexed') || <gl>.getExtension('WEBGL_explicit_present');
+
+# WebGL1-only extensions. Each line fetches its own object, because a line is
+# drawn independently of every other line and cannot assume an earlier one ran.
+# ANGLE_instanced_arrays: the divisor is per attribute index, so a bound buffer
+# and a real index both matter.
+var wbufA = <glw1>.createBuffer(); <glw1>.bindBuffer(<glw1>.ARRAY_BUFFER, wbufA); <glw1>.bufferData(<glw1>.ARRAY_BUFFER, new Float32Array([0,0,1,1,0,1]), <glw1>.STATIC_DRAW); <extAngle>.vertexAttribDivisorANGLE(<TexInt>, <TexInt>); <glw1>.getVertexAttrib(<TexInt>, <extAngle>.VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE); <extAngle>.vertexAttribDivisorANGLE(<TexInt>, <glint>);
+var wprgA = <glw1>.createProgram(); var wshA = <glw1>.createShader(<glw1>.VERTEX_SHADER); <glw1>.shaderSource(wshA, <glSrc>); <glw1>.compileShader(wshA); <glw1>.attachShader(wprgA, wshA); <glw1>.linkProgram(wprgA); <glw1>.useProgram(wprgA); <extAngle>.drawArraysInstancedANGLE(<glMd>, <glint>, <TexInt>, <TexInt>); <extAngle>.drawArraysInstancedANGLE(<glw1>.POINTS, <TexInt>, <TexInt>, <TexInt>); <glw1>.getError();
+var welem = <glw1>.createBuffer(); <glw1>.bindBuffer(<glw1>.ELEMENT_ARRAY_BUFFER, welem); <glw1>.bufferData(<glw1>.ELEMENT_ARRAY_BUFFER, new Uint16Array([0,1,2]), <glw1>.STATIC_DRAW); <extAngle>.drawElementsInstancedANGLE(<glMd>, <TexInt>, <glw1>.UNSIGNED_SHORT, <TexInt>, <TexInt>); <extAngle>.drawElementsInstancedANGLE(<glMd>, <glint>, <glStts>, <glint>, <glint>); <extAngle>.vertexAttribDivisorANGLE(<TexInt>, <TexInt>); <glw1>.getError();
+
+# OES_vertex_array_object. isVertexArrayOES() is [WebGLHandlesContextLoss], so it
+# is asked about the object both before and after deleting it.
+var wvao1 = <extVaoOES>.createVertexArrayOES(); <extVaoOES>.isVertexArrayOES(wvao1); <extVaoOES>.bindVertexArrayOES(wvao1); <glw1>.getParameter(<extVaoOES>.VERTEX_ARRAY_BINDING_OES); <extVaoOES>.bindVertexArrayOES(null); <extVaoOES>.deleteVertexArrayOES(wvao1); <extVaoOES>.isVertexArrayOES(wvao1);
+var wvao2 = <extVaoOES>.createVertexArrayOES(); <extVaoOES>.bindVertexArrayOES(wvao2); <glw1>.enableVertexAttribArray(<TexInt>); <glw1>.vertexAttribPointer(<TexInt>, <TexInt>, <glStts>, <bool>, <TexInt>, <TexInt>); <glw1>.getVertexAttrib(<TexInt>, <glw1>.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING); <extVaoOES>.isVertexArrayOES(wvao2); <extVaoOES>.bindVertexArrayOES(null); <extVaoOES>.deleteVertexArrayOES(wvao2);
+<extVaoOES>.bindVertexArrayOES(<extVaoOES>.createVertexArrayOES()); <extVaoOES>.deleteVertexArrayOES(null); <extVaoOES>.isVertexArrayOES(null); <extVaoOES>.bindVertexArrayOES(<glw1>.createVertexArray()); <glw1>.getError();
+
+# WEBGL_draw_buffers: the *_WEBGL enums live on the extension object rather than
+# on the context, and WebGL1 core has no COLOR_ATTACHMENT1 to borrow.
+var wfboD = <glw1>.createFramebuffer(); <glw1>.bindFramebuffer(<glw1>.FRAMEBUFFER, wfboD); <extDrawBuf>.drawBuffersWEBGL([<extDrawBuf>.COLOR_ATTACHMENT0_WEBGL, <extDrawBuf>.COLOR_ATTACHMENT1_WEBGL]); <glw1>.getParameter(<extDrawBuf>.MAX_DRAW_BUFFERS_WEBGL); <glw1>.clear(<glw1>.COLOR_BUFFER_BIT); <glw1>.bindFramebuffer(<glw1>.FRAMEBUFFER, null); <glw1>.deleteFramebuffer(wfboD);
+<extDrawBuf>.drawBuffersWEBGL([<extDrawBuf>.COLOR_ATTACHMENT0_WEBGL]); <extDrawBuf>.drawBuffersWEBGL([]); <extDrawBuf>.drawBuffersWEBGL([<extDrawBuf>.MAX_DRAW_BUFFERS_WEBGL]); <extDrawBuf>.drawBuffersWEBGL([<glint>]); <glw1>.getError();
+var wfboD2 = <glw1>.createFramebuffer(); var wtexD = <glw1>.createTexture(); <glw1>.bindTexture(<glw1>.TEXTURE_2D, wtexD); <glw1>.texImage2D(<glw1>.TEXTURE_2D, <TexInt>, <glw1>.RGBA, <TexInt>, <TexInt>, <TexInt>, <glw1>.RGBA, <glStts>, null); <glw1>.bindFramebuffer(<glw1>.FRAMEBUFFER, wfboD2); <glw1>.framebufferTexture2D(<glw1>.FRAMEBUFFER, <glw1>.COLOR_ATTACHMENT0, <glw1>.TEXTURE_2D, wtexD, <TexInt>); <extDrawBuf>.drawBuffersWEBGL([<extDrawBuf>.COLOR_ATTACHMENT0_WEBGL, 0]); <glw1>.checkFramebufferStatus(); <glw1>.deleteFramebuffer(wfboD2);
+
+# OES_draw_buffers_indexed: per-buffer blend and mask state, on a WebGL2 context
+# where it is an extension over the core MIX-equivalent calls.
+<extDrawIdxOES>.enableiOES(<gl>.BLEND, <TexInt>); <extDrawIdxOES>.disableiOES(<gl>.BLEND, <glint>); <extDrawIdxOES>.enableiOES(<gl>.POLYGON_OFFSET_FILL, <TexInt>); <extDrawIdxOES>.disableiOES(<gl>.SCISSOR_TEST, <TexInt>); <gl>.getError();
+<extDrawIdxOES>.blendEquationiOES(<TexInt>, <gEq>); <extDrawIdxOES>.blendEquationSeparateiOES(<TexInt>, <gEq>, <gEq_>); <extDrawIdxOES>.blendEquationiOES(<glint>, <gl>.FUNC_ADD); <extDrawIdxOES>.blendEquationSeparateiOES(<TexInt>, <gl>.FUNC_ADD, <gl>.FUNC_REVERSE_SUBTRACT);
+<extDrawIdxOES>.blendFunciOES(<TexInt>, <glFac>, <glFac_>); <extDrawIdxOES>.blendFuncSeparateiOES(<TexInt>, <glFac>, <glFac_>, <glFac>, <glFac_>); <extDrawIdxOES>.blendFuncSeparateiOES(<glint>, <gl>.SRC_ALPHA, <gl>.ONE_MINUS_SRC_ALPHA, <gl>.ONE, <gl>.ZERO); <extDrawIdxOES>.blendFunciOES(<TexInt>, <glint>, <glint>);
+<extDrawIdxOES>.colorMaskiOES(<TexInt>, <bool>, <bool>, <bool>, <bool>); <extDrawIdxOES>.colorMaskiOES(<glint>, <bool>, <bool>, <bool>, <bool>); <extDrawIdxOES>.colorMaskiOES(<TexInt>, <sint>, <TexInt>, <TexInt>, <TexInt>); <gl>.colorMask(<bool>, <bool>, <bool>, <bool>);
+<extDrawIdxOES>.enableiOES(<glint>, <glint>); <extDrawIdxOES>.disableiOES(<gl>.BLEND, <glint>); <extDrawIdxOES>.colorMaskiOES(<TexInt>, <TexInt>, <TexInt>, <TexInt>, <TexInt>); <extDrawIdxOES>.blendEquationiOES(<TexInt>, <glint>); <gl>.getError();
+
+# EXT_clip_control and EXT_polygon_offset_clamp. The clip enums are properties of
+# the extension object; gl.CLIP_ORIGIN_EXT does not exist on this build.
+<extClip>.clipControlEXT(<extClip>.LOWER_LEFT_EXT, <extClip>.ZERO_TO_ONE_EXT); <gl>.enable(<gl>.DEPTH_TEST); <extClip>.clipControlEXT(<extClip>.UPPER_LEFT_EXT, <extClip>.NEGATIVE_ONE_TO_ONE_EXT); <gl>.getParameter(<extClip>.CLIP_ORIGIN_EXT); <gl>.getParameter(<extClip>.CLIP_DEPTH_MODE_EXT);
+<extClip>.clipControlEXT(<glint>, <glint>); <extClip>.clipControlEXT(<extClip>.LOWER_LEFT_EXT, <glint>); <extClip>.clipControlEXT(<TexInt>, <TexInt>); <gl>.getError();
+<gl>.enable(<gl>.POLYGON_OFFSET_FILL); <extClamp>.polygonOffsetClampEXT(<GLclampf>, <GLclampf_>, <float min=-1 max=1>); <extClamp>.polygonOffsetClampEXT(<glint>, <glint>, <glint>); <gl>.getParameter(<extClamp>.POLYGON_OFFSET_CLAMP_EXT);
+<extClamp>.polygonOffsetClampEXT(1.0, 1.0, <float min=0 max=100>); <extClamp>.polygonOffsetClampEXT(<float min=-100 max=100>, <float min=-100 max=100>, <GLclampf>); <gl>.polygonOffset(<GLclampf>, <GLclampf_>); <gl>.disable(<gl>.POLYGON_OFFSET_FILL);
+
+# EXT_disjoint_timer_query: the WebGL1 timer query object, reached through a
+# WebGL2 context where this build still hands it out.
+var tq1 = <extTimer>.createQueryEXT(); <extTimer>.isQueryEXT(tq1); <extTimer>.getQueryEXT(<extTimer>.TIME_ELAPSED_EXT, <extTimer>.CURRENT_QUERY_EXT); <extTimer>.getQueryObjectEXT(tq1, <extTimer>.QUERY_RESULT_EXT); <extTimer>.getQueryObjectEXT(tq1, <extTimer>.QUERY_RESULT_AVAILABLE_EXT); <extTimer>.deleteQueryEXT(tq1); <extTimer>.isQueryEXT(tq1);
+var tq2 = <extTimer>.createQueryEXT(); <extTimer>.queryCounterEXT(tq2, <extTimer>.TIMESTAMP_EXT); <extTimer>.beginQueryEXT(<extTimer>.TIME_ELAPSED_EXT, tq2); <gl>.drawArrays(<gl>.POINTS, <TexInt>, <TexInt>); <extTimer>.getQueryEXT(<extTimer>.TIME_ELAPSED_EXT, <extTimer>.CURRENT_QUERY_EXT); <extTimer>.endQueryEXT(<extTimer>.TIME_ELAPSED_EXT); <extTimer>.getQueryObjectEXT(tq2, <extTimer>.QUERY_RESULT_EXT); <extTimer>.deleteQueryEXT(tq2);
+var tq3 = <extTimer>.createQueryEXT(); <extTimer>.beginQueryEXT(<glint>, tq3); <extTimer>.endQueryEXT(<glint>); <extTimer>.getQueryObjectEXT(null, <extTimer>.GPU_DISJOINT_EXT); <extTimer>.getQueryEXT(null, <extTimer>.QUERY_COUNTER_BITS_EXT); <extTimer>.deleteQueryEXT(null); <gl>.getParameter(<extTimer>.GPU_DISJOINT_EXT); <gl>.getError();
+
+# WEBGL_compressed_texture_astc: profile listing, and a compressed upload using a
+# block size the extension names.
+var astcProfiles = <extAstc>.getSupportedProfiles(); <extAstc>.getSupportedProfiles().length; <gl>.getSupportedExtensions().indexOf('WEBGL_compressed_texture_astc'); <extAstc>.getSupportedProfiles();
+var astcTex = <gl>.createTexture(); <gl>.bindTexture(<glTTrr>, astcTex); <gl>.compressedTexImage2D(<glTTrr>, <TexInt>, <extAstc>.COMPRESSED_RGBA_ASTC_4x4_KHR, <TexInt>, <TexInt>, <TexInt>, new Uint8Array(<TexInt>)); <gl>.getError(); <gl>.deleteTexture(astcTex);
+
+# WEBGL_debug_shaders reads the driver-side source, which only exists once the
+# shader has been compiled.
+var dsh1 = <gl>.createShader(<cShader>); <gl>.shaderSource(dsh1, <glSrc>); <gl>.compileShader(dsh1); <extDebug>.getTranslatedShaderSource(dsh1); <gl>.getShaderParameter(dsh1, <glShadP>); <gl>.deleteShader(dsh1);
+<extDebug>.getTranslatedShaderSource(<shader>); <extDebug>.getTranslatedShaderSource(null); <gl>.getError();
+
+# WEBGL_lose_context runs against glx, its own context: loseContext() holds the
+# context lost until the next tick, which would silence every later line drawn
+# from gl1/gl2, and a context-count of three is far from the per-process limit
+# that would force the harness's own context to be discarded.
+<extLose>.loseContext(); <glx>.isContextLost(); <glx>.getParameter(<glx>.VERSION); <extLose>.restoreContext(); <glx>.isContextLost();
+var loseBuf = <glx>.createBuffer(); <extLose>.loseContext(); <glx>.bindBuffer(<glx>.ARRAY_BUFFER, loseBuf); <glx>.createTexture(); <extLose>.restoreContext(); <glx>.isContextLost(); <glx>.deleteBuffer(loseBuf);
+<glx>.getExtension('WEBGL_lose_context').restoreContext(); <glx>.isContextLost(); <gl>.isContextLost(); <glx>.getContextAttributes();
+
+# provokingVertexWEBGL()/present() have no window global and no core-WebGL alias,
+# so the getExtension() result is the only receiver that can reach them. Both
+# extensions are optional: unsupported means null here and the guard eats it.
+<extProvoke>.provokingVertexWEBGL(<extProvoke>.FIRST_VERTEX_CONVENTION_WEBGL); <gl>.getParameter(<extProvoke>.PROVOKING_VERTEX_WEBGL); <extProvoke>.provokingVertexWEBGL(<extProvoke>.LAST_VERTEX_CONVENTION_WEBGL);
+<extProvoke>.provokingVertexWEBGL(<glint>); <extProvoke>.provokingVertexWEBGL(<TexInt>); <gl>.getError();
+<extPresent>.present(); <gl>.finish(); <extPresent>.present();
+
+# Color-space attributes and precision readback.
+#
+# drawingBufferColorSpace/unpackColorSpace are on both context names
+# (WebGLRenderingContext.webidl:540-541), so <gl> reaches them whether the canvas handed back a
+# WebGL2RenderingContext or a WebGLRenderingContext.
+#
+# Every rule below is receiver-literal on purpose. webgl.txt had no <new X> rule at all before
+# these lines, so its interesting-line pool (grammar.py:1031) was empty and all 250 draws came
+# from the uniform 230-statement pool; one <new prec> declaration made the three lines that read
+# <prec> the *only* interesting lines, and a measured 182 of 250 generated statements became
+# precision reads. Chained reads cost nothing: getShaderPrecisionFormat returns the object for a
+# valid shader/precision enum pair, so there is no null dereference for the guard to swallow.
+<gl>.drawingBufferColorSpace = <colorSpace>; <gl>.unpackColorSpace = <colorSpace>; <gl>.drawingBufferColorSpace; <gl>.unpackColorSpace;
+<gl>.unpackColorSpace = <colorSpace>; <gl>.pixelStorei(<gl>.UNPACK_FLIP_Y_WEBGL, <bool_>); <gl>.drawingBufferColorSpace; <gl>.getError();
+<gl>.drawingBufferColorSpace = "display-p3"; <gl>.drawingBufferColorSpace; <gl>.unpackColorSpace = "srgb"; <gl>.unpackColorSpace;
+var precObj = <gl>.getShaderPrecisionFormat(<cShader>, <glpType>); console.log(precObj.precision, precObj.rangeMin, precObj.rangeMax);
+<gl>.getShaderPrecisionFormat(<cShader>, <glpType>).precision; <gl>.getShaderPrecisionFormat(<cShader>, <glpType>).rangeMin; <gl>.getShaderPrecisionFormat(<cShader>, <glpType>).rangeMax;
+<gl>.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT).precision; <gl>.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.LOW_INT).rangeMax;
+<gl>.getShaderPrecisionFormat(<cShader>, <glpType>).rangeMin + <gl>.getShaderPrecisionFormat(<cShader>, <glpType>).rangeMax;
+<gl>.getShaderPrecisionFormat(<cShader>, gl.MEDIUM_INT).precision; <gl>.getShaderPrecisionFormat(<cShader>, gl.HIGH_INT).rangeMin;
+var vPrec = <gl>.getShaderPrecisionFormat(gl.VERTEX_SHADER, <glpType>); var fPrec = <gl>.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, <glpType>); console.log(vPrec.precision, vPrec.rangeMin, fPrec.precision, fPrec.rangeMax);
+
+# WebGLContextEvent.statusMessage (WebGLContextEvent.webidl:13) only ever arrives with the event,
+# so the receiver has to be a listener. glxcanvas is the throwaway context WEBGL_lose_context
+# already runs against, which is what produces the lost/restored pair; the creation-error listener
+# is registered without firing it.
+glxcanvas.addEventListener('webglcontextlost', function(evt){ evt.statusMessage; evt.preventDefault(); });
+glxcanvas.addEventListener('webglcontextrestored', function(evt){ evt.statusMessage; evt.type; });
+glxcanvas.addEventListener('webglcontextcreationerror', function(evt){ console.log(evt.statusMessage); });
+var loseEvtExt = <glx>.getExtension('WEBGL_lose_context'); loseEvtExt.loseContext(); loseEvtExt.restoreContext(); <glx>.isContextLost();
+<gl>.getExtension('WEBGL_lose_context'); glcanvas.addEventListener('webglcontextlost', function(evt){ evt.statusMessage; });
 
 !end lines

@@ -11,7 +11,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-
 <root root=true> = <lines count=1000>
 
 !lineguard try { <line> } catch(e) { }
@@ -861,7 +860,7 @@ document.getAnimations().forEach(function(animation){ if(animation instanceof CS
 <HTMLButtonElement>.appendChild(<HTMLSelectedContentElement>);
 <HTMLSelectElement>.appendChild(<HTMLButtonElement>);
 <new HTMLOptionElement> = document.createElement("option");
-<HTMLOptionElement>.textContent = "<DOMString>";
+<HTMLOptionElement>.textContent = <DOMString>;
 <HTMLSelectElement>.appendChild(<HTMLOptionElement>);
 <new HTMLSelectedContentElement> = <HTMLSelectElement>.querySelector("selectedcontent");
 <new boolean> = <HTMLSelectElement>.autofocus;
@@ -2030,6 +2029,8 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <new long> = <PointerEvent>.tiltY;
 <new DOMString> = <PointerEvent>.pointerType;
 <new boolean> = <PointerEvent>.isPrimary;
+<new PointerEvent[]> = new PointerEvent("pointermove", { pointerId:<fuzzint>, clientX:<fuzzint>, clientY:<fuzzint>, pointerType:"mouse" }).getCoalescedEvents();
+<new PointerEvent[]> = <PointerEvent>.getCoalescedEvents();
 
 #PromiseRejectionEvent
 !extends PromiseRejectionEvent Event
@@ -2060,7 +2061,8 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <new DOMString> = <InputEvent>.data;
 <new DataTransfer> = <InputEvent>.dataTransfer;
 <new boolean> = <InputEvent>.isComposing;
-<new sequence_StaticRange_> = <InputEvent>.getTargetRanges();
+<new long> = <InputEvent>.getTargetRanges().length;
+<new StaticRange> = <InputEvent>.getTargetRanges()[<fuzzint min=0 max=0>];
 
 #PageTransitionEvent
 !extends PageTransitionEvent Event
@@ -2138,11 +2140,6 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <new DOMString> = <AnimationEvent>.animationName;
 <new double> = <AnimationEvent>.elapsedTime;
 
-#RelatedEvent
-!extends RelatedEvent Event
-<new Event> = <RelatedEvent>;
-<new EventTarget> = <RelatedEvent>.relatedTarget;
-
 #ErrorEvent
 !extends ErrorEvent Event
 <new Event> = <ErrorEvent>;
@@ -2204,14 +2201,6 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <new Event> = <CustomEvent>;
 <new any> = <CustomEvent>.detail;
 <CustomEvent>.initCustomEvent(<DOMString>,<boolean>,<boolean>,<any>);
-
-#ApplicationCacheErrorEvent
-!extends ApplicationCacheErrorEvent Event
-<new Event> = <ApplicationCacheErrorEvent>;
-<new DOMString> = <ApplicationCacheErrorEvent>.reason;
-<new DOMString> = <ApplicationCacheErrorEvent>.url;
-<new short> = <ApplicationCacheErrorEvent>.status;
-<new DOMString> = <ApplicationCacheErrorEvent>.message;
 
 #BeforeUnloadEvent
 !extends BeforeUnloadEvent Event
@@ -2307,7 +2296,7 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 
 #FontFace
 <new DOMString> = <FontFace>.family;
-<FontFace>.family = "<cssproperty_font-family>";
+<FontFace>.family = "<cssproperty_font-family beforeoutput=domatoJsString>";
 <new DOMString> = <FontFace>.style;
 <FontFace>.style = "<import from=cssgrammar symbol=declaration5>";
 <FontFace>.style = <DOMString>;
@@ -2329,10 +2318,10 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <new sequence_FontFace_> = new Array(<FontFace>);
 
 <new DOMString> = <FontFace>.src;
-<FontFace>.src = "<cssproperty_font-src>";
-<new FontFace> = new FontFace("<cssproperty_font-family>", "<cssproperty_font-src>", {});
-<new FontFace> = new FontFace("<cssproperty_font-family>", "<cssproperty_font-src>", {<fontfacedescriptor>});
-<new FontFace> = new FontFace("<cssproperty_font-family>", "<cssproperty_font-src>", {<fontfacedescriptor>, <fontfacedescriptor>, <fontfacedescriptor>});
+<FontFace>.src = "<cssproperty_font-src beforeoutput=domatoJsString>";
+<new FontFace> = new FontFace("<cssproperty_font-family beforeoutput=domatoJsString>", "<cssproperty_font-src beforeoutput=domatoJsString>", {});
+<new FontFace> = new FontFace("<cssproperty_font-family beforeoutput=domatoJsString>", "<cssproperty_font-src beforeoutput=domatoJsString>", {<fontfacedescriptor>});
+<new FontFace> = new FontFace("<cssproperty_font-family beforeoutput=domatoJsString>", "<cssproperty_font-src beforeoutput=domatoJsString>", {<fontfacedescriptor>, <fontfacedescriptor>, <fontfacedescriptor>});
 
 #CSSViewportRule
 !extends CSSViewportRule CSSRule
@@ -2395,7 +2384,7 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <new DOMString> = <CSSStyleDeclaration id=1>.removeProperty(<CSSStyleDeclaration id=1>[<int min=0 max=100>%<CSSStyleDeclaration id=1>.length]);
 <new CSSRule> = <CSSStyleDeclaration>.parentRule;
 <new DOMString> = <CSSStyleDeclaration>.cssFloat;
-<CSSStyleDeclaration>.cssFloat = "<cssproperty_float>";
+<CSSStyleDeclaration>.cssFloat = "<cssproperty_float beforeoutput=domatoJsString>";
 <new DOMString> = <CSSStyleDeclaration id=1>[<int min=0 max=100>%<CSSStyleDeclaration id=1>.length];
 <new DOMString> = <CSSStyleDeclaration>[<string_cssproperty>];
 <CSSStyleDeclaration>[<string_cssproperty>] = <string_cssvalue>;
@@ -2875,7 +2864,6 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <Document>.captureEvents();
 <Document>.releaseEvents();
 <new HTMLAllCollection> = <Document>.all;
-
 
 #NonElementParentNode
 <new Element> = <Document>.getElementById("<elementid>");
@@ -4032,502 +4020,500 @@ customElements.define("domato-form-control", class extends HTMLElement { static 
 <Element>.setAttribute("onwebkittransitionend", "<eventhandlerstr>");
 <Element>.setAttribute("onwheel", "<eventhandlerstr>");
 
-
-
-<CSSStyleDeclaration>.setProperty("-ms-flex-align", "<cssproperty_-ms-flex-align>");
-<CSSStyleDeclaration>.setProperty("-ms-font-feature-settings", "<cssproperty_-ms-font-feature-settings>");
-<CSSStyleDeclaration>.setProperty("-ms-text-combine-horizontal", "<cssproperty_-ms-text-combine-horizontal>");
-<CSSStyleDeclaration>.setProperty("-ms-user-select", "<cssproperty_-ms-user-select>");
-<CSSStyleDeclaration>.setProperty("-webkit-align-content", "<cssproperty_-webkit-align-content>");
-<CSSStyleDeclaration>.setProperty("-webkit-align-items", "<cssproperty_-webkit-align-items>");
-<CSSStyleDeclaration>.setProperty("-webkit-align-self", "<cssproperty_-webkit-align-self>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation", "<cssproperty_-webkit-animation>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-delay", "<cssproperty_-webkit-animation-delay>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-direction", "<cssproperty_-webkit-animation-direction>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-duration", "<cssproperty_-webkit-animation-duration>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-fill-mode", "<cssproperty_-webkit-animation-fill-mode>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-iteration-count", "<cssproperty_-webkit-animation-iteration-count>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-name", "<cssproperty_-webkit-animation-name>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-play-state", "<cssproperty_-webkit-animation-play-state>");
-<CSSStyleDeclaration>.setProperty("-webkit-animation-timing-function", "<cssproperty_-webkit-animation-timing-function>");
-<CSSStyleDeclaration>.setProperty("-webkit-app-region", "<cssproperty_-webkit-app-region>");
-<CSSStyleDeclaration>.setProperty("-webkit-appearance", "<cssproperty_-webkit-appearance>");
-<CSSStyleDeclaration>.setProperty("-webkit-backface-visibility", "<cssproperty_-webkit-backface-visibility>");
-<CSSStyleDeclaration>.setProperty("-webkit-background-clip", "<cssproperty_-webkit-background-clip>");
-<CSSStyleDeclaration>.setProperty("-webkit-background-origin", "<cssproperty_-webkit-background-origin>");
-<CSSStyleDeclaration>.setProperty("-webkit-background-size", "<cssproperty_-webkit-background-size>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-after", "<cssproperty_-webkit-border-after>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-after-color", "<cssproperty_-webkit-border-after-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-after-width", "<cssproperty_-webkit-border-after-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-before", "<cssproperty_-webkit-border-before>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-before-color", "<cssproperty_-webkit-border-before-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-before-style", "<cssproperty_-webkit-border-before-style>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-before-width", "<cssproperty_-webkit-border-before-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-bottom-left-radius", "<cssproperty_-webkit-border-bottom-left-radius>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-bottom-right-radius", "<cssproperty_-webkit-border-bottom-right-radius>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-end", "<cssproperty_-webkit-border-end>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-end-color", "<cssproperty_-webkit-border-end-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-end-width", "<cssproperty_-webkit-border-end-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-image", "<cssproperty_-webkit-border-image>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-radius", "<cssproperty_-webkit-border-radius>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-start", "<cssproperty_-webkit-border-start>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-start-color", "<cssproperty_-webkit-border-start-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-start-width", "<cssproperty_-webkit-border-start-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-top-left-radius", "<cssproperty_-webkit-border-top-left-radius>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-top-right-radius", "<cssproperty_-webkit-border-top-right-radius>");
-<CSSStyleDeclaration>.setProperty("-webkit-border-vertical-spacing", "<cssproperty_-webkit-border-vertical-spacing>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-align", "<cssproperty_-webkit-box-align>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-decoration-break", "<cssproperty_-webkit-box-decoration-break>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-direction", "<cssproperty_-webkit-box-direction>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-flex", "<cssproperty_-webkit-box-flex>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-flex-group", "<cssproperty_-webkit-box-flex-group>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-lines", "<cssproperty_-webkit-box-lines>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-ordinal-group", "<cssproperty_-webkit-box-ordinal-group>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-orient", "<cssproperty_-webkit-box-orient>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-pack", "<cssproperty_-webkit-box-pack>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-reflect", "<cssproperty_-webkit-box-reflect>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-shadow", "<cssproperty_-webkit-box-shadow>");
-<CSSStyleDeclaration>.setProperty("-webkit-box-sizing", "<cssproperty_-webkit-box-sizing>");
-<CSSStyleDeclaration>.setProperty("-webkit-clip-path", "<cssproperty_-webkit-clip-path>");
-<CSSStyleDeclaration>.setProperty("-webkit-color-correction", "<cssproperty_-webkit-color-correction>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-break-after", "<cssproperty_-webkit-column-break-after>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-break-before", "<cssproperty_-webkit-column-break-before>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-break-inside", "<cssproperty_-webkit-column-break-inside>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-count", "<cssproperty_-webkit-column-count>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-fill", "<cssproperty_-webkit-column-fill>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-gap", "<cssproperty_-webkit-column-gap>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-rule", "<cssproperty_-webkit-column-rule>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-rule-color", "<cssproperty_-webkit-column-rule-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-rule-style", "<cssproperty_-webkit-column-rule-style>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-rule-width", "<cssproperty_-webkit-column-rule-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-span", "<cssproperty_-webkit-column-span>");
-<CSSStyleDeclaration>.setProperty("-webkit-column-width", "<cssproperty_-webkit-column-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-columns", "<cssproperty_-webkit-columns>");
-<CSSStyleDeclaration>.setProperty("-webkit-direction", "<cssproperty_-webkit-direction>");
-<CSSStyleDeclaration>.setProperty("-webkit-filter", "<cssproperty_-webkit-filter>");
-<CSSStyleDeclaration>.setProperty("-webkit-flex", "<cssproperty_-webkit-flex>");
-<CSSStyleDeclaration>.setProperty("-webkit-flex-direction", "<cssproperty_-webkit-flex-direction>");
-<CSSStyleDeclaration>.setProperty("-webkit-flex-wrap", "<cssproperty_-webkit-flex-wrap>");
-<CSSStyleDeclaration>.setProperty("-webkit-flow-from", "<cssproperty_-webkit-flow-from>");
-<CSSStyleDeclaration>.setProperty("-webkit-flow-into", "<cssproperty_-webkit-flow-into>");
-<CSSStyleDeclaration>.setProperty("-webkit-font-feature-settings", "<cssproperty_-webkit-font-feature-settings>");
-<CSSStyleDeclaration>.setProperty("-webkit-font-smoothing", "<cssproperty_-webkit-font-smoothing>");
-<CSSStyleDeclaration>.setProperty("-webkit-highlight", "<cssproperty_-webkit-highlight>");
-<CSSStyleDeclaration>.setProperty("-webkit-hyphenate-character", "<cssproperty_-webkit-hyphenate-character>");
-<CSSStyleDeclaration>.setProperty("-webkit-hyphens", "<cssproperty_-webkit-hyphens>");
-<CSSStyleDeclaration>.setProperty("-webkit-justify-content", "<cssproperty_-webkit-justify-content>");
-<CSSStyleDeclaration>.setProperty("-webkit-line-break", "<cssproperty_-webkit-line-break>");
-<CSSStyleDeclaration>.setProperty("-webkit-line-clamp", "<cssproperty_-webkit-line-clamp>");
-<CSSStyleDeclaration>.setProperty("-webkit-locale", "<cssproperty_-webkit-locale>");
-<CSSStyleDeclaration>.setProperty("-webkit-logical-height", "<cssproperty_-webkit-logical-height>");
-<CSSStyleDeclaration>.setProperty("-webkit-logical-width", "<cssproperty_-webkit-logical-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-after", "<cssproperty_-webkit-margin-after>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-after-collapse", "<cssproperty_-webkit-margin-after-collapse>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-before", "<cssproperty_-webkit-margin-before>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-before-collapse", "<cssproperty_-webkit-margin-before-collapse>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-bottom-collapse", "<cssproperty_-webkit-margin-bottom-collapse>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-collapse", "<cssproperty_-webkit-margin-collapse>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-end", "<cssproperty_-webkit-margin-end>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-start", "<cssproperty_-webkit-margin-start>");
-<CSSStyleDeclaration>.setProperty("-webkit-margin-top-collapse", "<cssproperty_-webkit-margin-top-collapse>");
-<CSSStyleDeclaration>.setProperty("-webkit-marquee-speed", "<cssproperty_-webkit-marquee-speed>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask", "<cssproperty_-webkit-mask>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image", "<cssproperty_-webkit-mask-box-image>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-outset", "<cssproperty_-webkit-mask-box-image-outset>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-repeat", "<cssproperty_-webkit-mask-box-image-repeat>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-slice", "<cssproperty_-webkit-mask-box-image-slice>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-source", "<cssproperty_-webkit-mask-box-image-source>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-width", "<cssproperty_-webkit-mask-box-image-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-clip", "<cssproperty_-webkit-mask-clip>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-composite", "<cssproperty_-webkit-mask-composite>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-image", "<cssproperty_-webkit-mask-image>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-origin", "<cssproperty_-webkit-mask-origin>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-position", "<cssproperty_-webkit-mask-position>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-repeat", "<cssproperty_-webkit-mask-repeat>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-repeat-y", "<cssproperty_-webkit-mask-repeat-y>");
-<CSSStyleDeclaration>.setProperty("-webkit-mask-size", "<cssproperty_-webkit-mask-size>");
-<CSSStyleDeclaration>.setProperty("-webkit-min-logical-height", "<cssproperty_-webkit-min-logical-height>");
-<CSSStyleDeclaration>.setProperty("-webkit-nbsp-mode", "<cssproperty_-webkit-nbsp-mode>");
-<CSSStyleDeclaration>.setProperty("-webkit-opacity", "<cssproperty_-webkit-opacity>");
-<CSSStyleDeclaration>.setProperty("-webkit-overflow-scrolling", "<cssproperty_-webkit-overflow-scrolling>");
-<CSSStyleDeclaration>.setProperty("-webkit-padding-after", "<cssproperty_-webkit-padding-after>");
-<CSSStyleDeclaration>.setProperty("-webkit-padding-before", "<cssproperty_-webkit-padding-before>");
-<CSSStyleDeclaration>.setProperty("-webkit-padding-end", "<cssproperty_-webkit-padding-end>");
-<CSSStyleDeclaration>.setProperty("-webkit-padding-start", "<cssproperty_-webkit-padding-start>");
-<CSSStyleDeclaration>.setProperty("-webkit-perspective", "<cssproperty_-webkit-perspective>");
-<CSSStyleDeclaration>.setProperty("-webkit-perspective-origin", "<cssproperty_-webkit-perspective-origin>");
-<CSSStyleDeclaration>.setProperty("-webkit-perspective-origin-x", "<cssproperty_-webkit-perspective-origin-x>");
-<CSSStyleDeclaration>.setProperty("-webkit-perspective-origin-y", "<cssproperty_-webkit-perspective-origin-y>");
-<CSSStyleDeclaration>.setProperty("-webkit-print-color-adjust", "<cssproperty_-webkit-print-color-adjust>");
-<CSSStyleDeclaration>.setProperty("-webkit-rtl-ordering", "<cssproperty_-webkit-rtl-ordering>");
-<CSSStyleDeclaration>.setProperty("-webkit-ruby-position", "<cssproperty_-webkit-ruby-position>");
-<CSSStyleDeclaration>.setProperty("-webkit-shape-margin", "<cssproperty_-webkit-shape-margin>");
-<CSSStyleDeclaration>.setProperty("-webkit-shape-outside", "<cssproperty_-webkit-shape-outside>");
-<CSSStyleDeclaration>.setProperty("-webkit-tap-highlight-color", "<cssproperty_-webkit-tap-highlight-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-combine", "<cssproperty_-webkit-text-combine>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-decorations-in-effect", "<cssproperty_-webkit-text-decorations-in-effect>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis", "<cssproperty_-webkit-text-emphasis>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis-color", "<cssproperty_-webkit-text-emphasis-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis-position", "<cssproperty_-webkit-text-emphasis-position>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis-style", "<cssproperty_-webkit-text-emphasis-style>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-fill-color", "<cssproperty_-webkit-text-fill-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-orientation", "<cssproperty_-webkit-text-orientation>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-security", "<cssproperty_-webkit-text-security>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-stroke", "<cssproperty_-webkit-text-stroke>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-stroke-color", "<cssproperty_-webkit-text-stroke-color>");
-<CSSStyleDeclaration>.setProperty("-webkit-text-stroke-width", "<cssproperty_-webkit-text-stroke-width>");
-<CSSStyleDeclaration>.setProperty("-webkit-transform", "<cssproperty_-webkit-transform>");
-<CSSStyleDeclaration>.setProperty("-webkit-transform-origin", "<cssproperty_-webkit-transform-origin>");
-<CSSStyleDeclaration>.setProperty("-webkit-transform-style", "<cssproperty_-webkit-transform-style>");
-<CSSStyleDeclaration>.setProperty("-webkit-transition", "<cssproperty_-webkit-transition>");
-<CSSStyleDeclaration>.setProperty("-webkit-transition-delay", "<cssproperty_-webkit-transition-delay>");
-<CSSStyleDeclaration>.setProperty("-webkit-transition-duration", "<cssproperty_-webkit-transition-duration>");
-<CSSStyleDeclaration>.setProperty("-webkit-transition-property", "<cssproperty_-webkit-transition-property>");
-<CSSStyleDeclaration>.setProperty("-webkit-transition-timing-function", "<cssproperty_-webkit-transition-timing-function>");
-<CSSStyleDeclaration>.setProperty("-webkit-user-drag", "<cssproperty_-webkit-user-drag>");
-<CSSStyleDeclaration>.setProperty("-webkit-user-modify", "<cssproperty_-webkit-user-modify>");
-<CSSStyleDeclaration>.setProperty("-webkit-user-select", "<cssproperty_-webkit-user-select>");
-<CSSStyleDeclaration>.setProperty("-webkit-wrap-flow", "<cssproperty_-webkit-wrap-flow>");
-<CSSStyleDeclaration>.setProperty("-webkit-writing-mode", "<cssproperty_-webkit-writing-mode>");
-<CSSStyleDeclaration>.setProperty("align-content", "<cssproperty_align-content>");
-<CSSStyleDeclaration>.setProperty("align-items", "<cssproperty_align-items>");
-<CSSStyleDeclaration>.setProperty("align-self", "<cssproperty_align-self>");
-<CSSStyleDeclaration>.setProperty("alignx", "<cssproperty_alignx>");
-<CSSStyleDeclaration>.setProperty("animation", "<cssproperty_animation>");
-<CSSStyleDeclaration>.setProperty("animation-delay", "<cssproperty_animation-delay>");
-<CSSStyleDeclaration>.setProperty("animation-direction", "<cssproperty_animation-direction>");
-<CSSStyleDeclaration>.setProperty("animation-duration", "<cssproperty_animation-duration>");
-<CSSStyleDeclaration>.setProperty("animation-fill-mode", "<cssproperty_animation-fill-mode>");
-<CSSStyleDeclaration>.setProperty("animation-iteration-count", "<cssproperty_animation-iteration-count>");
-<CSSStyleDeclaration>.setProperty("animation-name", "<cssproperty_animation-name>");
-<CSSStyleDeclaration>.setProperty("animation-play-state", "<cssproperty_animation-play-state>");
-<CSSStyleDeclaration>.setProperty("animation-timing-function", "<cssproperty_animation-timing-function>");
-<CSSStyleDeclaration>.setProperty("backdrop-filter", "<cssproperty_backdrop-filter>");
-<CSSStyleDeclaration>.setProperty("backface-visibility", "<cssproperty_backface-visibility>");
-<CSSStyleDeclaration>.setProperty("background", "<cssproperty_background>");
-<CSSStyleDeclaration>.setProperty("background-attachment", "<cssproperty_background-attachment>");
-<CSSStyleDeclaration>.setProperty("background-blend-mode", "<cssproperty_background-blend-mode>");
-<CSSStyleDeclaration>.setProperty("background-clip", "<cssproperty_background-clip>");
-<CSSStyleDeclaration>.setProperty("background-color", "<cssproperty_background-color>");
-<CSSStyleDeclaration>.setProperty("background-image", "<cssproperty_background-image>");
-<CSSStyleDeclaration>.setProperty("background-origin", "<cssproperty_background-origin>");
-<CSSStyleDeclaration>.setProperty("background-position", "<cssproperty_background-position>");
-<CSSStyleDeclaration>.setProperty("background-position-x", "<cssproperty_background-position-x>");
-<CSSStyleDeclaration>.setProperty("background-repeat", "<cssproperty_background-repeat>");
-<CSSStyleDeclaration>.setProperty("background-repeat-x", "<cssproperty_background-repeat-x>");
-<CSSStyleDeclaration>.setProperty("background-repeat-y", "<cssproperty_background-repeat-y>");
-<CSSStyleDeclaration>.setProperty("background-size", "<cssproperty_background-size>");
-<CSSStyleDeclaration>.setProperty("baseline-shift", "<cssproperty_baseline-shift>");
-<CSSStyleDeclaration>.setProperty("border", "<cssproperty_border>");
-<CSSStyleDeclaration>.setProperty("border-bottom", "<cssproperty_border-bottom>");
-<CSSStyleDeclaration>.setProperty("border-bottom-color", "<cssproperty_border-bottom-color>");
-<CSSStyleDeclaration>.setProperty("border-bottom-left-radius", "<cssproperty_border-bottom-left-radius>");
-<CSSStyleDeclaration>.setProperty("border-bottom-right-radius", "<cssproperty_border-bottom-right-radius>");
-<CSSStyleDeclaration>.setProperty("border-bottom-style", "<cssproperty_border-bottom-style>");
-<CSSStyleDeclaration>.setProperty("border-bottom-width", "<cssproperty_border-bottom-width>");
-<CSSStyleDeclaration>.setProperty("border-collapse", "<cssproperty_border-collapse>");
-<CSSStyleDeclaration>.setProperty("border-color", "<cssproperty_border-color>");
-<CSSStyleDeclaration>.setProperty("border-image", "<cssproperty_border-image>");
-<CSSStyleDeclaration>.setProperty("border-image-outset", "<cssproperty_border-image-outset>");
-<CSSStyleDeclaration>.setProperty("border-image-repeat", "<cssproperty_border-image-repeat>");
-<CSSStyleDeclaration>.setProperty("border-image-slice", "<cssproperty_border-image-slice>");
-<CSSStyleDeclaration>.setProperty("border-image-source", "<cssproperty_border-image-source>");
-<CSSStyleDeclaration>.setProperty("border-image-width", "<cssproperty_border-image-width>");
-<CSSStyleDeclaration>.setProperty("border-left", "<cssproperty_border-left>");
-<CSSStyleDeclaration>.setProperty("border-left-color", "<cssproperty_border-left-color>");
-<CSSStyleDeclaration>.setProperty("border-left-style", "<cssproperty_border-left-style>");
-<CSSStyleDeclaration>.setProperty("border-left-width", "<cssproperty_border-left-width>");
-<CSSStyleDeclaration>.setProperty("border-radius", "<cssproperty_border-radius>");
-<CSSStyleDeclaration>.setProperty("border-right", "<cssproperty_border-right>");
-<CSSStyleDeclaration>.setProperty("border-right-color", "<cssproperty_border-right-color>");
-<CSSStyleDeclaration>.setProperty("border-right-style", "<cssproperty_border-right-style>");
-<CSSStyleDeclaration>.setProperty("border-right-width", "<cssproperty_border-right-width>");
-<CSSStyleDeclaration>.setProperty("border-size", "<cssproperty_border-size>");
-<CSSStyleDeclaration>.setProperty("border-spacing", "<cssproperty_border-spacing>");
-<CSSStyleDeclaration>.setProperty("border-style", "<cssproperty_border-style>");
-<CSSStyleDeclaration>.setProperty("border-top", "<cssproperty_border-top>");
-<CSSStyleDeclaration>.setProperty("border-top-color", "<cssproperty_border-top-color>");
-<CSSStyleDeclaration>.setProperty("border-top-left-radius", "<cssproperty_border-top-left-radius>");
-<CSSStyleDeclaration>.setProperty("border-top-right-radius", "<cssproperty_border-top-right-radius>");
-<CSSStyleDeclaration>.setProperty("border-top-style", "<cssproperty_border-top-style>");
-<CSSStyleDeclaration>.setProperty("border-top-width", "<cssproperty_border-top-width>");
-<CSSStyleDeclaration>.setProperty("border-width", "<cssproperty_border-width>");
-<CSSStyleDeclaration>.setProperty("bottom", "<cssproperty_bottom>");
-<CSSStyleDeclaration>.setProperty("box-align", "<cssproperty_box-align>");
-<CSSStyleDeclaration>.setProperty("box-decoration-break", "<cssproperty_box-decoration-break>");
-<CSSStyleDeclaration>.setProperty("box-direction", "<cssproperty_box-direction>");
-<CSSStyleDeclaration>.setProperty("box-flex", "<cssproperty_box-flex>");
-<CSSStyleDeclaration>.setProperty("box-flex-group", "<cssproperty_box-flex-group>");
-<CSSStyleDeclaration>.setProperty("box-ordinal-group", "<cssproperty_box-ordinal-group>");
-<CSSStyleDeclaration>.setProperty("box-orient", "<cssproperty_box-orient>");
-<CSSStyleDeclaration>.setProperty("box-pack", "<cssproperty_box-pack>");
-<CSSStyleDeclaration>.setProperty("box-reflect", "<cssproperty_box-reflect>");
-<CSSStyleDeclaration>.setProperty("box-shadow", "<cssproperty_box-shadow>");
-<CSSStyleDeclaration>.setProperty("box-sizing", "<cssproperty_box-sizing>");
-<CSSStyleDeclaration>.setProperty("break-after", "<cssproperty_break-after>");
-<CSSStyleDeclaration>.setProperty("break-before", "<cssproperty_break-before>");
-<CSSStyleDeclaration>.setProperty("break-inside", "<cssproperty_break-inside>");
-<CSSStyleDeclaration>.setProperty("caption-side", "<cssproperty_caption-side>");
-<CSSStyleDeclaration>.setProperty("cellpadding", "<cssproperty_cellpadding>");
-<CSSStyleDeclaration>.setProperty("cellspacing", "<cssproperty_cellspacing>");
-<CSSStyleDeclaration>.setProperty("clear", "<cssproperty_clear>");
-<CSSStyleDeclaration>.setProperty("clip", "<cssproperty_clip>");
-<CSSStyleDeclaration>.setProperty("clip-path", "<cssproperty_clip-path>");
-<CSSStyleDeclaration>.setProperty("color", "<cssproperty_color>");
-<CSSStyleDeclaration>.setProperty("color-interpolation-filters", "<cssproperty_color-interpolation-filters>");
-<CSSStyleDeclaration>.setProperty("color-profile", "<cssproperty_color-profile>");
-<CSSStyleDeclaration>.setProperty("column-break-after", "<cssproperty_column-break-after>");
-<CSSStyleDeclaration>.setProperty("column-break-before", "<cssproperty_column-break-before>");
-<CSSStyleDeclaration>.setProperty("column-count", "<cssproperty_column-count>");
-<CSSStyleDeclaration>.setProperty("column-fill", "<cssproperty_column-fill>");
-<CSSStyleDeclaration>.setProperty("column-gap", "<cssproperty_column-gap>");
-<CSSStyleDeclaration>.setProperty("column-rule", "<cssproperty_column-rule>");
-<CSSStyleDeclaration>.setProperty("column-rule-style", "<cssproperty_column-rule-style>");
-<CSSStyleDeclaration>.setProperty("column-span", "<cssproperty_column-span>");
-<CSSStyleDeclaration>.setProperty("column-width", "<cssproperty_column-width>");
-<CSSStyleDeclaration>.setProperty("columns", "<cssproperty_columns>");
-<CSSStyleDeclaration>.setProperty("contain", "<cssproperty_contain>");
-<CSSStyleDeclaration>.setProperty("content", "<cssproperty_content>");
-<CSSStyleDeclaration>.setProperty("counter-increment", "<cssproperty_counter-increment>");
-<CSSStyleDeclaration>.setProperty("counter-reset", "<cssproperty_counter-reset>");
-<CSSStyleDeclaration>.setProperty("css-float", "<cssproperty_css-float>");
-<CSSStyleDeclaration>.setProperty("cursor", "<cssproperty_cursor>");
-<CSSStyleDeclaration>.setProperty("cx", "<cssproperty_cx>");
-<CSSStyleDeclaration>.setProperty("cy", "<cssproperty_cy>");
-<CSSStyleDeclaration>.setProperty("direction", "<cssproperty_direction>");
-<CSSStyleDeclaration>.setProperty("display", "<cssproperty_display>");
-<CSSStyleDeclaration>.setProperty("dominant-baseline", "<cssproperty_dominant-baseline>");
-<CSSStyleDeclaration>.setProperty("empty-cells", "<cssproperty_empty-cells>");
-<CSSStyleDeclaration>.setProperty("fill", "<cssproperty_fill>");
-<CSSStyleDeclaration>.setProperty("fill-opacity", "<cssproperty_fill-opacity>");
-<CSSStyleDeclaration>.setProperty("fill-rule", "<cssproperty_fill-rule>");
-<CSSStyleDeclaration>.setProperty("filter", "<cssproperty_filter>");
-<CSSStyleDeclaration>.setProperty("flex", "<cssproperty_flex>");
-<CSSStyleDeclaration>.setProperty("flex-basis", "<cssproperty_flex-basis>");
-<CSSStyleDeclaration>.setProperty("flex-direction", "<cssproperty_flex-direction>");
-<CSSStyleDeclaration>.setProperty("flex-flow", "<cssproperty_flex-flow>");
-<CSSStyleDeclaration>.setProperty("flex-grow", "<cssproperty_flex-grow>");
-<CSSStyleDeclaration>.setProperty("flex-shrink", "<cssproperty_flex-shrink>");
-<CSSStyleDeclaration>.setProperty("flex-wrap", "<cssproperty_flex-wrap>");
-<CSSStyleDeclaration>.setProperty("float", "<cssproperty_float>");
-<CSSStyleDeclaration>.setProperty("flood-color", "<cssproperty_flood-color>");
-<CSSStyleDeclaration>.setProperty("flood-opacity", "<cssproperty_flood-opacity>");
-<CSSStyleDeclaration>.setProperty("font", "<cssproperty_font>");
-<CSSStyleDeclaration>.setProperty("font-face", "<cssproperty_font-face>");
-<CSSStyleDeclaration>.setProperty("font-family", "<cssproperty_font-family>");
-<CSSStyleDeclaration>.setProperty("font-feature-settings", "<cssproperty_font-feature-settings>");
-<CSSStyleDeclaration>.setProperty("font-kerning", "<cssproperty_font-kerning>");
-<CSSStyleDeclaration>.setProperty("font-size", "<cssproperty_font-size>");
-<CSSStyleDeclaration>.setProperty("font-size-adjust", "<cssproperty_font-size-adjust>");
-<CSSStyleDeclaration>.setProperty("font-stretch", "<cssproperty_font-stretch>");
-<CSSStyleDeclaration>.setProperty("font-style", "<cssproperty_font-style>");
-<CSSStyleDeclaration>.setProperty("font-variant", "<cssproperty_font-variant>");
-<CSSStyleDeclaration>.setProperty("font-variant-caps", "<cssproperty_font-variant-caps>");
-<CSSStyleDeclaration>.setProperty("font-variant-ligatures", "<cssproperty_font-variant-ligatures>");
-<CSSStyleDeclaration>.setProperty("font-vendor", "<cssproperty_font-vendor>");
-<CSSStyleDeclaration>.setProperty("font-weight", "<cssproperty_font-weight>");
-<CSSStyleDeclaration>.setProperty("grid", "<cssproperty_grid>");
-<CSSStyleDeclaration>.setProperty("grid-area", "<cssproperty_grid-area>");
-<CSSStyleDeclaration>.setProperty("grid-auto-columns", "<cssproperty_grid-auto-columns>");
-<CSSStyleDeclaration>.setProperty("grid-auto-flow", "<cssproperty_grid-auto-flow>");
-<CSSStyleDeclaration>.setProperty("grid-auto-rows", "<cssproperty_grid-auto-rows>");
-<CSSStyleDeclaration>.setProperty("grid-column", "<cssproperty_grid-column>");
-<CSSStyleDeclaration>.setProperty("grid-column-end", "<cssproperty_grid-column-end>");
-<CSSStyleDeclaration>.setProperty("grid-column-gap", "<cssproperty_grid-column-gap>");
-<CSSStyleDeclaration>.setProperty("grid-column-start", "<cssproperty_grid-column-start>");
-<CSSStyleDeclaration>.setProperty("grid-gap", "<cssproperty_grid-gap>");
-<CSSStyleDeclaration>.setProperty("grid-row", "<cssproperty_grid-row>");
-<CSSStyleDeclaration>.setProperty("grid-row-end", "<cssproperty_grid-row-end>");
-<CSSStyleDeclaration>.setProperty("grid-row-gap", "<cssproperty_grid-row-gap>");
-<CSSStyleDeclaration>.setProperty("grid-row-start", "<cssproperty_grid-row-start>");
-<CSSStyleDeclaration>.setProperty("grid-template", "<cssproperty_grid-template>");
-<CSSStyleDeclaration>.setProperty("grid-template-areas", "<cssproperty_grid-template-areas>");
-<CSSStyleDeclaration>.setProperty("grid-template-columns", "<cssproperty_grid-template-columns>");
-<CSSStyleDeclaration>.setProperty("grid-template-rows", "<cssproperty_grid-template-rows>");
-<CSSStyleDeclaration>.setProperty("height", "<cssproperty_height>");
-<CSSStyleDeclaration>.setProperty("hyphens", "<cssproperty_hyphens>");
-<CSSStyleDeclaration>.setProperty("image-orientation", "<cssproperty_image-orientation>");
-<CSSStyleDeclaration>.setProperty("image-rendering", "<cssproperty_image-rendering>");
-<CSSStyleDeclaration>.setProperty("isolation", "<cssproperty_isolation>");
-<CSSStyleDeclaration>.setProperty("justify-content", "<cssproperty_justify-content>");
-<CSSStyleDeclaration>.setProperty("justify-items", "<cssproperty_justify-items>");
-<CSSStyleDeclaration>.setProperty("justify-self", "<cssproperty_justify-self>");
-<CSSStyleDeclaration>.setProperty("kerning", "<cssproperty_kerning>");
-<CSSStyleDeclaration>.setProperty("left", "<cssproperty_left>");
-<CSSStyleDeclaration>.setProperty("letter-spacing", "<cssproperty_letter-spacing>");
-<CSSStyleDeclaration>.setProperty("lighting-color", "<cssproperty_lighting-color>");
-<CSSStyleDeclaration>.setProperty("line-break", "<cssproperty_line-break>");
-<CSSStyleDeclaration>.setProperty("line-height", "<cssproperty_line-height>");
-<CSSStyleDeclaration>.setProperty("list-style", "<cssproperty_list-style>");
-<CSSStyleDeclaration>.setProperty("list-style-image", "<cssproperty_list-style-image>");
-<CSSStyleDeclaration>.setProperty("list-style-position", "<cssproperty_list-style-position>");
-<CSSStyleDeclaration>.setProperty("list-style-type", "<cssproperty_list-style-type>");
-<CSSStyleDeclaration>.setProperty("margin", "<cssproperty_margin>");
-<CSSStyleDeclaration>.setProperty("margin-bottom", "<cssproperty_margin-bottom>");
-<CSSStyleDeclaration>.setProperty("margin-left", "<cssproperty_margin-left>");
-<CSSStyleDeclaration>.setProperty("margin-right", "<cssproperty_margin-right>");
-<CSSStyleDeclaration>.setProperty("margin-top", "<cssproperty_margin-top>");
-<CSSStyleDeclaration>.setProperty("marker", "<cssproperty_marker>");
-<CSSStyleDeclaration>.setProperty("marker-mid", "<cssproperty_marker-mid>");
-<CSSStyleDeclaration>.setProperty("mask-source-type", "<cssproperty_mask-source-type>");
-<CSSStyleDeclaration>.setProperty("max-height", "<cssproperty_max-height>");
-<CSSStyleDeclaration>.setProperty("max-width", "<cssproperty_max-width>");
-<CSSStyleDeclaration>.setProperty("max-zoom", "<cssproperty_max-zoom>");
-<CSSStyleDeclaration>.setProperty("min-height", "<cssproperty_min-height>");
-<CSSStyleDeclaration>.setProperty("min-width", "<cssproperty_min-width>");
-<CSSStyleDeclaration>.setProperty("min-zoom", "<cssproperty_min-zoom>");
-<CSSStyleDeclaration>.setProperty("mix-blend-mode", "<cssproperty_mix-blend-mode>");
-<CSSStyleDeclaration>.setProperty("motion", "<cssproperty_motion>");
-<CSSStyleDeclaration>.setProperty("motion-offset", "<cssproperty_motion-offset>");
-<CSSStyleDeclaration>.setProperty("motion-path", "<cssproperty_motion-path>");
-<CSSStyleDeclaration>.setProperty("motion-rotation", "<cssproperty_motion-rotation>");
-<CSSStyleDeclaration>.setProperty("mso-background-source", "<cssproperty_mso-background-source>");
-<CSSStyleDeclaration>.setProperty("mso-bidi-font-size", "<cssproperty_mso-bidi-font-size>");
-<CSSStyleDeclaration>.setProperty("mso-border-alt", "<cssproperty_mso-border-alt>");
-<CSSStyleDeclaration>.setProperty("mso-border-left-alt", "<cssproperty_mso-border-left-alt>");
-<CSSStyleDeclaration>.setProperty("mso-border-top-alt", "<cssproperty_mso-border-top-alt>");
-<CSSStyleDeclaration>.setProperty("mso-data-placement", "<cssproperty_mso-data-placement>");
-<CSSStyleDeclaration>.setProperty("mso-displayed-decimal-separator", "<cssproperty_mso-displayed-decimal-separator>");
-<CSSStyleDeclaration>.setProperty("mso-displayed-thousand-separator", "<cssproperty_mso-displayed-thousand-separator>");
-<CSSStyleDeclaration>.setProperty("mso-fareast-font-family", "<cssproperty_mso-fareast-font-family>");
-<CSSStyleDeclaration>.setProperty("mso-font-charset", "<cssproperty_mso-font-charset>");
-<CSSStyleDeclaration>.setProperty("mso-font-kerning", "<cssproperty_mso-font-kerning>");
-<CSSStyleDeclaration>.setProperty("mso-generic-font-family", "<cssproperty_mso-generic-font-family>");
-<CSSStyleDeclaration>.setProperty("mso-height-source", "<cssproperty_mso-height-source>");
-<CSSStyleDeclaration>.setProperty("mso-ignore", "<cssproperty_mso-ignore>");
-<CSSStyleDeclaration>.setProperty("mso-number-format", "<cssproperty_mso-number-format>");
-<CSSStyleDeclaration>.setProperty("mso-outline-level", "<cssproperty_mso-outline-level>");
-<CSSStyleDeclaration>.setProperty("mso-padding-alt", "<cssproperty_mso-padding-alt>");
-<CSSStyleDeclaration>.setProperty("mso-pagination", "<cssproperty_mso-pagination>");
-<CSSStyleDeclaration>.setProperty("mso-pattern", "<cssproperty_mso-pattern>");
-<CSSStyleDeclaration>.setProperty("mso-protection", "<cssproperty_mso-protection>");
-<CSSStyleDeclaration>.setProperty("mso-rotate", "<cssproperty_mso-rotate>");
-<CSSStyleDeclaration>.setProperty("mso-style-id", "<cssproperty_mso-style-id>");
-<CSSStyleDeclaration>.setProperty("mso-style-name", "<cssproperty_mso-style-name>");
-<CSSStyleDeclaration>.setProperty("mso-style-next", "<cssproperty_mso-style-next>");
-<CSSStyleDeclaration>.setProperty("mso-style-parent", "<cssproperty_mso-style-parent>");
-<CSSStyleDeclaration>.setProperty("mso-width-alt", "<cssproperty_mso-width-alt>");
-<CSSStyleDeclaration>.setProperty("mso-width-source", "<cssproperty_mso-width-source>");
-<CSSStyleDeclaration>.setProperty("object-fit", "<cssproperty_object-fit>");
-<CSSStyleDeclaration>.setProperty("object-position", "<cssproperty_object-position>");
-<CSSStyleDeclaration>.setProperty("offset", "<cssproperty_offset>");
-<CSSStyleDeclaration>.setProperty("offset-anchor", "<cssproperty_offset-anchor>");
-<CSSStyleDeclaration>.setProperty("offset-distance", "<cssproperty_offset-distance>");
-<CSSStyleDeclaration>.setProperty("offset-path", "<cssproperty_offset-path>");
-<CSSStyleDeclaration>.setProperty("offset-position", "<cssproperty_offset-position>");
-<CSSStyleDeclaration>.setProperty("offset-rotation", "<cssproperty_offset-rotation>");
-<CSSStyleDeclaration>.setProperty("opacity", "<cssproperty_opacity>");
-<CSSStyleDeclaration>.setProperty("order", "<cssproperty_order>");
-<CSSStyleDeclaration>.setProperty("orientation", "<cssproperty_orientation>");
-<CSSStyleDeclaration>.setProperty("orphans", "<cssproperty_orphans>");
-<CSSStyleDeclaration>.setProperty("outline", "<cssproperty_outline>");
-<CSSStyleDeclaration>.setProperty("outline-bottom", "<cssproperty_outline-bottom>");
-<CSSStyleDeclaration>.setProperty("outline-color", "<cssproperty_outline-color>");
-<CSSStyleDeclaration>.setProperty("outline-offset", "<cssproperty_outline-offset>");
-<CSSStyleDeclaration>.setProperty("outline-style", "<cssproperty_outline-style>");
-<CSSStyleDeclaration>.setProperty("outline-width", "<cssproperty_outline-width>");
-<CSSStyleDeclaration>.setProperty("overflow", "<cssproperty_overflow>");
-<CSSStyleDeclaration>.setProperty("overflow-anchor", "<cssproperty_overflow-anchor>");
-<CSSStyleDeclaration>.setProperty("overflow-wrap", "<cssproperty_overflow-wrap>");
-<CSSStyleDeclaration>.setProperty("overflow-x", "<cssproperty_overflow-x>");
-<CSSStyleDeclaration>.setProperty("overflow-y", "<cssproperty_overflow-y>");
-<CSSStyleDeclaration>.setProperty("padding", "<cssproperty_padding>");
-<CSSStyleDeclaration>.setProperty("padding-bottom", "<cssproperty_padding-bottom>");
-<CSSStyleDeclaration>.setProperty("padding-left", "<cssproperty_padding-left>");
-<CSSStyleDeclaration>.setProperty("padding-right", "<cssproperty_padding-right>");
-<CSSStyleDeclaration>.setProperty("padding-top", "<cssproperty_padding-top>");
-<CSSStyleDeclaration>.setProperty("page", "<cssproperty_page>");
-<CSSStyleDeclaration>.setProperty("page-break-after", "<cssproperty_page-break-after>");
-<CSSStyleDeclaration>.setProperty("page-break-before", "<cssproperty_page-break-before>");
-<CSSStyleDeclaration>.setProperty("page-break-inside", "<cssproperty_page-break-inside>");
-<CSSStyleDeclaration>.setProperty("perspective", "<cssproperty_perspective>");
-<CSSStyleDeclaration>.setProperty("perspective-origin", "<cssproperty_perspective-origin>");
-<CSSStyleDeclaration>.setProperty("pointer-events", "<cssproperty_pointer-events>");
-<CSSStyleDeclaration>.setProperty("position", "<cssproperty_position>");
-<CSSStyleDeclaration>.setProperty("prince-hyphens", "<cssproperty_prince-hyphens>");
-<CSSStyleDeclaration>.setProperty("quotes", "<cssproperty_quotes>");
-<CSSStyleDeclaration>.setProperty("resize", "<cssproperty_resize>");
-<CSSStyleDeclaration>.setProperty("right", "<cssproperty_right>");
-<CSSStyleDeclaration>.setProperty("rotate", "<cssproperty_rotate>");
-<CSSStyleDeclaration>.setProperty("rotation", "<cssproperty_rotation>");
-<CSSStyleDeclaration>.setProperty("rotation-code", "<cssproperty_rotation-code>");
-<CSSStyleDeclaration>.setProperty("rx", "<cssproperty_rx>");
-<CSSStyleDeclaration>.setProperty("ry", "<cssproperty_ry>");
-<CSSStyleDeclaration>.setProperty("scale", "<cssproperty_scale>");
-<CSSStyleDeclaration>.setProperty("scroll-behavior", "<cssproperty_scroll-behavior>");
-<CSSStyleDeclaration>.setProperty("scroll-snap-coordinate", "<cssproperty_scroll-snap-coordinate>");
-<CSSStyleDeclaration>.setProperty("scroll-snap-destination", "<cssproperty_scroll-snap-destination>");
-<CSSStyleDeclaration>.setProperty("scroll-snap-points-x", "<cssproperty_scroll-snap-points-x>");
-<CSSStyleDeclaration>.setProperty("scroll-snap-points-y", "<cssproperty_scroll-snap-points-y>");
-<CSSStyleDeclaration>.setProperty("scroll-snap-type", "<cssproperty_scroll-snap-type>");
-<CSSStyleDeclaration>.setProperty("shape-image-threshold", "<cssproperty_shape-image-threshold>");
-<CSSStyleDeclaration>.setProperty("shape-inside", "<cssproperty_shape-inside>");
-<CSSStyleDeclaration>.setProperty("shape-margin", "<cssproperty_shape-margin>");
-<CSSStyleDeclaration>.setProperty("shape-outside", "<cssproperty_shape-outside>");
-<CSSStyleDeclaration>.setProperty("snap-height", "<cssproperty_snap-height>");
-<CSSStyleDeclaration>.setProperty("src", "<cssproperty_src>");
-<CSSStyleDeclaration>.setProperty("stop-color", "<cssproperty_stop-color>");
-<CSSStyleDeclaration>.setProperty("stop-opacity", "<cssproperty_stop-opacity>");
-<CSSStyleDeclaration>.setProperty("stroke", "<cssproperty_stroke>");
-<CSSStyleDeclaration>.setProperty("stroke-dasharray", "<cssproperty_stroke-dasharray>");
-<CSSStyleDeclaration>.setProperty("stroke-dashoffset", "<cssproperty_stroke-dashoffset>");
-<CSSStyleDeclaration>.setProperty("stroke-linecap", "<cssproperty_stroke-linecap>");
-<CSSStyleDeclaration>.setProperty("stroke-linejoin", "<cssproperty_stroke-linejoin>");
-<CSSStyleDeclaration>.setProperty("stroke-miterlimit", "<cssproperty_stroke-miterlimit>");
-<CSSStyleDeclaration>.setProperty("stroke-opacity", "<cssproperty_stroke-opacity>");
-<CSSStyleDeclaration>.setProperty("stroke-width", "<cssproperty_stroke-width>");
-<CSSStyleDeclaration>.setProperty("tab-size", "<cssproperty_tab-size>");
-<CSSStyleDeclaration>.setProperty("table-layout", "<cssproperty_table-layout>");
-<CSSStyleDeclaration>.setProperty("text-align", "<cssproperty_text-align>");
-<CSSStyleDeclaration>.setProperty("text-align-last", "<cssproperty_text-align-last>");
-<CSSStyleDeclaration>.setProperty("text-anchor", "<cssproperty_text-anchor>");
-<CSSStyleDeclaration>.setProperty("text-combine-upright", "<cssproperty_text-combine-upright>");
-<CSSStyleDeclaration>.setProperty("text-decoration", "<cssproperty_text-decoration>");
-<CSSStyleDeclaration>.setProperty("text-decoration-color", "<cssproperty_text-decoration-color>");
-<CSSStyleDeclaration>.setProperty("text-decoration-line", "<cssproperty_text-decoration-line>");
-<CSSStyleDeclaration>.setProperty("text-decoration-style", "<cssproperty_text-decoration-style>");
-<CSSStyleDeclaration>.setProperty("text-decoration-upright", "<cssproperty_text-decoration-upright>");
-<CSSStyleDeclaration>.setProperty("text-indent", "<cssproperty_text-indent>");
-<CSSStyleDeclaration>.setProperty("text-justify", "<cssproperty_text-justify>");
-<CSSStyleDeclaration>.setProperty("text-orientation", "<cssproperty_text-orientation>");
-<CSSStyleDeclaration>.setProperty("text-overflow", "<cssproperty_text-overflow>");
-<CSSStyleDeclaration>.setProperty("text-rendering", "<cssproperty_text-rendering>");
-<CSSStyleDeclaration>.setProperty("text-shadow", "<cssproperty_text-shadow>");
-<CSSStyleDeclaration>.setProperty("text-transform", "<cssproperty_text-transform>");
-<CSSStyleDeclaration>.setProperty("text-underline", "<cssproperty_text-underline>");
-<CSSStyleDeclaration>.setProperty("text-underline-position", "<cssproperty_text-underline-position>");
-<CSSStyleDeclaration>.setProperty("top", "<cssproperty_top>");
-<CSSStyleDeclaration>.setProperty("touch-action", "<cssproperty_touch-action>");
-<CSSStyleDeclaration>.setProperty("transform", "<cssproperty_transform>");
-<CSSStyleDeclaration>.setProperty("transform-origin", "<cssproperty_transform-origin>");
-<CSSStyleDeclaration>.setProperty("transform-style", "<cssproperty_transform-style>");
-<CSSStyleDeclaration>.setProperty("transition", "<cssproperty_transition>");
-<CSSStyleDeclaration>.setProperty("transition-delay", "<cssproperty_transition-delay>");
-<CSSStyleDeclaration>.setProperty("transition-duration", "<cssproperty_transition-duration>");
-<CSSStyleDeclaration>.setProperty("transition-properties", "<cssproperty_transition-properties>");
-<CSSStyleDeclaration>.setProperty("transition-property", "<cssproperty_transition-property>");
-<CSSStyleDeclaration>.setProperty("transition-timing-function", "<cssproperty_transition-timing-function>");
-<CSSStyleDeclaration>.setProperty("translate", "<cssproperty_translate>");
-<CSSStyleDeclaration>.setProperty("unicode-bidi", "<cssproperty_unicode-bidi>");
-<CSSStyleDeclaration>.setProperty("user-select", "<cssproperty_user-select>");
-<CSSStyleDeclaration>.setProperty("user-zoom", "<cssproperty_user-zoom>");
-<CSSStyleDeclaration>.setProperty("vector-effect", "<cssproperty_vector-effect>");
-<CSSStyleDeclaration>.setProperty("vertical-align", "<cssproperty_vertical-align>");
-<CSSStyleDeclaration>.setProperty("visibility", "<cssproperty_visibility>");
-<CSSStyleDeclaration>.setProperty("weight", "<cssproperty_weight>");
-<CSSStyleDeclaration>.setProperty("white", "<cssproperty_white>");
-<CSSStyleDeclaration>.setProperty("white-space", "<cssproperty_white-space>");
-<CSSStyleDeclaration>.setProperty("whitespace", "<cssproperty_whitespace>");
-<CSSStyleDeclaration>.setProperty("widows", "<cssproperty_widows>");
-<CSSStyleDeclaration>.setProperty("width", "<cssproperty_width>");
-<CSSStyleDeclaration>.setProperty("will-change", "<cssproperty_will-change>");
-<CSSStyleDeclaration>.setProperty("word-break", "<cssproperty_word-break>");
-<CSSStyleDeclaration>.setProperty("word-space", "<cssproperty_word-space>");
-<CSSStyleDeclaration>.setProperty("word-spacing", "<cssproperty_word-spacing>");
-<CSSStyleDeclaration>.setProperty("word-wrap", "<cssproperty_word-wrap>");
-<CSSStyleDeclaration>.setProperty("writing-mode", "<cssproperty_writing-mode>");
-<CSSStyleDeclaration>.setProperty("z-index", "<cssproperty_z-index>");
-<CSSStyleDeclaration>.setProperty("zoom", "<cssproperty_zoom>");
+<CSSStyleDeclaration>.setProperty("-ms-flex-align", "<cssproperty_-ms-flex-align beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-ms-font-feature-settings", "<cssproperty_-ms-font-feature-settings beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-ms-text-combine-horizontal", "<cssproperty_-ms-text-combine-horizontal beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-ms-user-select", "<cssproperty_-ms-user-select beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-align-content", "<cssproperty_-webkit-align-content beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-align-items", "<cssproperty_-webkit-align-items beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-align-self", "<cssproperty_-webkit-align-self beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation", "<cssproperty_-webkit-animation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-delay", "<cssproperty_-webkit-animation-delay beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-direction", "<cssproperty_-webkit-animation-direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-duration", "<cssproperty_-webkit-animation-duration beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-fill-mode", "<cssproperty_-webkit-animation-fill-mode beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-iteration-count", "<cssproperty_-webkit-animation-iteration-count beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-name", "<cssproperty_-webkit-animation-name beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-play-state", "<cssproperty_-webkit-animation-play-state beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-animation-timing-function", "<cssproperty_-webkit-animation-timing-function beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-app-region", "<cssproperty_-webkit-app-region beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-appearance", "<cssproperty_-webkit-appearance beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-backface-visibility", "<cssproperty_-webkit-backface-visibility beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-background-clip", "<cssproperty_-webkit-background-clip beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-background-origin", "<cssproperty_-webkit-background-origin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-background-size", "<cssproperty_-webkit-background-size beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-after", "<cssproperty_-webkit-border-after beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-after-color", "<cssproperty_-webkit-border-after-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-after-width", "<cssproperty_-webkit-border-after-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-before", "<cssproperty_-webkit-border-before beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-before-color", "<cssproperty_-webkit-border-before-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-before-style", "<cssproperty_-webkit-border-before-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-before-width", "<cssproperty_-webkit-border-before-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-bottom-left-radius", "<cssproperty_-webkit-border-bottom-left-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-bottom-right-radius", "<cssproperty_-webkit-border-bottom-right-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-end", "<cssproperty_-webkit-border-end beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-end-color", "<cssproperty_-webkit-border-end-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-end-width", "<cssproperty_-webkit-border-end-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-image", "<cssproperty_-webkit-border-image beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-radius", "<cssproperty_-webkit-border-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-start", "<cssproperty_-webkit-border-start beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-start-color", "<cssproperty_-webkit-border-start-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-start-width", "<cssproperty_-webkit-border-start-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-top-left-radius", "<cssproperty_-webkit-border-top-left-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-top-right-radius", "<cssproperty_-webkit-border-top-right-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-border-vertical-spacing", "<cssproperty_-webkit-border-vertical-spacing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-align", "<cssproperty_-webkit-box-align beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-decoration-break", "<cssproperty_-webkit-box-decoration-break beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-direction", "<cssproperty_-webkit-box-direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-flex", "<cssproperty_-webkit-box-flex beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-flex-group", "<cssproperty_-webkit-box-flex-group beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-lines", "<cssproperty_-webkit-box-lines beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-ordinal-group", "<cssproperty_-webkit-box-ordinal-group beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-orient", "<cssproperty_-webkit-box-orient beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-pack", "<cssproperty_-webkit-box-pack beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-reflect", "<cssproperty_-webkit-box-reflect beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-shadow", "<cssproperty_-webkit-box-shadow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-box-sizing", "<cssproperty_-webkit-box-sizing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-clip-path", "<cssproperty_-webkit-clip-path beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-color-correction", "<cssproperty_-webkit-color-correction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-break-after", "<cssproperty_-webkit-column-break-after beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-break-before", "<cssproperty_-webkit-column-break-before beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-break-inside", "<cssproperty_-webkit-column-break-inside beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-count", "<cssproperty_-webkit-column-count beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-fill", "<cssproperty_-webkit-column-fill beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-gap", "<cssproperty_-webkit-column-gap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-rule", "<cssproperty_-webkit-column-rule beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-rule-color", "<cssproperty_-webkit-column-rule-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-rule-style", "<cssproperty_-webkit-column-rule-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-rule-width", "<cssproperty_-webkit-column-rule-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-span", "<cssproperty_-webkit-column-span beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-column-width", "<cssproperty_-webkit-column-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-columns", "<cssproperty_-webkit-columns beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-direction", "<cssproperty_-webkit-direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-filter", "<cssproperty_-webkit-filter beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-flex", "<cssproperty_-webkit-flex beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-flex-direction", "<cssproperty_-webkit-flex-direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-flex-wrap", "<cssproperty_-webkit-flex-wrap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-flow-from", "<cssproperty_-webkit-flow-from beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-flow-into", "<cssproperty_-webkit-flow-into beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-font-feature-settings", "<cssproperty_-webkit-font-feature-settings beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-font-smoothing", "<cssproperty_-webkit-font-smoothing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-highlight", "<cssproperty_-webkit-highlight beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-hyphenate-character", "<cssproperty_-webkit-hyphenate-character beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-hyphens", "<cssproperty_-webkit-hyphens beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-justify-content", "<cssproperty_-webkit-justify-content beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-line-break", "<cssproperty_-webkit-line-break beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-line-clamp", "<cssproperty_-webkit-line-clamp beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-locale", "<cssproperty_-webkit-locale beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-logical-height", "<cssproperty_-webkit-logical-height beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-logical-width", "<cssproperty_-webkit-logical-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-after", "<cssproperty_-webkit-margin-after beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-after-collapse", "<cssproperty_-webkit-margin-after-collapse beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-before", "<cssproperty_-webkit-margin-before beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-before-collapse", "<cssproperty_-webkit-margin-before-collapse beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-bottom-collapse", "<cssproperty_-webkit-margin-bottom-collapse beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-collapse", "<cssproperty_-webkit-margin-collapse beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-end", "<cssproperty_-webkit-margin-end beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-start", "<cssproperty_-webkit-margin-start beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-margin-top-collapse", "<cssproperty_-webkit-margin-top-collapse beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-marquee-speed", "<cssproperty_-webkit-marquee-speed beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask", "<cssproperty_-webkit-mask beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image", "<cssproperty_-webkit-mask-box-image beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-outset", "<cssproperty_-webkit-mask-box-image-outset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-repeat", "<cssproperty_-webkit-mask-box-image-repeat beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-slice", "<cssproperty_-webkit-mask-box-image-slice beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-source", "<cssproperty_-webkit-mask-box-image-source beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-box-image-width", "<cssproperty_-webkit-mask-box-image-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-clip", "<cssproperty_-webkit-mask-clip beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-composite", "<cssproperty_-webkit-mask-composite beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-image", "<cssproperty_-webkit-mask-image beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-origin", "<cssproperty_-webkit-mask-origin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-position", "<cssproperty_-webkit-mask-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-repeat", "<cssproperty_-webkit-mask-repeat beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-repeat-y", "<cssproperty_-webkit-mask-repeat-y beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-mask-size", "<cssproperty_-webkit-mask-size beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-min-logical-height", "<cssproperty_-webkit-min-logical-height beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-nbsp-mode", "<cssproperty_-webkit-nbsp-mode beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-opacity", "<cssproperty_-webkit-opacity beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-overflow-scrolling", "<cssproperty_-webkit-overflow-scrolling beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-padding-after", "<cssproperty_-webkit-padding-after beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-padding-before", "<cssproperty_-webkit-padding-before beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-padding-end", "<cssproperty_-webkit-padding-end beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-padding-start", "<cssproperty_-webkit-padding-start beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-perspective", "<cssproperty_-webkit-perspective beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-perspective-origin", "<cssproperty_-webkit-perspective-origin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-perspective-origin-x", "<cssproperty_-webkit-perspective-origin-x beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-perspective-origin-y", "<cssproperty_-webkit-perspective-origin-y beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-print-color-adjust", "<cssproperty_-webkit-print-color-adjust beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-rtl-ordering", "<cssproperty_-webkit-rtl-ordering beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-ruby-position", "<cssproperty_-webkit-ruby-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-shape-margin", "<cssproperty_-webkit-shape-margin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-shape-outside", "<cssproperty_-webkit-shape-outside beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-tap-highlight-color", "<cssproperty_-webkit-tap-highlight-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-combine", "<cssproperty_-webkit-text-combine beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-decorations-in-effect", "<cssproperty_-webkit-text-decorations-in-effect beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis", "<cssproperty_-webkit-text-emphasis beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis-color", "<cssproperty_-webkit-text-emphasis-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis-position", "<cssproperty_-webkit-text-emphasis-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-emphasis-style", "<cssproperty_-webkit-text-emphasis-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-fill-color", "<cssproperty_-webkit-text-fill-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-orientation", "<cssproperty_-webkit-text-orientation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-security", "<cssproperty_-webkit-text-security beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-stroke", "<cssproperty_-webkit-text-stroke beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-stroke-color", "<cssproperty_-webkit-text-stroke-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-text-stroke-width", "<cssproperty_-webkit-text-stroke-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transform", "<cssproperty_-webkit-transform beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transform-origin", "<cssproperty_-webkit-transform-origin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transform-style", "<cssproperty_-webkit-transform-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transition", "<cssproperty_-webkit-transition beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transition-delay", "<cssproperty_-webkit-transition-delay beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transition-duration", "<cssproperty_-webkit-transition-duration beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transition-property", "<cssproperty_-webkit-transition-property beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-transition-timing-function", "<cssproperty_-webkit-transition-timing-function beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-user-drag", "<cssproperty_-webkit-user-drag beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-user-modify", "<cssproperty_-webkit-user-modify beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-user-select", "<cssproperty_-webkit-user-select beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-wrap-flow", "<cssproperty_-webkit-wrap-flow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("-webkit-writing-mode", "<cssproperty_-webkit-writing-mode beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("align-content", "<cssproperty_align-content beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("align-items", "<cssproperty_align-items beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("align-self", "<cssproperty_align-self beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("alignx", "<cssproperty_alignx beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation", "<cssproperty_animation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-delay", "<cssproperty_animation-delay beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-direction", "<cssproperty_animation-direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-duration", "<cssproperty_animation-duration beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-fill-mode", "<cssproperty_animation-fill-mode beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-iteration-count", "<cssproperty_animation-iteration-count beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-name", "<cssproperty_animation-name beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-play-state", "<cssproperty_animation-play-state beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("animation-timing-function", "<cssproperty_animation-timing-function beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("backdrop-filter", "<cssproperty_backdrop-filter beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("backface-visibility", "<cssproperty_backface-visibility beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background", "<cssproperty_background beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-attachment", "<cssproperty_background-attachment beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-blend-mode", "<cssproperty_background-blend-mode beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-clip", "<cssproperty_background-clip beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-color", "<cssproperty_background-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-image", "<cssproperty_background-image beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-origin", "<cssproperty_background-origin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-position", "<cssproperty_background-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-position-x", "<cssproperty_background-position-x beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-repeat", "<cssproperty_background-repeat beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-repeat-x", "<cssproperty_background-repeat-x beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-repeat-y", "<cssproperty_background-repeat-y beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("background-size", "<cssproperty_background-size beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("baseline-shift", "<cssproperty_baseline-shift beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border", "<cssproperty_border beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-bottom", "<cssproperty_border-bottom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-bottom-color", "<cssproperty_border-bottom-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-bottom-left-radius", "<cssproperty_border-bottom-left-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-bottom-right-radius", "<cssproperty_border-bottom-right-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-bottom-style", "<cssproperty_border-bottom-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-bottom-width", "<cssproperty_border-bottom-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-collapse", "<cssproperty_border-collapse beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-color", "<cssproperty_border-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-image", "<cssproperty_border-image beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-image-outset", "<cssproperty_border-image-outset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-image-repeat", "<cssproperty_border-image-repeat beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-image-slice", "<cssproperty_border-image-slice beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-image-source", "<cssproperty_border-image-source beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-image-width", "<cssproperty_border-image-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-left", "<cssproperty_border-left beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-left-color", "<cssproperty_border-left-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-left-style", "<cssproperty_border-left-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-left-width", "<cssproperty_border-left-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-radius", "<cssproperty_border-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-right", "<cssproperty_border-right beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-right-color", "<cssproperty_border-right-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-right-style", "<cssproperty_border-right-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-right-width", "<cssproperty_border-right-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-size", "<cssproperty_border-size beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-spacing", "<cssproperty_border-spacing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-style", "<cssproperty_border-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-top", "<cssproperty_border-top beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-top-color", "<cssproperty_border-top-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-top-left-radius", "<cssproperty_border-top-left-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-top-right-radius", "<cssproperty_border-top-right-radius beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-top-style", "<cssproperty_border-top-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-top-width", "<cssproperty_border-top-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("border-width", "<cssproperty_border-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("bottom", "<cssproperty_bottom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-align", "<cssproperty_box-align beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-decoration-break", "<cssproperty_box-decoration-break beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-direction", "<cssproperty_box-direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-flex", "<cssproperty_box-flex beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-flex-group", "<cssproperty_box-flex-group beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-ordinal-group", "<cssproperty_box-ordinal-group beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-orient", "<cssproperty_box-orient beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-pack", "<cssproperty_box-pack beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-reflect", "<cssproperty_box-reflect beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-shadow", "<cssproperty_box-shadow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("box-sizing", "<cssproperty_box-sizing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("break-after", "<cssproperty_break-after beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("break-before", "<cssproperty_break-before beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("break-inside", "<cssproperty_break-inside beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("caption-side", "<cssproperty_caption-side beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("cellpadding", "<cssproperty_cellpadding beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("cellspacing", "<cssproperty_cellspacing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("clear", "<cssproperty_clear beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("clip", "<cssproperty_clip beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("clip-path", "<cssproperty_clip-path beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("color", "<cssproperty_color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("color-interpolation-filters", "<cssproperty_color-interpolation-filters beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("color-profile", "<cssproperty_color-profile beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-break-after", "<cssproperty_column-break-after beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-break-before", "<cssproperty_column-break-before beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-count", "<cssproperty_column-count beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-fill", "<cssproperty_column-fill beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-gap", "<cssproperty_column-gap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-rule", "<cssproperty_column-rule beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-rule-style", "<cssproperty_column-rule-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-span", "<cssproperty_column-span beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("column-width", "<cssproperty_column-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("columns", "<cssproperty_columns beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("contain", "<cssproperty_contain beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("content", "<cssproperty_content beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("counter-increment", "<cssproperty_counter-increment beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("counter-reset", "<cssproperty_counter-reset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("css-float", "<cssproperty_css-float beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("cursor", "<cssproperty_cursor beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("cx", "<cssproperty_cx beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("cy", "<cssproperty_cy beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("direction", "<cssproperty_direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("display", "<cssproperty_display beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("dominant-baseline", "<cssproperty_dominant-baseline beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("empty-cells", "<cssproperty_empty-cells beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("fill", "<cssproperty_fill beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("fill-opacity", "<cssproperty_fill-opacity beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("fill-rule", "<cssproperty_fill-rule beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("filter", "<cssproperty_filter beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flex", "<cssproperty_flex beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flex-basis", "<cssproperty_flex-basis beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flex-direction", "<cssproperty_flex-direction beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flex-flow", "<cssproperty_flex-flow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flex-grow", "<cssproperty_flex-grow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flex-shrink", "<cssproperty_flex-shrink beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flex-wrap", "<cssproperty_flex-wrap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("float", "<cssproperty_float beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flood-color", "<cssproperty_flood-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("flood-opacity", "<cssproperty_flood-opacity beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font", "<cssproperty_font beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-face", "<cssproperty_font-face beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-family", "<cssproperty_font-family beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-feature-settings", "<cssproperty_font-feature-settings beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-kerning", "<cssproperty_font-kerning beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-size", "<cssproperty_font-size beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-size-adjust", "<cssproperty_font-size-adjust beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-stretch", "<cssproperty_font-stretch beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-style", "<cssproperty_font-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-variant", "<cssproperty_font-variant beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-variant-caps", "<cssproperty_font-variant-caps beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-variant-ligatures", "<cssproperty_font-variant-ligatures beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-vendor", "<cssproperty_font-vendor beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("font-weight", "<cssproperty_font-weight beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid", "<cssproperty_grid beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-area", "<cssproperty_grid-area beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-auto-columns", "<cssproperty_grid-auto-columns beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-auto-flow", "<cssproperty_grid-auto-flow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-auto-rows", "<cssproperty_grid-auto-rows beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-column", "<cssproperty_grid-column beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-column-end", "<cssproperty_grid-column-end beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-column-gap", "<cssproperty_grid-column-gap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-column-start", "<cssproperty_grid-column-start beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-gap", "<cssproperty_grid-gap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-row", "<cssproperty_grid-row beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-row-end", "<cssproperty_grid-row-end beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-row-gap", "<cssproperty_grid-row-gap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-row-start", "<cssproperty_grid-row-start beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-template", "<cssproperty_grid-template beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-template-areas", "<cssproperty_grid-template-areas beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-template-columns", "<cssproperty_grid-template-columns beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("grid-template-rows", "<cssproperty_grid-template-rows beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("height", "<cssproperty_height beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("hyphens", "<cssproperty_hyphens beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("image-orientation", "<cssproperty_image-orientation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("image-rendering", "<cssproperty_image-rendering beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("isolation", "<cssproperty_isolation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("justify-content", "<cssproperty_justify-content beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("justify-items", "<cssproperty_justify-items beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("justify-self", "<cssproperty_justify-self beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("kerning", "<cssproperty_kerning beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("left", "<cssproperty_left beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("letter-spacing", "<cssproperty_letter-spacing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("lighting-color", "<cssproperty_lighting-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("line-break", "<cssproperty_line-break beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("line-height", "<cssproperty_line-height beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("list-style", "<cssproperty_list-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("list-style-image", "<cssproperty_list-style-image beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("list-style-position", "<cssproperty_list-style-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("list-style-type", "<cssproperty_list-style-type beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("margin", "<cssproperty_margin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("margin-bottom", "<cssproperty_margin-bottom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("margin-left", "<cssproperty_margin-left beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("margin-right", "<cssproperty_margin-right beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("margin-top", "<cssproperty_margin-top beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("marker", "<cssproperty_marker beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("marker-mid", "<cssproperty_marker-mid beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mask-source-type", "<cssproperty_mask-source-type beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("max-height", "<cssproperty_max-height beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("max-width", "<cssproperty_max-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("max-zoom", "<cssproperty_max-zoom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("min-height", "<cssproperty_min-height beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("min-width", "<cssproperty_min-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("min-zoom", "<cssproperty_min-zoom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mix-blend-mode", "<cssproperty_mix-blend-mode beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("motion", "<cssproperty_motion beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("motion-offset", "<cssproperty_motion-offset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("motion-path", "<cssproperty_motion-path beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("motion-rotation", "<cssproperty_motion-rotation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-background-source", "<cssproperty_mso-background-source beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-bidi-font-size", "<cssproperty_mso-bidi-font-size beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-border-alt", "<cssproperty_mso-border-alt beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-border-left-alt", "<cssproperty_mso-border-left-alt beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-border-top-alt", "<cssproperty_mso-border-top-alt beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-data-placement", "<cssproperty_mso-data-placement beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-displayed-decimal-separator", "<cssproperty_mso-displayed-decimal-separator beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-displayed-thousand-separator", "<cssproperty_mso-displayed-thousand-separator beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-fareast-font-family", "<cssproperty_mso-fareast-font-family beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-font-charset", "<cssproperty_mso-font-charset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-font-kerning", "<cssproperty_mso-font-kerning beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-generic-font-family", "<cssproperty_mso-generic-font-family beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-height-source", "<cssproperty_mso-height-source beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-ignore", "<cssproperty_mso-ignore beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-number-format", "<cssproperty_mso-number-format beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-outline-level", "<cssproperty_mso-outline-level beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-padding-alt", "<cssproperty_mso-padding-alt beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-pagination", "<cssproperty_mso-pagination beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-pattern", "<cssproperty_mso-pattern beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-protection", "<cssproperty_mso-protection beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-rotate", "<cssproperty_mso-rotate beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-style-id", "<cssproperty_mso-style-id beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-style-name", "<cssproperty_mso-style-name beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-style-next", "<cssproperty_mso-style-next beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-style-parent", "<cssproperty_mso-style-parent beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-width-alt", "<cssproperty_mso-width-alt beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("mso-width-source", "<cssproperty_mso-width-source beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("object-fit", "<cssproperty_object-fit beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("object-position", "<cssproperty_object-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("offset", "<cssproperty_offset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("offset-anchor", "<cssproperty_offset-anchor beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("offset-distance", "<cssproperty_offset-distance beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("offset-path", "<cssproperty_offset-path beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("offset-position", "<cssproperty_offset-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("offset-rotation", "<cssproperty_offset-rotation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("opacity", "<cssproperty_opacity beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("order", "<cssproperty_order beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("orientation", "<cssproperty_orientation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("orphans", "<cssproperty_orphans beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("outline", "<cssproperty_outline beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("outline-bottom", "<cssproperty_outline-bottom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("outline-color", "<cssproperty_outline-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("outline-offset", "<cssproperty_outline-offset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("outline-style", "<cssproperty_outline-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("outline-width", "<cssproperty_outline-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("overflow", "<cssproperty_overflow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("overflow-anchor", "<cssproperty_overflow-anchor beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("overflow-wrap", "<cssproperty_overflow-wrap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("overflow-x", "<cssproperty_overflow-x beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("overflow-y", "<cssproperty_overflow-y beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("padding", "<cssproperty_padding beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("padding-bottom", "<cssproperty_padding-bottom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("padding-left", "<cssproperty_padding-left beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("padding-right", "<cssproperty_padding-right beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("padding-top", "<cssproperty_padding-top beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("page", "<cssproperty_page beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("page-break-after", "<cssproperty_page-break-after beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("page-break-before", "<cssproperty_page-break-before beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("page-break-inside", "<cssproperty_page-break-inside beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("perspective", "<cssproperty_perspective beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("perspective-origin", "<cssproperty_perspective-origin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("pointer-events", "<cssproperty_pointer-events beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("position", "<cssproperty_position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("prince-hyphens", "<cssproperty_prince-hyphens beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("quotes", "<cssproperty_quotes beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("resize", "<cssproperty_resize beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("right", "<cssproperty_right beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("rotate", "<cssproperty_rotate beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("rotation", "<cssproperty_rotation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("rotation-code", "<cssproperty_rotation-code beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("rx", "<cssproperty_rx beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("ry", "<cssproperty_ry beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("scale", "<cssproperty_scale beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("scroll-behavior", "<cssproperty_scroll-behavior beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("scroll-snap-coordinate", "<cssproperty_scroll-snap-coordinate beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("scroll-snap-destination", "<cssproperty_scroll-snap-destination beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("scroll-snap-points-x", "<cssproperty_scroll-snap-points-x beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("scroll-snap-points-y", "<cssproperty_scroll-snap-points-y beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("scroll-snap-type", "<cssproperty_scroll-snap-type beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("shape-image-threshold", "<cssproperty_shape-image-threshold beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("shape-inside", "<cssproperty_shape-inside beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("shape-margin", "<cssproperty_shape-margin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("shape-outside", "<cssproperty_shape-outside beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("snap-height", "<cssproperty_snap-height beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("src", "<cssproperty_src beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stop-color", "<cssproperty_stop-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stop-opacity", "<cssproperty_stop-opacity beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke", "<cssproperty_stroke beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke-dasharray", "<cssproperty_stroke-dasharray beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke-dashoffset", "<cssproperty_stroke-dashoffset beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke-linecap", "<cssproperty_stroke-linecap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke-linejoin", "<cssproperty_stroke-linejoin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke-miterlimit", "<cssproperty_stroke-miterlimit beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke-opacity", "<cssproperty_stroke-opacity beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("stroke-width", "<cssproperty_stroke-width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("tab-size", "<cssproperty_tab-size beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("table-layout", "<cssproperty_table-layout beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-align", "<cssproperty_text-align beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-align-last", "<cssproperty_text-align-last beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-anchor", "<cssproperty_text-anchor beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-combine-upright", "<cssproperty_text-combine-upright beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-decoration", "<cssproperty_text-decoration beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-decoration-color", "<cssproperty_text-decoration-color beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-decoration-line", "<cssproperty_text-decoration-line beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-decoration-style", "<cssproperty_text-decoration-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-decoration-upright", "<cssproperty_text-decoration-upright beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-indent", "<cssproperty_text-indent beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-justify", "<cssproperty_text-justify beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-orientation", "<cssproperty_text-orientation beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-overflow", "<cssproperty_text-overflow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-rendering", "<cssproperty_text-rendering beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-shadow", "<cssproperty_text-shadow beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-transform", "<cssproperty_text-transform beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-underline", "<cssproperty_text-underline beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("text-underline-position", "<cssproperty_text-underline-position beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("top", "<cssproperty_top beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("touch-action", "<cssproperty_touch-action beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transform", "<cssproperty_transform beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transform-origin", "<cssproperty_transform-origin beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transform-style", "<cssproperty_transform-style beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transition", "<cssproperty_transition beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transition-delay", "<cssproperty_transition-delay beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transition-duration", "<cssproperty_transition-duration beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transition-properties", "<cssproperty_transition-properties beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transition-property", "<cssproperty_transition-property beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("transition-timing-function", "<cssproperty_transition-timing-function beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("translate", "<cssproperty_translate beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("unicode-bidi", "<cssproperty_unicode-bidi beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("user-select", "<cssproperty_user-select beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("user-zoom", "<cssproperty_user-zoom beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("vector-effect", "<cssproperty_vector-effect beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("vertical-align", "<cssproperty_vertical-align beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("visibility", "<cssproperty_visibility beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("weight", "<cssproperty_weight beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("white", "<cssproperty_white beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("white-space", "<cssproperty_white-space beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("whitespace", "<cssproperty_whitespace beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("widows", "<cssproperty_widows beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("width", "<cssproperty_width beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("will-change", "<cssproperty_will-change beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("word-break", "<cssproperty_word-break beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("word-space", "<cssproperty_word-space beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("word-spacing", "<cssproperty_word-spacing beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("word-wrap", "<cssproperty_word-wrap beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("writing-mode", "<cssproperty_writing-mode beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("z-index", "<cssproperty_z-index beforeoutput=domatoJsString>");
+<CSSStyleDeclaration>.setProperty("zoom", "<cssproperty_zoom beforeoutput=domatoJsString>");
 
 <CSSStyleDeclaration>.setProperty("<cssvar>", <string_cssvalue>);
 <CSSStyleDeclaration>.setProperty(<string_cssproperty>, "var(<cssvar>)");
@@ -4767,7 +4753,6 @@ document.all[<int min=0 max=100>%document.all.length].appendChild(<Element>);
 <SVGElement>.onselectstart = <EventHandler>;
 <new EventHandler> = <SVGElement>.onwheel;
 <SVGElement>.onwheel = <EventHandler>;
-
 
 #SVGTextContentElement
 !extends SVGTextContentElement SVGGraphicsElement
@@ -5898,7 +5883,6 @@ document.all[<int min=0 max=100>%document.all.length].appendChild(<Element>);
 <SVGElement>.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:lang", "<svgattr_xml_lang_value>");
 <SVGElement>.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space", "<svgattr_xml_space_value>");
 
-
 <new CSSStyleDeclaration> = <SVGElement>.style;
 <new CSSStyleDeclaration> = <SVGElement>.style;
 <new CSSStyleDeclaration> = <SVGElement>.style;
@@ -6116,7 +6100,7 @@ document.all[<int min=0 max=100>%document.all.length].appendChild(<Element>);
 <MathMLElement>.setAttribute("mathvariant", "<mathmlattr_mathvariant_value>");
 <MathMLElement>.setAttribute("nonce", "<nonce_value>");
 <MathMLElement>.setAttribute("scriptlevel", "<mathmlattr_scriptlevel_value>");
-<MathMLElement>.setAttribute("style", "<style_value>");
+<MathMLElement>.setAttribute("style", "<style_value beforeoutput=domatoJsString>");
 <MathMLElement>.setAttribute("tabindex", "<tabindex_value>");
 
 <new CSSStyleDeclaration> = <MathMLElement>.style;
@@ -6281,26 +6265,26 @@ setTimeout(<eventhandler>, <timeout_time>);
 <RTCPeerConnection>.ondatachannel = <EventHandler>;
 <new EventHandler> = <RTCPeerConnection>.onnegotiationneeded;
 <RTCPeerConnection>.onnegotiationneeded = <EventHandler>;
-<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("<DOMString>");
-<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("<DOMString>", { ordered:true });
-<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("<DOMString>", { ordered:false });
-<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("<DOMString>", { negotiated:true, id:<fuzzint> });
-<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("<DOMString>", { protocol:"<DOMString>" });
-<new MediaStream> = <RTCPeerConnection>.createDataChannel("<DOMString>").label;
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel(<DOMString>);
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel(<DOMString>, { ordered:true });
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel(<DOMString>, { ordered:false });
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel(<DOMString>, { negotiated:true, id:<fuzzint> });
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel(<DOMString>, { protocol:<DOMString> });
+<new MediaStream> = <RTCPeerConnection>.createDataChannel(<DOMString>).label;
 <RTCPeerConnection>.addTrack(<MediaStreamTrack>, <MediaStream>);
 <RTCPeerConnection>.addTrack(<MediaStreamTrack>, <MediaStream>, <MediaStream>);
 <RTCPeerConnection>.removeTrack(<RTCRtpSender>);
-<RTCPeerConnection>.addIceCandidate({ candidate:"<DOMString>" });
-<RTCPeerConnection>.addIceCandidate({ sdpMid:"<DOMString>", sdpMLineIndex:<fuzzint>, candidate:"<DOMString>" });
+<RTCPeerConnection>.addIceCandidate({ candidate:<DOMString> });
+<RTCPeerConnection>.addIceCandidate({ sdpMid:<DOMString>, sdpMLineIndex:<fuzzint>, candidate:<DOMString> });
 <RTCPeerConnection>.close();
 <new RTCConfiguration> = <RTCPeerConnection>.getConfiguration();
 <RTCPeerConnection>.setConfiguration({ iceServers:[{ urls:"stun:stun.l.google.com:19302" }] });
 <RTCPeerConnection>.createOffer();
 <RTCPeerConnection>.createAnswer();
 <RTCPeerConnection>.setLocalDescription();
-<RTCPeerConnection>.setLocalDescription({ type:"offer", sdp:"<DOMString>" });
-<RTCPeerConnection>.setRemoteDescription({ type:"answer", sdp:"<DOMString>" });
-<RTCPeerConnection>.setRemoteDescription({ type:"pranswer", sdp:"<DOMString>" });
+<RTCPeerConnection>.setLocalDescription({ type:"offer", sdp:<DOMString> });
+<RTCPeerConnection>.setRemoteDescription({ type:"answer", sdp:<DOMString> });
+<RTCPeerConnection>.setRemoteDescription({ type:"pranswer", sdp:<DOMString> });
 <new RTCRtpSender[]> = <RTCPeerConnection>.getSenders();
 <new RTCRtpReceiver[]> = <RTCPeerConnection>.getReceivers();
 <new RTCRtpTransceiver[]> = <RTCPeerConnection>.getTransceivers();
@@ -6326,7 +6310,7 @@ setTimeout(<eventhandler>, <timeout_time>);
 <RTCDataChannel>.onmessage = <EventHandler>;
 <new EventHandler> = <RTCDataChannel>.onerror;
 <RTCDataChannel>.onerror = <EventHandler>;
-<RTCDataChannel>.send("<DOMString>");
+<RTCDataChannel>.send(<DOMString>);
 <RTCDataChannel>.send(<ArrayBuffer>);
 <RTCDataChannel>.send(<Blob>);
 <RTCDataChannel>.close();
@@ -6334,7 +6318,7 @@ setTimeout(<eventhandler>, <timeout_time>);
 #MediaStream
 <new MediaStream> = new MediaStream();
 <new MediaStream> = new MediaStream(<MediaStream>);
-<new MediaStream> = new MediaStream({ id:"<DOMString>" });
+<new MediaStream> = new MediaStream({ id:<DOMString> });
 <new MediaStream> = new MediaStream(<MediaStreamTrack[]>);
 <new DOMString> = <MediaStream>.id;
 <new boolean> = <MediaStream>.active;
@@ -6343,7 +6327,7 @@ setTimeout(<eventhandler>, <timeout_time>);
 <MediaStream>.getTracks();
 <new MediaStreamTrack[]> = <MediaStream>.getAudioTracks();
 <new MediaStreamTrack[]> = <MediaStream>.getVideoTracks();
-<new MediaStreamTrack> = <MediaStream>.getTrackById("<DOMString>");
+<new MediaStreamTrack> = <MediaStream>.getTrackById(<DOMString>);
 <new MediaStream> = <MediaStream>.clone();
 
 #MediaStreamTrack
@@ -6434,8 +6418,8 @@ setTimeout(<eventhandler>, <timeout_time>);
 
 #IndexedDB
 #IDBDatabase
-<new IDBDatabase> = indexedDB.open("<DOMString>");
-<new IDBDatabase> = indexedDB.open("<DOMString>", <fuzzint>);
+<new IDBDatabase> = indexedDB.open(<DOMString>);
+<new IDBDatabase> = indexedDB.open(<DOMString>, <fuzzint>);
 <new DOMString> = <IDBDatabase>.name;
 <new long> = <IDBDatabase>.version;
 <new DOMString[]> = <IDBDatabase>.objectStoreNames;
@@ -6446,12 +6430,12 @@ setTimeout(<eventhandler>, <timeout_time>);
 <new EventHandler> = <IDBDatabase>.onclose;
 <IDBDatabase>.onclose = <EventHandler>;
 <IDBDatabase>.close();
-<IDBDatabase>.deleteObjectStore("<DOMString>");
-<new IDBTransaction> = <IDBDatabase>.transaction("<DOMString>");
-<new IDBTransaction> = <IDBDatabase>.transaction("<DOMString>", "readonly");
-<new IDBTransaction> = <IDBDatabase>.transaction("<DOMString>", "readwrite");
-<new IDBTransaction> = <IDBDatabase>.transaction(["<DOMString>"], "readwrite");
-<new IDBObjectStore> = <IDBDatabase>.transaction("<DOMString>", "readwrite").objectStore("<DOMString>");
+<IDBDatabase>.deleteObjectStore(<DOMString>);
+<new IDBTransaction> = <IDBDatabase>.transaction(<DOMString>);
+<new IDBTransaction> = <IDBDatabase>.transaction(<DOMString>, "readonly");
+<new IDBTransaction> = <IDBDatabase>.transaction(<DOMString>, "readwrite");
+<new IDBTransaction> = <IDBDatabase>.transaction([<DOMString>], "readwrite");
+<new IDBObjectStore> = <IDBDatabase>.transaction(<DOMString>, "readwrite").objectStore(<DOMString>);
 
 #IDBObjectStore
 <new DOMString> = <IDBObjectStore>.name;
@@ -6460,24 +6444,24 @@ setTimeout(<eventhandler>, <timeout_time>);
 <new boolean> = <IDBObjectStore>.autoIncrement;
 <new IDBIndex[]> = <IDBObjectStore>.indexNames;
 <IDBObjectStore>.clear();
-<IDBObjectStore>.delete("<DOMString>");
+<IDBObjectStore>.delete(<DOMString>);
 <IDBObjectStore>.delete(<fuzzint>);
-<IDBObjectStore>.put("<DOMString>", "<DOMString>");
+<IDBObjectStore>.put(<DOMString>, <DOMString>);
 <IDBObjectStore>.put(<fuzzint>, <fuzzint>);
-<IDBObjectStore>.add("<DOMString>", "<DOMString>");
-<IDBObjectStore>.get("<DOMString>");
+<IDBObjectStore>.add(<DOMString>, <DOMString>);
+<IDBObjectStore>.get(<DOMString>);
 <IDBObjectStore>.get(<fuzzint>);
-<IDBObjectStore>.getKey("<DOMString>");
+<IDBObjectStore>.getKey(<DOMString>);
 <IDBObjectStore>.count();
-<IDBObjectStore>.count("<DOMString>");
+<IDBObjectStore>.count(<DOMString>);
 <IDBObjectStore>.cursor();
 <IDBObjectStore>.openCursor();
 <IDBObjectStore>.openKeyCursor();
-<new IDBIndex> = <IDBObjectStore>.createIndex("<DOMString>", "<DOMString>");
-<new IDBIndex> = <IDBObjectStore>.createIndex("<DOMString>", "<DOMString>", { unique:true });
-<new IDBIndex> = <IDBObjectStore>.createIndex("<DOMString>", "<DOMString>", { unique:false, multiEntry:true });
-<IDBObjectStore>.deleteIndex("<DOMString>");
-<new IDBIndex> = <IDBObjectStore>.index("<DOMString>");
+<new IDBIndex> = <IDBObjectStore>.createIndex(<DOMString>, <DOMString>);
+<new IDBIndex> = <IDBObjectStore>.createIndex(<DOMString>, <DOMString>, { unique:true });
+<new IDBIndex> = <IDBObjectStore>.createIndex(<DOMString>, <DOMString>, { unique:false, multiEntry:true });
+<IDBObjectStore>.deleteIndex(<DOMString>);
+<new IDBIndex> = <IDBObjectStore>.index(<DOMString>);
 
 #IDBTransaction
 <new DOMString> = <IDBTransaction>.mode;
@@ -6489,7 +6473,7 @@ setTimeout(<eventhandler>, <timeout_time>);
 <new EventHandler> = <IDBTransaction>.onerror;
 <IDBTransaction>.onerror = <EventHandler>;
 <IDBTransaction>.abort();
-<new IDBObjectStore> = <IDBTransaction>.objectStore("<DOMString>");
+<new IDBObjectStore> = <IDBTransaction>.objectStore(<DOMString>);
 
 #IDBRequest
 <new EventHandler> = <IDBRequest>.onsuccess;
@@ -6509,14 +6493,14 @@ setTimeout(<eventhandler>, <timeout_time>);
 <IDBCursor>.continue();
 <IDBCursor>.continue(<any>);
 <IDBCursor>.delete();
-<IDBCursor>.update("<DOMString>");
+<IDBCursor>.update(<DOMString>);
 
 #IDBIndex
 <new DOMString> = <IDBIndex>.name;
 <new DOMString> = <IDBIndex>.keyPath;
 <new DOMString> = <IDBIndex>.multiEntry;
 <new boolean> = <IDBIndex>.unique;
-<IDBIndex>.get("<DOMString>");
+<IDBIndex>.get(<DOMString>);
 <IDBIndex>.count();
 <IDBIndex>.openCursor();
 
@@ -6529,13 +6513,15 @@ setTimeout(<eventhandler>, <timeout_time>);
 <IDBOpenDBRequest>.onerror = <EventHandler>;
 
 #Observers
-#IntersectionObserver
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>);
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { root:<Element> });
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { rootMargin:"<DOMString>" });
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { threshold:0.5 });
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { threshold:[0, 0.25, 0.5, 0.75, 1] });
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { root:<Element>, rootMargin:"100px", threshold:0.5 });
+#IntersectionObserver The callback argument must be callable: <EventHandler> resolves to a read of an
+#on* attribute, which is null on a fresh object, so every one of these constructors threw and no
+#observer variable was ever registered.
+<new IntersectionObserver> = new IntersectionObserver(function(entries){ console.log(entries.length); });
+<new IntersectionObserver> = new IntersectionObserver(function(entries){ entries.forEach(function(entry){ entry.time; }); }, { root:<Element> });
+<new IntersectionObserver> = new IntersectionObserver(function(entries, obs){ console.log(obs.takeRecords().length); }, { rootMargin:<DOMString> });
+<new IntersectionObserver> = new IntersectionObserver(function(entries){ console.log(entries[0].isIntersecting, entries[0].intersectionRatio); }, { threshold:0.5 });
+<new IntersectionObserver> = new IntersectionObserver(function(entries){ console.log(entries[0].boundingClientRect.width, entries[0].rootMargin); }, { threshold:[0, 0.25, 0.5, 0.75, 1] });
+<new IntersectionObserver> = new IntersectionObserver(function(entries){ entries[0].target; }, { root:<Element>, rootMargin:"100px", threshold:0.5 });
 <IntersectionObserver>.observe(<Element>);
 <IntersectionObserver>.unobserve(<Element>);
 <IntersectionObserver>.disconnect();
@@ -6550,7 +6536,7 @@ setTimeout(<eventhandler>, <timeout_time>);
 <new double> = <IntersectionObserverEntry>.time;
 
 #ResizeObserver
-<new ResizeObserver> = new ResizeObserver(<EventHandler>);
+<new ResizeObserver> = new ResizeObserver(function(entries){ console.log(entries[0].contentRect.width, entries[0].target); });
 <ResizeObserver>.observe(<Element>);
 <ResizeObserver>.observe(<Element>, { box:"border-box" });
 <ResizeObserver>.observe(<Element>, { box:"content-box" });
@@ -6565,8 +6551,8 @@ setTimeout(<eventhandler>, <timeout_time>);
 <new ResizeObserverSize> = <ResizeObserverEntry>.devicePixelContentBoxSize;
 
 #PerformanceObserver
-<new PerformanceObserver> = new PerformanceObserver(<EventHandler>);
-<new PerformanceObserver> = new PerformanceObserver({ buffered:true });
+<new PerformanceObserver> = new PerformanceObserver(function(list, obs){ console.log(list.getEntries()[0].entryType, obs.takeRecords().length); });
+<new PerformanceObserver> = new PerformanceObserver(function(list, obs){ list.getEntries().forEach(function(entry){ console.log(entry.name, entry.startTime, entry.duration); }); }, { buffered:true });
 <PerformanceObserver>.observe();
 <PerformanceObserver>.observe({ type:"mark" });
 <PerformanceObserver>.observe({ type:"measure" });
@@ -6639,13 +6625,13 @@ setTimeout(<eventhandler>, <timeout_time>);
 <PerformanceObserver>.observe({ type:"container", buffered:true });
 
 #BroadcastChannel
-<new BroadcastChannel> = new BroadcastChannel("<DOMString>");
+<new BroadcastChannel> = new BroadcastChannel(<DOMString>);
 <new DOMString> = <BroadcastChannel>.name;
 <new EventHandler> = <BroadcastChannel>.onmessage;
 <BroadcastChannel>.onmessage = <EventHandler>;
 <new EventHandler> = <BroadcastChannel>.onmessageerror;
 <BroadcastChannel>.onmessageerror = <EventHandler>;
-<BroadcastChannel>.postMessage("<DOMString>");
+<BroadcastChannel>.postMessage(<DOMString>);
 <BroadcastChannel>.postMessage(<fuzzint>);
 <BroadcastChannel>.postMessage({ type:"message", value:<fuzzint> });
 <BroadcastChannel>.close();
@@ -6653,19 +6639,19 @@ setTimeout(<eventhandler>, <timeout_time>);
 #CacheStorage
 #Cache
 <new CacheStorage> = caches;
-<Cache>.add("<DOMString>");
-<Cache>.addAll(["<DOMString>"]);
-<new boolean> = <Cache>.delete("<DOMString>");
+<Cache>.add(<DOMString>);
+<Cache>.addAll([<DOMString>]);
+<new boolean> = <Cache>.delete(<DOMString>);
 <Cache>.keys();
-<Cache>.match("<DOMString>");
-<Cache>.match("<DOMString>", { ignoreSearch:true });
-<Cache>.put("<DOMString>", <Response>);
-<Cache>.delete("<DOMString>", <Request>);
+<Cache>.match(<DOMString>);
+<Cache>.match(<DOMString>, { ignoreSearch:true });
+<Cache>.put(<DOMString>, <Response>);
+<Cache>.delete(<DOMString>, <Request>);
 
 #CacheStorage
-<new Cache> = <CacheStorage>.open("<DOMString>");
-<new boolean> = <CacheStorage>.has("<DOMString>");
-<CacheStorage>.delete("<DOMString>");
+<new Cache> = <CacheStorage>.open(<DOMString>);
+<new boolean> = <CacheStorage>.has(<DOMString>);
+<CacheStorage>.delete(<DOMString>);
 <CacheStorage>.keys();
 
 #SharedArrayBuffer
@@ -6690,12 +6676,12 @@ Atomics.wake(<Int32Array>, <fuzzint>, <fuzzint>);
 
 #Web Workers
 #Worker
-<new Worker> = new Worker("<DOMString>");
-<new Worker> = new Worker("<DOMString>", { type:"classic" });
-<new Worker> = new Worker("<DOMString>", { type:"module" });
-<new Worker> = new Worker("<DOMString>", { credentials:"include" });
-<new Worker> = new Worker("<DOMString>", { name:"<DOMString>" });
-<Worker>.postMessage("<DOMString>");
+<new Worker> = new Worker(<DOMString>);
+<new Worker> = new Worker(<DOMString>, { type:"classic" });
+<new Worker> = new Worker(<DOMString>, { type:"module" });
+<new Worker> = new Worker(<DOMString>, { credentials:"include" });
+<new Worker> = new Worker(<DOMString>, { name:<DOMString> });
+<Worker>.postMessage(<DOMString>);
 <Worker>.postMessage(<fuzzint>);
 <Worker>.terminate();
 <new EventHandler> = <Worker>.onerror;
@@ -6704,11 +6690,11 @@ Atomics.wake(<Int32Array>, <fuzzint>, <fuzzint>);
 <Worker>.onmessage = <EventHandler>;
 
 #SharedWorker
-<new SharedWorker> = new SharedWorker("<DOMString>");
-<new SharedWorker> = new SharedWorker("<DOMString>", { name:"<DOMString>" });
-<new SharedWorker> = new SharedWorker("<DOMString>", { type:"module" });
+<new SharedWorker> = new SharedWorker(<DOMString>);
+<new SharedWorker> = new SharedWorker(<DOMString>, { name:<DOMString> });
+<new SharedWorker> = new SharedWorker(<DOMString>, { type:"module" });
 <new SharedWorker> = <SharedWorker>.port;
-<SharedWorker>.port.postMessage("<DOMString>");
+<SharedWorker>.port.postMessage(<DOMString>);
 <new EventHandler> = <SharedWorker>.onerror;
 <SharedWorker>.onerror = <EventHandler>;
 
@@ -6734,17 +6720,17 @@ Atomics.wake(<Int32Array>, <fuzzint>, <fuzzint>);
 <PermissionStatus>.onchange = <EventHandler>;
 
 #Notification
-<new Notification> = new Notification("<DOMString>");
-<new Notification> = new Notification("<DOMString>", { body:"<DOMString>" });
-<new Notification> = new Notification("<DOMString>", { icon:"<DOMString>" });
-<new Notification> = new Notification("<DOMString>", { badge:"<DOMString>" });
-<new Notification> = new Notification("<DOMString>", { tag:"<DOMString>" });
-<new Notification> = new Notification("<DOMString>", { requireInteraction:true });
-<new Notification> = new Notification("<DOMString>", { renotify:true });
-<new Notification> = new Notification("<DOMString>", { silent:true });
-<new Notification> = new Notification("<DOMString>", { vibrate:[<fuzzint>, <fuzzint>, <fuzzint>] });
-<new Notification> = new Notification("<DOMString>", { dir:"ltr" });
-<new Notification> = new Notification("<DOMString>", { lang:"en-US" });
+<new Notification> = new Notification(<DOMString>);
+<new Notification> = new Notification(<DOMString>, { body:<DOMString> });
+<new Notification> = new Notification(<DOMString>, { icon:<DOMString> });
+<new Notification> = new Notification(<DOMString>, { badge:<DOMString> });
+<new Notification> = new Notification(<DOMString>, { tag:<DOMString> });
+<new Notification> = new Notification(<DOMString>, { requireInteraction:true });
+<new Notification> = new Notification(<DOMString>, { renotify:true });
+<new Notification> = new Notification(<DOMString>, { silent:true });
+<new Notification> = new Notification(<DOMString>, { vibrate:[<fuzzint>, <fuzzint>, <fuzzint>] });
+<new Notification> = new Notification(<DOMString>, { dir:"ltr" });
+<new Notification> = new Notification(<DOMString>, { lang:"en-US" });
 <Notification>.close();
 Notification.requestPermission();
 <new DOMString> = Notification.permission;
@@ -6780,12 +6766,6 @@ Notification.requestPermission();
 <new double> = <DeviceLightEvent>.value;
 <new EventHandler> = <window>.ondevicelight;
 <window>.ondevicelight = <EventHandler>;
-
-#ImageCaptureErrorEvent (preference-gated)
-!extends ImageCaptureErrorEvent Event
-<new Event> = <ImageCaptureErrorEvent>;
-<new ImageCaptureErrorEvent> = new ImageCaptureErrorEvent("error", { imageCaptureError:null });
-<new ImageCaptureError> = <ImageCaptureErrorEvent>.imageCaptureError;
 
 #BlobEvent
 !extends BlobEvent Event
@@ -6895,16 +6875,16 @@ Notification.requestPermission();
 
 #Clipboard API extended
 <new Clipboard> = navigator.clipboard;
-<Clipboard>.writeText("<DOMString>");
+<Clipboard>.writeText(<DOMString>);
 <new DOMString> = <Clipboard>.readText();
 <Clipboard>.write([<ClipboardItem>]);
 <new ClipboardItem[]> = <Clipboard>.read();
 
 #ClipboardItem
-<new ClipboardItem> = new ClipboardItem({ "text/plain": new Blob(["<DOMString>"], { type:"text/plain" }) });
+<new ClipboardItem> = new ClipboardItem({ "text/plain": new Blob([<DOMString>], { type:"text/plain" }) });
 <new ClipboardItem> = new ClipboardItem({ "image/png": new Blob([<ArrayBuffer>], { type:"image/png" }) });
 <new MIMEType[]> = <ClipboardItem>.types;
-<ClipboardItem>.getType("<DOMString>");
+<ClipboardItem>.getType(<DOMString>);
 
 #Screen Capture
 #getDisplayMedia
@@ -6993,20 +6973,20 @@ Notification.requestPermission();
 <new ArrayBuffer> = <AuthenticatorAssertionResponse>.userHandle;
 
 #PasswordCredential
-<new PasswordCredential> = new PasswordCredential({ id:"<DOMString>", password:"<DOMString>" });
+<new PasswordCredential> = new PasswordCredential({ id:<DOMString>, password:<DOMString> });
 <new DOMString> = <PasswordCredential>.id;
 <new DOMString> = <PasswordCredential>.password;
 <new DOMString> = <PasswordCredential>.icon;
 
 #Web Share
-<navigator>.share({ title:"<DOMString>", text:"<DOMString>", url:"<DOMString>" });
+<navigator>.share({ title:<DOMString>, text:<DOMString>, url:<DOMString> });
 <navigator>.share({ files:[<File>] });
 <navigator>.canShare();
-<navigator>.canShare({ title:"<DOMString>" });
+<navigator>.canShare({ title:<DOMString> });
 <navigator>.canShare({ files:[<File>] });
 
 #Web OTP
-<new Credential> = navigator.credentials.get({ otp: { account: { name: "<DOMString>" } } });
+<new Credential> = navigator.credentials.get({ otp: { account: { name: <DOMString> } } });
 
 #EyeDropper
 <new EyeDropper> = new EyeDropper();
@@ -7028,7 +7008,7 @@ Notification.requestPermission();
 <Bluetooth>.requestDevice({ filters:[{ services:["battery_service"] }] });
 <Bluetooth>.requestDevice({ filters:[{ services:["heart_rate"] }] });
 <Bluetooth>.requestDevice({ acceptAllDevices:true });
-<Bluetooth>.requestDevice({ optionalServices:["<DOMString>"] });
+<Bluetooth>.requestDevice({ optionalServices:[<DOMString>] });
 <new boolean> = <Bluetooth>.getAvailability();
 
 #BluetoothDevice
@@ -7038,19 +7018,19 @@ Notification.requestPermission();
 <new EventHandler> = <BluetoothDevice>.ongattserverdisconnected;
 <BluetoothDevice>.ongattserverdisconnected = <EventHandler>;
 <BluetoothDevice>.gatt;
-<BluetoothDevice>.getPrimaryService("<DOMString>");
+<BluetoothDevice>.getPrimaryService(<DOMString>);
 <BluetoothDevice>.getPrimaryServices();
 
 #BluetoothRemoteGATTServer
-<new BluetoothRemoteGATTService> = <BluetoothRemoteGATTServer>.getPrimaryService("<DOMString>");
+<new BluetoothRemoteGATTService> = <BluetoothRemoteGATTServer>.getPrimaryService(<DOMString>);
 <new BluetoothRemoteGATTService[]> = <BluetoothRemoteGATTServer>.getPrimaryServices();
 <BluetoothRemoteGATTServer>.connect();
 <BluetoothRemoteGATTServer>.disconnect();
 
 #BluetoothRemoteGATTService
 <new DOMString> = <BluetoothRemoteGATTService>.uuid;
-<new BluetoothRemoteGATTService> = <BluetoothRemoteGATTService>.getIncludedService("<DOMString>");
-<new BluetoothRemoteGATTCharacteristic> = <BluetoothRemoteGATTService>.getCharacteristic("<DOMString>");
+<new BluetoothRemoteGATTService> = <BluetoothRemoteGATTService>.getIncludedService(<DOMString>);
+<new BluetoothRemoteGATTCharacteristic> = <BluetoothRemoteGATTService>.getCharacteristic(<DOMString>);
 <new BluetoothRemoteGATTCharacteristic[]> = <BluetoothRemoteGATTService>.getCharacteristics();
 
 #BluetoothRemoteGATTCharacteristic
@@ -7062,7 +7042,7 @@ Notification.requestPermission();
 <BluetoothRemoteGATTCharacteristic>.stopNotifications();
 <new EventHandler> = <BluetoothRemoteGATTCharacteristic>.oncharacteristicvaluechanged;
 <BluetoothRemoteGATTCharacteristic>.oncharacteristicvaluechanged = <EventHandler>;
-<new BluetoothRemoteGATTDescriptor> = <BluetoothRemoteGATTCharacteristic>.getDescriptor("<DOMString>");
+<new BluetoothRemoteGATTDescriptor> = <BluetoothRemoteGATTCharacteristic>.getDescriptor(<DOMString>);
 <new BluetoothRemoteGATTDescriptor[]> = <BluetoothRemoteGATTCharacteristic>.getDescriptors();
 
 #BluetoothRemoteGATTDescriptor
@@ -7123,138 +7103,12 @@ Notification.requestPermission();
 <SerialPort>.readable.getReader();
 <SerialPort>.writable.getWriter();
 
-#WebXR
-#XRSystem
-!extends XRSystem EventTarget
-<new EventTarget> = <XRSystem>;
-<new XRSystem> = navigator.xr;
-<XRSystem>.isSessionSupported("immersive-vr").then(function(supported){ return supported; }, function(error){ console.error(error); });
-<XRSystem>.isSessionSupported("immersive-ar").then(function(supported){ return supported; }, function(error){ console.error(error); });
-<XRSystem>.isSessionSupported("inline").then(function(supported){ return supported; }, function(error){ console.error(error); });
-<XRSystem>.requestSession("inline").then(function(session){ session.visibilityState; session.renderState.depthNear; session.renderState.depthFar; session.inputSources.length; session.requestReferenceSpace("viewer").then(function(space){ session.requestAnimationFrame(function(time, frame){ var pose=frame.getViewerPose(space); if(pose){ pose.transform.position; pose.transform.orientation; pose.views.forEach(function(view){ view.eye; view.projectionMatrix; view.transform; var baseLayer=frame.session.renderState.baseLayer; if(baseLayer){ baseLayer.getViewport(view); } }); } var sameSpacePose=frame.getPose(space, space); if(sameSpacePose){ sameSpacePose.transform.matrix; } }); space.getOffsetReferenceSpace(new XRRigidTransform()).onreset; }, function(error){ console.error(error); }); var gl=document.createElement("canvas").getContext("webgl"); if(gl){ var layer=new XRWebGLLayer(session, gl, { antialias:false, depth:true }); session.updateRenderState({ baseLayer:layer, depthNear:0.1, depthFar:1000 }); layer.framebufferWidth; layer.framebufferHeight; } session.updateTargetFrameRate(60).then(function(){}, function(error){ console.error(error); }); session.end().then(function(){}, function(error){ console.error(error); }); }, function(error){ console.error(error); });
-<XRSystem>.requestSession("immersive-vr", { optionalFeatures:["local-floor", "bounded-floor"] }).then(function(session){ session.requestReferenceSpace("local-floor").then(function(space){ return space; }, function(error){ console.error(error); }); }, function(error){ console.error(error); });
-<new EventHandler> = <XRSystem>.ondevicechange;
-<XRSystem>.ondevicechange = <EventHandler>;
-
-#XRSession
-!extends XRSession EventTarget
-<new EventTarget> = <XRSession>;
-<new XRInputSourceArray> = <XRSession>.inputSources;
-<new DOMString> = <XRSession>.visibilityState;
-<new XRRenderState> = <XRSession>.renderState;
-<new float> = <XRSession>.frameRate;
-<new Float32Array> = <XRSession>.supportedFrameRates;
-<XRSession>.updateRenderState({ depthNear:0.1, depthFar:1000 });
-<XRSession>.updateTargetFrameRate(72);
-<XRSession>.cancelAnimationFrame(<fuzzint>);
-<new EventHandler> = <XRSession>.onend;
-<XRSession>.onend = <EventHandler>;
-<new EventHandler> = <XRSession>.oninputsourceschange;
-<XRSession>.oninputsourceschange = <EventHandler>;
-<new EventHandler> = <XRSession>.onselect;
-<XRSession>.onselect = <EventHandler>;
-<new EventHandler> = <XRSession>.onvisibilitychange;
-<XRSession>.onvisibilitychange = <EventHandler>;
-
-#XRRenderState
-<new double> = <XRRenderState>.depthNear;
-<new double> = <XRRenderState>.depthFar;
-<new double> = <XRRenderState>.inlineVerticalFieldOfView;
-<new XRWebGLLayer> = <XRRenderState>.baseLayer;
-
-#XRInputSourceArray
-<new unsignedLong> = <XRInputSourceArray>.length;
-<new XRInputSource> = <XRInputSourceArray>[0];
-
-#XRFrame
-<new XRSession> = <XRFrame>.session;
-<new XRViewerPose> = <XRFrame>.getViewerPose(<XRReferenceSpace>);
-<new XRPose> = <XRFrame>.getPose(<XRSpace>, <XRSpace>);
-
-#XRInputSource
-<new DOMString> = <XRInputSource>.handedness;
-<new DOMString> = <XRInputSource>.targetRayMode;
-<new XRSpace> = <XRInputSource>.targetRaySpace;
-<new XRSpace> = <XRInputSource>.gripSpace;
-<new DOMString[]> = <XRInputSource>.profiles;
-<new Gamepad> = <XRInputSource>.gamepad;
-
-#XRReferenceSpace
-!extends XRReferenceSpace XRSpace
-<new XRSpace> = <XRReferenceSpace>;
-<new XRReferenceSpace> = <XRReferenceSpace>.getOffsetReferenceSpace(new XRRigidTransform());
-<new EventHandler> = <XRReferenceSpace>.onreset;
-<XRReferenceSpace>.onreset = <EventHandler>;
-
-#XRBoundedReferenceSpace
-!extends XRBoundedReferenceSpace XRReferenceSpace
-<new XRReferenceSpace> = <XRBoundedReferenceSpace>;
-<new DOMPointReadOnly[]> = <XRBoundedReferenceSpace>.boundsGeometry;
-
-#XRSpace
-!extends XRSpace EventTarget
-<new EventTarget> = <XRSpace>;
-
-#XRReferenceSpaceEvent
-!extends XRReferenceSpaceEvent Event
-<new Event> = <XRReferenceSpaceEvent>;
-<new XRReferenceSpaceEvent> = new XRReferenceSpaceEvent("reset", { referenceSpace:<XRReferenceSpace>, transform:new XRRigidTransform() });
-<new XRReferenceSpace> = <XRReferenceSpaceEvent>.referenceSpace;
-<new XRRigidTransform> = <XRReferenceSpaceEvent>.transform;
-
-#XRInputSourceEvent
-!extends XRInputSourceEvent Event
-<new Event> = <XRInputSourceEvent>;
-<new XRInputSourceEvent> = new XRInputSourceEvent("select", { frame:<XRFrame>, inputSource:<XRInputSource> });
-<new XRFrame> = <XRInputSourceEvent>.frame;
-<new XRInputSource> = <XRInputSourceEvent>.inputSource;
-
-#XRInputSourcesChangeEvent
-!extends XRInputSourcesChangeEvent Event
-<new Event> = <XRInputSourcesChangeEvent>;
-<new XRInputSourcesChangeEvent> = new XRInputSourcesChangeEvent("inputsourceschange", { session:<XRSession>, added:[<XRInputSource>], removed:[<XRInputSource>] });
-<new XRSession> = <XRInputSourcesChangeEvent>.session;
-<new XRInputSource[]> = <XRInputSourcesChangeEvent>.added;
-<new XRInputSource[]> = <XRInputSourcesChangeEvent>.removed;
-
-#XRViewerPose and XRPose
-!extends XRViewerPose XRPose
-<new XRPose> = <XRViewerPose>;
-<new XRRigidTransform> = <XRPose>.transform;
-<new boolean> = <XRPose>.emulatedPosition;
-<new XRView[]> = <XRViewerPose>.views;
-
-#XRRigidTransform
-<new XRRigidTransform> = new XRRigidTransform({ x:<fuzzfloat>, y:<fuzzfloat>, z:<fuzzfloat> }, { x:0, y:0, z:0, w:1 });
-<new DOMPointReadOnly> = <XRRigidTransform>.position;
-<new DOMPointReadOnly> = <XRRigidTransform>.orientation;
-<new Float32Array> = <XRRigidTransform>.matrix;
-<new XRRigidTransform> = <XRRigidTransform>.inverse;
-
-#XRView and XRViewport
-<new DOMString> = <XRView>.eye;
-<new Float32Array> = <XRView>.projectionMatrix;
-<new XRRigidTransform> = <XRView>.transform;
-<new long> = <XRViewport>.x;
-<new long> = <XRViewport>.y;
-<new long> = <XRViewport>.width;
-<new long> = <XRViewport>.height;
-
-#XRWebGLLayer
-<new boolean> = <XRWebGLLayer>.antialias;
-<new boolean> = <XRWebGLLayer>.ignoreDepthValues;
-<new WebGLFramebuffer> = <XRWebGLLayer>.framebuffer;
-<new unsignedLong> = <XRWebGLLayer>.framebufferWidth;
-<new unsignedLong> = <XRWebGLLayer>.framebufferHeight;
-<new XRViewport> = <XRWebGLLayer>.getViewport(<XRView>);
-<new double> = XRWebGLLayer.getNativeFramebufferScaleFactor(<XRSession>);
-
 #WebTransport
 !extends WebTransportDatagramsWritable WritableStream
 !extends WebTransportSendStream WritableStream
 !extends WebTransportReceiveStream ReadableStream
 !extends WebTransportError DOMException
-<new WebTransport> = new WebTransport("<DOMString>");
+<new WebTransport> = new WebTransport(<DOMString>);
 <new WebTransport> = new WebTransport("https://localhost:4433", { allowPooling:true, requireUnreliable:true, congestionControl:"low-latency", protocols:["domato"] });
 <new WebTransport> = new WebTransport("https://localhost:4433", { serverCertificateHashes:[{ algorithm:"sha-256", value:<ArrayBuffer> }] });
 <new any> = <WebTransport>.ready;
@@ -7281,8 +7135,8 @@ Notification.requestPermission();
 <new ReadableStreamDefaultReader> = <WebTransport>.incomingBidirectionalStreams.getReader();
 <new any> = <WebTransport>.incomingBidirectionalStreams.getReader().read().then(function(result){ if(!result.done){ result.value.readable.getReader().read(); result.value.writable.getWriter().write(new Uint8Array([7, 8])); } return result; }, function(error){ console.error(error); });
 <new any> = <WebTransport>.incomingUnidirectionalStreams.getReader().read().then(function(result){ return result; }, function(error){ console.error(error); });
-<WebTransport>.close({ closeCode:<fuzzint>, reason:"<DOMString>" });
-<new WebTransportError> = new WebTransportError({ streamErrorCode:<fuzzint>, message:"<DOMString>" });
+<WebTransport>.close({ closeCode:<fuzzint>, reason:<DOMString> });
+<new WebTransportError> = new WebTransportError({ streamErrorCode:<fuzzint>, message:<DOMString> });
 <new any> = <WebTransportError>.source;
 <new any> = <WebTransportError>.streamErrorCode;
 
@@ -7296,8 +7150,8 @@ Notification.requestPermission();
 <new boolean> = <SpeechSynthesis>.speaking;
 <new boolean> = <SpeechSynthesis>.paused;
 <new SpeechSynthesisUtterance> = new SpeechSynthesisUtterance();
-<new SpeechSynthesisUtterance> = new SpeechSynthesisUtterance("<DOMString>");
-<SpeechSynthesisUtterance>.text = "<DOMString>";
+<new SpeechSynthesisUtterance> = new SpeechSynthesisUtterance(<DOMString>);
+<SpeechSynthesisUtterance>.text = <DOMString>;
 <SpeechSynthesisUtterance>.lang = "en-US";
 <SpeechSynthesisUtterance>.volume = <fuzzfloat>;
 <SpeechSynthesisUtterance>.rate = <fuzzfloat>;
@@ -7354,9 +7208,9 @@ Notification.requestPermission();
 <SpeechGrammar>.src = "data:application/grammar+xml,%3Cgrammar%2F%3E";
 <SpeechGrammar>.weight = <fuzzfloat>;
 <SpeechGrammarList>.addFromUri("data:application/grammar+xml,%3Cgrammar%2F%3E", <fuzzfloat>);
-<SpeechGrammarList>.addFromString("<DOMString>", <fuzzfloat>);
+<SpeechGrammarList>.addFromString(<DOMString>, <fuzzfloat>);
 <SpeechRecognition>.grammars = <SpeechGrammarList>;
-<new SpeechRecognitionPhrase> = new SpeechRecognitionPhrase("<DOMString>", <fuzzfloat>);
+<new SpeechRecognitionPhrase> = new SpeechRecognitionPhrase(<DOMString>, <fuzzfloat>);
 <new DOMString> = <SpeechRecognitionPhrase>.phrase;
 <new float> = <SpeechRecognitionPhrase>.boost;
 <SpeechRecognition>.phrases = [new SpeechRecognitionPhrase("domato", 0.5)];
@@ -7378,7 +7232,7 @@ Notification.requestPermission();
 <SpeechRecognition>.onnomatch = <EventHandler>;
 <SpeechRecognition>.onstart = <EventHandler>;
 <SpeechRecognition>.onend = <EventHandler>;
-<new SpeechRecognitionErrorEvent> = new SpeechRecognitionErrorEvent("error", { error:"language-not-supported", message:"<DOMString>" });
+<new SpeechRecognitionErrorEvent> = new SpeechRecognitionErrorEvent("error", { error:"language-not-supported", message:<DOMString> });
 <new any> = <SpeechRecognitionErrorEvent>.error;
 <new DOMString> = <SpeechRecognitionErrorEvent>.message;
 
@@ -7459,11 +7313,11 @@ Notification.requestPermission();
 #Web Locks
 #LockManager
 <new LockManager> = navigator.locks;
-<LockManager>.request("<DOMString>", <EventHandler>);
-<LockManager>.request("<DOMString>", { mode:"shared" }, <EventHandler>);
-<LockManager>.request("<DOMString>", { mode:"exclusive" }, <EventHandler>);
-<LockManager>.request("<DOMString>", { ifAvailable:true }, <EventHandler>);
-<LockManager>.request("<DOMString>", { signal:<AbortSignal> }, <EventHandler>);
+<LockManager>.request(<DOMString>, <EventHandler>);
+<LockManager>.request(<DOMString>, { mode:"shared" }, <EventHandler>);
+<LockManager>.request(<DOMString>, { mode:"exclusive" }, <EventHandler>);
+<LockManager>.request(<DOMString>, { ifAvailable:true }, <EventHandler>);
+<LockManager>.request(<DOMString>, { signal:<AbortSignal> }, <EventHandler>);
 <LockManager>.query();
 
 #Lock
@@ -7474,8 +7328,8 @@ Notification.requestPermission();
 #NDEFReader
 <new NDEFReader> = new NDEFReader();
 <NDEFReader>.scan();
-<NDEFReader>.write("<DOMString>");
-<NDEFReader>.write({ recordType:"text", data:"<DOMString>" });
+<NDEFReader>.write(<DOMString>);
+<NDEFReader>.write({ recordType:"text", data:<DOMString> });
 <NDEFReader>.watch(<EventHandler>);
 <NDEFReader>.watch({ overtimeout:<fuzzint> }, <EventHandler>);
 <NDEFReader>.unwatch();
@@ -7485,7 +7339,7 @@ Notification.requestPermission();
 <NDEFReader>.onreadingerror = <EventHandler>;
 
 #NDEFMessage
-<new NDEFMessage> = new NDEFMessage([{ recordType:"text", data:"<DOMString>" }]);
+<new NDEFMessage> = new NDEFMessage([{ recordType:"text", data:<DOMString> }]);
 <new NDEFRecord[]> = <NDEFMessage>.records;
 
 #NDEFRecord

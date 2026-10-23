@@ -136,8 +136,8 @@
 <new PerformanceEntry> = performance.getEntriesByType("measure")[<fuzzint min=0 max=0>];
 <new PerformanceEntry> = performance.getEntriesByName(<DOMString>)[<fuzzint min=0 max=0>];
 
-<new IntersectionObserverEntry> = new IntersectionObserver(<EventHandler>).takeRecords()[<fuzzint min=0 max=0>];
-<new ResizeObserverEntry> = new ResizeObserver(<EventHandler>).takeRecords()[<fuzzint min=0 max=0>];
+<new IntersectionObserverEntry> = new IntersectionObserver(function(entries){ console.log(entries[0].isIntersecting); }).takeRecords()[<fuzzint min=0 max=0>];
+<new ResizeObserverEntry> = new ResizeObserver(function(entries){ console.log(entries[0].contentBoxSize); }).takeRecords()[<fuzzint min=0 max=0>];
 
 <new MediaDeviceInfo> = undefined;
 <new MIDIInput> = undefined;
@@ -172,20 +172,6 @@
 <new IDBCursor> = <IDBObjectStore>.openKeyCursor();
 <new IDBCursor> = <IDBIndex>.openCursor();
 <new IDBCursor> = <IDBIndex>.openKeyCursor();
-
-<new XRSession> = undefined;
-<new XRSpace> = undefined;
-<new XRFrame> = undefined;
-<new XRInputSource> = undefined;
-<new XRReferenceSpace> = undefined;
-<new XRInputSourceArray> = undefined;
-<new XRRenderState> = undefined;
-<new XRBoundedReferenceSpace> = undefined;
-<new XRViewerPose> = undefined;
-<new XRPose> = undefined;
-<new XRView> = undefined;
-<new XRWebGLLayer> = undefined;
-<new XRViewport> = undefined;
 
 #The generator configures "window"/"navigator" as initial variables of type
 #Window/Navigator, but js.txt also uses the lowercase <window>/<navigator>
@@ -241,47 +227,6 @@
 <WebSocket>.close(<fuzzint min=1000 max=4999>);
 <WebSocket>.close(<fuzzint min=1000 max=4999>, <DOMString>);
 <WebSocket>.addEventListener("message", <eventhandler>);
-
-#Firefox TCP sockets (availability-gated)
-!extends TCPSocket EventTarget
-!extends TCPServerSocket EventTarget
-!extends TCPSocketEvent Event
-!extends TCPSocketErrorEvent Event
-!extends TCPServerSocketEvent Event
-<new LegacyMozTCPSocket> = navigator.mozTCPSocket;
-<new TCPSocket> = new TCPSocket("127.0.0.1", 443);
-<new TCPSocket> = new TCPSocket("localhost", 80, { useSecureTransport:true, binaryType:"arraybuffer" });
-<new TCPSocket> = <LegacyMozTCPSocket>.open("localhost", 443, { useSecureTransport:true, binaryType:"string" });
-<new USVString> = <TCPSocket>.host;
-<new unsignedShort> = <TCPSocket>.port;
-<new boolean> = <TCPSocket>.ssl;
-<new unsignedLongLong> = <TCPSocket>.bufferedAmount;
-<new any> = <TCPSocket>.readyState;
-<new any> = <TCPSocket>.binaryType;
-<new any> = <TCPSocket>.transport;
-<new boolean> = <TCPSocket>.send("domato socket payload");
-<new boolean> = <TCPSocket>.send(new Uint8Array([1, 2, 3]).buffer, 0, 3);
-<TCPSocket>.suspend();
-<TCPSocket>.resume();
-<TCPSocket>.upgradeToSecure();
-<TCPSocket>.close();
-<TCPSocket>.onopen = <EventHandler>;
-<TCPSocket>.ondrain = <EventHandler>;
-<TCPSocket>.ondata = function(event){ event.data; };
-<TCPSocket>.onerror = function(event){ event.name; event.message; event.errorCode; };
-<TCPSocket>.onclose = <EventHandler>;
-<new TCPServerSocket> = new TCPServerSocket(0, { binaryType:"arraybuffer" }, 4);
-<new TCPServerSocket> = <LegacyMozTCPSocket>.listen(0, { binaryType:"string" }, 2);
-<new unsignedShort> = <TCPServerSocket>.localPort;
-<TCPServerSocket>.onconnect = function(event){ event.socket.send("accepted"); event.socket.close(); };
-<TCPServerSocket>.onerror = <EventHandler>;
-<TCPServerSocket>.close();
-<new TCPServerSocketEvent> = new TCPServerSocketEvent("connect", { socket:<TCPSocket> });
-<new TCPSocket> = <TCPServerSocketEvent>.socket;
-<new TCPSocketEvent> = new TCPSocketEvent("data", { data:new Uint8Array([1, 2, 3]).buffer });
-<new any> = <TCPSocketEvent>.data;
-<new TCPSocketErrorEvent> = new TCPSocketErrorEvent("error", { name:"NetworkError", message:"socket error", errorCode:0 });
-<new DOMString> = <TCPSocketErrorEvent>.message;
 
 #Web Crypto
 <new any> = crypto.getRandomValues(new Uint8Array(<fuzzint min=1 max=32>));
@@ -572,16 +517,16 @@
 <new boolean> = navigator.cookieEnabled;
 
 #ReportingObserver
-<new ReportingObserver> = new ReportingObserver(<EventHandler>);
-<new ReportingObserver> = new ReportingObserver(<EventHandler>, { buffered:true });
-<new ReportingObserver> = new ReportingObserver(<EventHandler>, { types:["deprecation", "intervention"] });
+<new ReportingObserver> = new ReportingObserver(function(reports, observer){ reports.forEach(function(report){ console.log(report.type, report.url); }); });
+<new ReportingObserver> = new ReportingObserver(function(reports){ console.log(reports.length); }, { buffered:true });
+<new ReportingObserver> = new ReportingObserver(function(reports, observer){ observer.takeRecords(); }, { types:["deprecation", "intervention"] });
 <new ReportingObserver> = new ReportingObserver(function(reports, observer){ reports.forEach(function(report){ report.type; report.url; if(report.body){ report.body.toJSON(); } }); }, { types:["deprecation", "intervention", "csp-violation"], buffered:true });
 <ReportingObserver>.observe();
 <ReportingObserver>.disconnect();
 <ReportingObserver>.takeRecords();
 
 #ResizeObserver
-<new ResizeObserver> = new ResizeObserver(<EventHandler>);
+<new ResizeObserver> = new ResizeObserver(function(entries, obs){ console.log(entries[0].borderBoxSize, obs.takeRecords().length); });
 <new ResizeObserver> = new ResizeObserver(function(entries, obs){});
 <ResizeObserver>.observe(<Element>);
 <ResizeObserver>.observe(<Element>, { box: "border-box" });
@@ -591,9 +536,9 @@
 <ResizeObserver>.disconnect();
 
 #IntersectionObserver
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>);
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { threshold: [<float min=0 max=1>] });
-<new IntersectionObserver> = new IntersectionObserver(<EventHandler>, { root: <Element>, rootMargin: "<fuzzint>px" });
+<new IntersectionObserver> = new IntersectionObserver(function(entries){ console.log(entries[0].intersectionRect.width); });
+<new IntersectionObserver> = new IntersectionObserver(function(entries, obs){ obs.unobserve(entries[0].target); }, { threshold: [<float min=0 max=1>] });
+<new IntersectionObserver> = new IntersectionObserver(function(entries){ entries.forEach(function(entry){ entry.boundingClientRect; }); }, { root: <Element>, rootMargin: "<fuzzint>px" });
 <IntersectionObserver>.observe(<Element>);
 <IntersectionObserver>.unobserve(<Element>);
 <IntersectionObserver>.disconnect();
@@ -837,7 +782,7 @@ performance.clearMeasures();
 <new any> = performance.getEntriesByType("resource");
 <new any> = performance.getEntriesByType("navigation");
 <new any> = performance.getEntriesByType("paint");
-<new PerformanceObserver> = new PerformanceObserver(<EventHandler>);
+<new PerformanceObserver> = new PerformanceObserver(function(list, obs){ console.log(list.getEntries().length, obs.takeRecords().length); });
 <PerformanceObserver>.observe({ entryTypes: ["mark", "measure", "resource", "paint"] });
 <PerformanceObserver>.disconnect();
 <PerformanceObserver>.takeRecords();
@@ -901,6 +846,11 @@ navigator.storage.getDirectory().then(function(directory){ directory.entries(); 
 <new CSSUnitValue> = CSS.em(<fuzzfloat>);
 <new CSSUnitValue> = CSS.deg(<fuzzint>);
 <new CSSUnitValue> = CSS.s(<fuzzfloat>);
+# the namespace's 26 conversion factors are plain doubles (CSS.cm is 96, CSS.dpi is 1).
+# They go in one self-contained rule: a definition split from its uses would let a case
+# draw the use without the definition and throw.
+<new double> = [CSS.Hz, CSS.cap, CSS.cm, CSS.cqb, CSS.cqh, CSS.cqi, CSS.cqw, CSS.dpcm, CSS.dpi, CSS.dvh, CSS.dvw, CSS.ex, CSS.grad, CSS.ic, CSS.in, CSS.mm, CSS.pc, CSS.pt, CSS.rad, CSS.rem, CSS.turn, CSS.vh, CSS.vi, CSS.vmax, CSS.vmin, CSS.vw][<int min=0 max=25>];
+<Element>.attributeStyleMap.set("width", CSS.px(CSS.cm + CSS.rem));
 <new CSSNumericValue> = CSSNumericValue.parse("<fuzzint>px");
 <new CSSStyleValue> = CSSStyleValue.parse("transform", "translateX(<fuzzint>px)");
 <new any> = CSSStyleValue.parseAll("color", "<color>");
@@ -937,31 +887,6 @@ navigator.storage.getDirectory().then(function(directory){ directory.entries(); 
 <new DOMString> = <CSSKeywordValue>.value;
 <CSSKeywordValue>.value = "inherit";
 <new CSSImageValue> = CSSStyleValue.parse("background-image", "url(data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=)");
-<new CSSRGB> = new CSSRGB(<fuzzint>, <fuzzint>, <fuzzint>);
-<new CSSRGB> = new CSSRGB("red", "green", "blue", 0.5);
-<new CSSHSL> = new CSSHSL(CSS.deg(<fuzzint>), <float min=0 max=1>, <float min=0 max=1>);
-<new CSSHWB> = new CSSHWB(CSS.deg(<fuzzint>), <float min=0 max=1>, <float min=0 max=1>);
-<new CSSLab> = new CSSLab(<float min=0 max=100>, <fuzzfloat>, <fuzzfloat>);
-<new CSSLCH> = new CSSLCH(<float min=0 max=100>, <fuzzfloat>, CSS.deg(<fuzzint>));
-<new CSSOKLab> = new CSSOKLab(<float min=0 max=1>, <fuzzfloat>, <fuzzfloat>);
-<new CSSOKLCH> = new CSSOKLCH(<float min=0 max=1>, <fuzzfloat>, CSS.deg(<fuzzint>));
-<new CSSColorValue> = CSSColorValue.parse("color(srgb 1 0 0)");
-<new CSSColorValue> = CSSColorValue.parse("lab(50% 20 30)");
-<new CSSColorValue> = CSSColorValue.parse("oklch(60% 0.2 30)");
-<new any> = <CSSRGB>.r;
-<new any> = <CSSRGB>.g;
-<new any> = <CSSRGB>.b;
-<new any> = <CSSRGB>.alpha;
-<CSSRGB>.r = <fuzzint>;
-<CSSRGB>.alpha = 0.5;
-<new any> = <CSSHSL>.h;
-<new any> = <CSSHSL>.s;
-<new any> = <CSSHWB>.w;
-<new any> = <CSSHWB>.b;
-<new any> = <CSSLab>.a;
-<new any> = <CSSLCH>.c;
-<new any> = <CSSOKLab>.l;
-<new any> = <CSSOKLCH>.h;
 <new CSSVariableReferenceValue> = new CSSVariableReferenceValue("--fuzz-color");
 <new CSSUnparsedValue> = new CSSUnparsedValue(["var(--fuzz-color)"]);
 <new DOMString> = <CSSVariableReferenceValue>.variable;
@@ -1006,15 +931,6 @@ navigator.mediaDevices.getUserMedia({ audio:{ deviceId:{ exact:"default" } }, vi
 <new any> = <MediaStreamTrack>.applyConstraints({ advanced:[{ exposureMode:"continuous" }] });
 <new MediaStreamTrack> = <MediaStreamTrack>.clone();
 <MediaStreamTrack>.stop();
-!extends ImageCapture EventTarget
-<new ImageCapture> = new ImageCapture(<MediaStreamTrack>);
-<new MediaStreamTrack> = <ImageCapture>.videoStreamTrack;
-<ImageCapture>.takePhoto();
-<new EventHandler> = <ImageCapture>.onphoto;
-<ImageCapture>.onphoto = <EventHandler>;
-<new EventHandler> = <ImageCapture>.onerror;
-<ImageCapture>.onerror = <EventHandler>;
-<new any> = navigator.mediaDevices.getUserMedia({ video:true }).then(function(stream){ const capture = new ImageCapture(stream.getVideoTracks()[0]); capture.takePhoto(); capture.videoStreamTrack.stop(); return capture; }, function(error){ console.error(error); });
 
 #Web Serial, Web USB, and Web NFC
 navigator.serial.getPorts();
@@ -1039,6 +955,8 @@ navigator.usb.requestDevice({ filters:[{ vendorId:<fuzzint>, productId:<fuzzint>
 <new NavigationActivation> = <Navigation>.activation;
 <new boolean> = <Navigation>.canGoBack;
 <new boolean> = <Navigation>.canGoForward;
+<new NavigationResult> = <Navigation>.back({ info:{ value:<fuzzint> } });
+<new NavigationResult> = <Navigation>.forward();
 <new any> = <NavigationHistoryEntry>.getState();
 <new DOMString> = <NavigationHistoryEntry>.key;
 <new DOMString> = <NavigationHistoryEntry>.id;
@@ -1550,7 +1468,7 @@ var domatoLogin = window.navigator.login;
 if (domatoLogin) { domatoLogin.setStatus("logged-in"); domatoLogin.setStatus("logged-out"); }
 
 #--- Storage, Performance, History, Location, Screen, Selection ---
-<new Storage> p=0.4 = <Window>.localStorage;
+<new Storage p=0.4> = <Window>.localStorage;
 <new Storage> = <Window>.sessionStorage;
 <Storage>.setItem("domato-key", <DOMString>);
 <Storage>.getItem("domato-key");
@@ -1568,7 +1486,7 @@ var domatoComposedRanges = <Selection>.getComposedRanges();
 <Selection>.removeRange(<Range>);
 <new boolean> = <AbortSignal>.throwIfAborted();
 <new any> = <Scheduler>.yield({ signal:<AbortSignal> }).then(function(domatoYieldOptions){ return domatoYieldOptions; }, function(error){ console.error(error); });
-<new TaskController> p=0.4 = new TaskController({ priority:"background" });
+<new TaskController p=0.4> = new TaskController({ priority:"background" });
 <TaskController>.setPriority("high");
 <TaskController>.setPriority(<DOMString>);
 <new boolean> = URL.canParse(<DOMString>);
@@ -1594,7 +1512,7 @@ var domatoRemoteStreams = <RTCPeerConnection>.getRemoteStreams();
 <new any> = <RTCPeerConnection>.getIdentityAssertion().then(function(domatoAssertion){ return domatoAssertion; }, function(error){ console.error(error); });
 <new RTCRtpSender> = <RTCRtpTransceiver>.sender;
 <new RTCRtpReceiver> = <RTCRtpTransceiver>.receiver;
-<new RTCDTMFSender> p=0.3 = <RTCRtpSender>.dtmf;
+<new RTCDTMFSender p=0.3> = <RTCRtpSender>.dtmf;
 <new any> = <RTCRtpSender>.getParameters();
 <new any> = <RTCRtpSender>.setParameters(<RTCRtpSender>.getParameters());
 <new any> = <RTCRtpSender>.replaceTrack(null);
@@ -1618,7 +1536,7 @@ var domatoFrameProto = window.RTCEncodedAudioFrame; if (domatoFrameProto) { doma
 
 #--- IndexedDB: self-contained open/upgrade/read cycle ---
 <new IDBKeyRange> = IDBKeyRange.only(<DOMString>);
-<new IDBKeyRange> p=0.3 = IDBKeyRange.bound(<fuzzint>, <fuzzint>, <boolean>, <boolean>);
+<new IDBKeyRange p=0.3> = IDBKeyRange.bound(<fuzzint>, <fuzzint>, <boolean>, <boolean>);
 var domatoIdbLower = IDBKeyRange.lowerBound(<fuzzint>, <boolean>);
 var domatoIdbUpper = IDBKeyRange.upperBound(<DOMString>, <boolean>);
 var domatoIdbOpen = <IDBFactory>.open("domato-idb", 1);
@@ -1653,7 +1571,7 @@ var domatoDefinedElement = customElements.get("domato-counter-element"); if (!do
 <CustomElementRegistry>.upgrade(<Element>);
 <CustomElementRegistry>.upgrade(domatoSlotHost, <fuzzfloat>);
 <Navigation>.updateCurrentEntry({ state:{ value:<fuzzint> } });
-<new NavigationPreloadManager> p=0.3 = <Navigation>.preload;
+<new NavigationPreloadManager p=0.3> = <Navigation>.preload;
 var domatoPreload = <Navigation>.preload; if (domatoPreload) { domatoPreload.enable().then(function(){ return domatoPreload.setHeaderValue("domato-preload"); }).then(function(){ }, function(domatoPreloadError){ console.error(domatoPreloadError); }); }
 var domatoResponseFrequency = new Float32Array(<int min=1 max=8>); var domatoMagnitude = new Float32Array(domatoResponseFrequency.length); var domatoPhase = new Float32Array(domatoResponseFrequency.length); <BiquadFilterNode>.getFrequencyResponse(domatoResponseFrequency, domatoMagnitude, domatoPhase);
 var domatoIirFrequency = new Float32Array(<int min=1 max=8>); var domatoIirMagnitude = new Float32Array(domatoIirFrequency.length); var domatoIirPhase = new Float32Array(domatoIirFrequency.length); <IIRFilterNode>.getFrequencyResponse(domatoIirFrequency, domatoIirMagnitude, domatoIirPhase);
@@ -1661,3 +1579,501 @@ var domatoChannelCopy = new Float32Array(<int min=1 max=8>); <AudioBuffer>.copyF
 var domatoTrackCues = <TextTrack>.cues; if (domatoTrackCues) { domatoTrackCues.getCueById("domato-cue"); }
 <new DOMString> = <AuthenticatorAttestationResponse>.getPublicKeyAlgorithm();
 var domatoAttestationProto = window.AuthenticatorAttestationResponse; if (domatoAttestationProto) { domatoAttestationProto.prototype.getPublicKeyAlgorithm; }
+
+#--- FuzzingFunctions is deliberately absent ---
+# the whole namespace is compiled out unless the build is configured
+# --enable-fuzzing; this one (ASan debug, no such option) has no binding at all - zero
+# hits for FuzzingFunctions/garbageCollectCompacting in libxul.so - so every line here
+# would be a ReferenceError the guard swallows. tools/probe_apis.py answers
+# "no page object carries this interface" for it. Re-run the probe before adding any
+# of it back on a build that does configure fuzzing.
+
+#--- members content can call but the standard name hides them ---
+# AbortSignal.any and IDBKeyRange.includes are exposed to WebIDL as _any/_includes
+# (the un-underscored names are reserved for the JS-builtin merge), console
+# ._exception is the DevTools-only exception recorder.
+<new AbortSignal> = AbortSignal._any([<AbortSignal>, <AbortSignal>]);
+<new boolean> = <IDBKeyRange>._includes(<DOMString>);
+<new boolean> = <IDBKeyRange>._includes(<fuzzint>);
+console._exception("domato-exception", <DOMString>);
+
+#--- EventListener as an object with handleEvent, not just a function ---
+# Passing the object to addEventListener makes the dispatch call handleEvent; the
+# direct call runs the same callback against an event this line controls.
+var domatoListener = { handleEvent: function(domatoListenerEvent){ domatoListenerEvent.type; domatoListenerEvent.target; } }; <EventTarget>.addEventListener("domato-handled-event", domatoListener); domatoListener.handleEvent(new Event("domato-handled-event")); <EventTarget>.removeEventListener("domato-handled-event", domatoListener);
+
+#--- Event handler attributes, the class extract_idl.py could not see ---
+#
+# _ATTRIBUTE required a trailing ';' that parse_file()'s split had already removed, so the
+# inventory held only methods and consts: 5973 members instead of 10932, and every `attribute`
+# in every WebIDL file was invisible to the audit. These handler names are therefore not a
+# regression - they were never in the queue. Each is the shape js.txt:2911 already uses for
+# onclick: read the installed handler into an EventHandler, then install one.
+#
+# <GlobalEventHandlers> (js.txt:575, 2672, 3443, 4603, 5919) resolves to an Element, Document,
+# Window, SVGElement or MathMLElement, so one pair of lines here covers the member on all five
+# receivers - that is why 16 names close the Element/HTMLElement/MathMLElement/SVGElement rows.
+<new EventHandler> = <GlobalEventHandlers>.onanimationcancel;
+<GlobalEventHandlers>.onanimationcancel = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onbeforeinput;
+<GlobalEventHandlers>.onbeforeinput = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onbeforematch;
+<GlobalEventHandlers>.onbeforematch = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onbeforetoggle;
+<GlobalEventHandlers>.onbeforetoggle = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.oncommand;
+<GlobalEventHandlers>.oncommand = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.oncontentvisibilityautostatechange;
+<GlobalEventHandlers>.oncontentvisibilityautostatechange = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.oncontextlost;
+<GlobalEventHandlers>.oncontextlost = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.oncontextrestored;
+<GlobalEventHandlers>.oncontextrestored = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onmozfullscreenchange;
+<GlobalEventHandlers>.onmozfullscreenchange = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onmozfullscreenerror;
+<GlobalEventHandlers>.onmozfullscreenerror = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onpointerrawupdate;
+<GlobalEventHandlers>.onpointerrawupdate = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onscrollend;
+<GlobalEventHandlers>.onscrollend = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.onslotchange;
+<GlobalEventHandlers>.onslotchange = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.ontransitioncancel;
+<GlobalEventHandlers>.ontransitioncancel = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.ontransitionrun;
+<GlobalEventHandlers>.ontransitionrun = <EventHandler>;
+<new EventHandler> = <GlobalEventHandlers>.ontransitionstart;
+<GlobalEventHandlers>.ontransitionstart = <EventHandler>;
+
+# WindowEventHandlers and the device sensors belong to Window only - no element receiver has
+# onafterprint, and the orientation/motion handlers are Window globals in
+# Window.webidl, so <Window> is the honest receiver for all six.
+<new EventHandler> = <Window>.onafterprint;
+<Window>.onafterprint = <EventHandler>;
+<new EventHandler> = <Window>.onbeforeprint;
+<Window>.onbeforeprint = <EventHandler>;
+<new EventHandler> = <Window>.ondevicemotion;
+<Window>.ondevicemotion = <EventHandler>;
+<new EventHandler> = <Window>.ondeviceorientation;
+<Window>.ondeviceorientation = <EventHandler>;
+<new EventHandler> = <Window>.ondeviceorientationabsolute;
+<Window>.ondeviceorientationabsolute = <EventHandler>;
+<new EventHandler> = <Window>.onuserproximity;
+<Window>.onuserproximity = <EventHandler>;
+
+#--- The handlers whose only receiver is a single interface ---
+# onmozorientationchange is Screen's, onresourcetimingbufferfull is Performance's,
+# onblocked is IDBOpenDBRequest's (an open() that waits on another connection),
+# onaddstream/onicecandidateerror/onicegatheringstatechange are RTCPeerConnection's,
+# onbufferedamountlow/onclosing are RTCDataChannel's, onencrypted/onwaitingforkey are
+# HTMLMediaElement's, ontimeout/onloadend come from XMLHttpRequestEventTarget,
+# onremove is Animation's, onaudioprocess is ScriptProcessorNode's, onaddsourcebuffer/
+# onremovesourcebuffer are SourceBufferList's and onprioritychange is TaskSignal's.
+<Screen>.onmozorientationchange = <EventHandler>; <new EventHandler> = <Screen>.onmozorientationchange;
+<Performance>.onresourcetimingbufferfull = <EventHandler>; <new EventHandler> = <Performance>.onresourcetimingbufferfull;
+<Performance>.onresourcetimingbufferfull = null; <Performance>.clearResourceTimings();
+<VisualViewport>.onscrollend = <EventHandler>; <new EventHandler> = <VisualViewport>.onscrollend;
+<FileReader>.onloadend = <EventHandler>; <new EventHandler> = <FileReader>.onloadend;
+<XMLHttpRequest>.ontimeout = <EventHandler>; <new EventHandler> = <XMLHttpRequest>.ontimeout;
+<XMLHttpRequest>.onloadend = <EventHandler>; <XMLHttpRequest>.timeout = <fuzzint>;
+<IDBOpenDBRequest>.onblocked = <EventHandler>; <new EventHandler> = <IDBOpenDBRequest>.onblocked;
+<Animation>.onremove = <EventHandler>; <new EventHandler> = <Animation>.onremove;
+<RTCPeerConnection>.onaddstream = <EventHandler>; <new EventHandler> = <RTCPeerConnection>.onaddstream;
+<RTCPeerConnection>.onicecandidateerror = <EventHandler>; <new EventHandler> = <RTCPeerConnection>.onicecandidateerror;
+<RTCPeerConnection>.onicegatheringstatechange = <EventHandler>; <new EventHandler> = <RTCPeerConnection>.onicegatheringstatechange;
+<RTCDataChannel>.onbufferedamountlow = <EventHandler>; <new EventHandler> = <RTCDataChannel>.onbufferedamountlow;
+<RTCDataChannel>.onclosing = <EventHandler>; <new EventHandler> = <RTCDataChannel>.onclosing;
+<HTMLMediaElement>.onencrypted = <EventHandler>; <new EventHandler> = <HTMLMediaElement>.onencrypted;
+<HTMLMediaElement>.onwaitingforkey = <EventHandler>; <new EventHandler> = <HTMLMediaElement>.onwaitingforkey;
+<new ScriptProcessorNode> = <AudioContext>.createScriptProcessor(4096, 1, 1);
+<ScriptProcessorNode>.onaudioprocess = <EventHandler>; <new EventHandler> = <ScriptProcessorNode>.onaudioprocess;
+<new SourceBufferList> = <MediaSource>.sourceBuffers;
+<SourceBufferList>.onaddsourcebuffer = <EventHandler>; <SourceBufferList>.onremovesourcebuffer = <EventHandler>;
+<new TaskSignal> = new TaskSignal("high");
+<TaskSignal>.onprioritychange = <EventHandler>; <new EventHandler> = <TaskSignal>.onprioritychange;
+
+#--- ARIAMixin: the 51 reflected properties Element and ElementInternals both carry ---
+#
+# ARIAMixin.webidl declares one Element?, eight sequence<Element>? and forty-two DOMString?
+# members, included by Element (js.txt:5908) and ElementInternals - so every line here covers
+# both interfaces, which is 102 of the 523 queue rows. Values follow the ARIA spec tokens rather
+# than arbitrary strings: the setters are [SetterThrows] but only for type, so a wrong token is
+# accepted by the binding and dropped by the accessibility layer, which would hide the reflection
+# path this is exercising. The DOMString? number-ish members are strings, not doubles.
+<Element>.ariaActiveDescendantElement = null; <Element>.ariaActiveDescendantElement = <Element>; <new Element> = <Document>.createElement("div");
+<Element>.ariaControlsElements = [<Element>, <Element>]; <Element>.ariaDescribedByElements = null; <Element>.ariaLabelledByElements = [<Element>];
+<Element>.ariaOwnsElements = null; <Element>.ariaDetailsElements = [<Element>]; <Element>.ariaFlowToElements = null; <Element>.ariaErrorMessageElements = [<Element>];
+<new DOMString> = <Element>.ariaLabel; <Element>.ariaLabel = "domato label";
+<new DOMString> = <Element>.ariaRoleDescription; <Element>.ariaRoleDescription = "a fuzzed thing";
+<new DOMString> = <Element>.ariaDescription; <Element>.ariaDescription = "described";
+<Element>.ariaBrailleLabel = "dot dot"; <Element>.ariaBrailleRoleDescription = "role in braille";
+<Element>.ariaKeyShortcuts = "a b c"; <Element>.ariaPlaceholder = "type here";
+<Element>.ariaValueText = "very high"; <Element>.ariaValueNow = "3"; <Element>.ariaValueMin = "0"; <Element>.ariaValueMax = "10";
+<Element>.ariaAtomic = "true"; <Element>.ariaBusy = "false"; <Element>.ariaChecked = "mixed"; <Element>.ariaDisabled = "false";
+<Element>.ariaExpanded = "false"; <Element>.ariaHidden = "false"; <Element>.ariaInvalid = "spelling"; <Element>.ariaModal = "false";
+<Element>.ariaMultiLine = "false"; <Element>.ariaMultiSelectable = "false"; <Element>.ariaPressed = "mixed"; <Element>.ariaReadOnly = "false";
+<Element>.ariaRequired = "false"; <Element>.ariaSelected = "true"; <Element>.ariaHasPopup = "menu"; <Element>.ariaCurrent = "step";
+<Element>.ariaAutoComplete = "both"; <Element>.ariaLive = "polite"; <Element>.ariaOrientation = "vertical"; <Element>.ariaRelevant = "all";
+<Element>.ariaSort = "ascending"; <Element>.ariaColIndexText = "third"; <Element>.ariaRowIndexText = "second row";
+<Element>.ariaLevel = "2"; <Element>.ariaPosInSet = "3"; <Element>.ariaSetSize = "9";
+<Element>.ariaColCount = "4"; <Element>.ariaColIndex = "2"; <Element>.ariaColSpan = "3";
+<Element>.ariaRowCount = "5"; <Element>.ariaRowIndex = "1"; <Element>.ariaRowSpan = "2";
+<ElementInternals>.ariaLabel = "internals label"; <new DOMString> = <ElementInternals>.ariaLabel;
+<ElementInternals>.ariaChecked = "mixed"; <ElementInternals>.ariaDisabled = "false"; <ElementInternals>.ariaExpanded = "true";
+<ElementInternals>.ariaHidden = "false"; <ElementInternals>.ariaInvalid = "grammar"; <ElementInternals>.ariaLive = "assertive";
+<ElementInternals>.ariaOrientation = "horizontal"; <ElementInternals>.ariaRelevant = "additions"; <ElementInternals>.ariaSort = "none";
+<ElementInternals>.ariaAtomic = "false"; <ElementInternals>.ariaBusy = "true"; <ElementInternals>.ariaModal = "true";
+<ElementInternals>.ariaMultiLine = "true"; <ElementInternals>.ariaMultiSelectable = "true"; <ElementInternals>.ariaPressed = "true";
+<ElementInternals>.ariaReadOnly = "true"; <ElementInternals>.ariaRequired = "true"; <ElementInternals>.ariaSelected = "false";
+<ElementInternals>.ariaHasPopup = "listbox"; <ElementInternals>.ariaCurrent = "date"; <ElementInternals>.ariaAutoComplete = "inline";
+<ElementInternals>.ariaLevel = "3"; <ElementInternals>.ariaPosInSet = "2"; <ElementInternals>.ariaSetSize = "7";
+<ElementInternals>.ariaValueNow = "5"; <ElementInternals>.ariaValueMin = "1"; <ElementInternals>.ariaValueMax = "8"; <ElementInternals>.ariaValueText = "mid";
+<ElementInternals>.ariaColCount = "2"; <ElementInternals>.ariaColIndex = "1"; <ElementInternals>.ariaColSpan = "2"; <ElementInternals>.ariaColIndexText = "b";
+<ElementInternals>.ariaRowCount = "3"; <ElementInternals>.ariaRowIndex = "2"; <ElementInternals>.ariaRowSpan = "1"; <ElementInternals>.ariaRowIndexText = "ii";
+<ElementInternals>.ariaRoleDescription = "custom"; <ElementInternals>.ariaDescription = "internals description";
+<ElementInternals>.ariaPlaceholder = "ph"; <ElementInternals>.ariaKeyShortcuts = "k";
+<ElementInternals>.ariaBrailleLabel = "braille"; <ElementInternals>.ariaBrailleRoleDescription = "braille role";
+<ElementInternals>.ariaActiveDescendantElement = null; <ElementInternals>.ariaControlsElements = null; <ElementInternals>.ariaDescribedByElements = null;
+<ElementInternals>.ariaDetailsElements = null; <ElementInternals>.ariaFlowToElements = null; <ElementInternals>.ariaOwnsElements = null;
+<ElementInternals>.ariaErrorMessageElements = null; <ElementInternals>.ariaLabelledByElements = null;
+
+#--- DOMMatrix / DOMMatrixReadOnly: the sixteen 4x4 entries and isIdentity ---
+# Column-major m11..m44 (Geometry API). `!extends DOMMatrix DOMMatrixReadOnly` at the top of this
+# file already links the two, and inverse() hands back a DOMMatrixReadOnly, so both receivers are
+# real objects rather than undefined variables.
+<DOMMatrix>.m11; <DOMMatrix>.m12; <DOMMatrix>.m13; <DOMMatrix>.m14;
+<DOMMatrix>.m21; <DOMMatrix>.m22; <DOMMatrix>.m23; <DOMMatrix>.m24;
+<DOMMatrix>.m31; <DOMMatrix>.m32; <DOMMatrix>.m33; <DOMMatrix>.m34;
+<DOMMatrix>.m41; <DOMMatrix>.m42; <DOMMatrix>.m43; <DOMMatrix>.m44;
+<new double> = <DOMMatrix>.m11; <new double> = <DOMMatrix>.m22; <new double> = <DOMMatrix>.m33; <new double> = <DOMMatrix>.m44;
+<new boolean> = <DOMMatrix>.isIdentity; <new boolean> = <DOMMatrixReadOnly>.isIdentity;
+<new DOMMatrixReadOnly> = <DOMMatrix>.inverse();
+<new DOMMatrixReadOnly> = <DOMMatrix>.translate(<fuzzfloat>, <fuzzfloat>);
+<DOMMatrixReadOnly>.m11; <DOMMatrixReadOnly>.m12; <DOMMatrixReadOnly>.m13; <DOMMatrixReadOnly>.m14;
+<DOMMatrixReadOnly>.m21; <DOMMatrixReadOnly>.m22; <DOMMatrixReadOnly>.m23; <DOMMatrixReadOnly>.m24;
+<DOMMatrixReadOnly>.m31; <DOMMatrixReadOnly>.m32; <DOMMatrixReadOnly>.m33; <DOMMatrixReadOnly>.m34;
+<DOMMatrixReadOnly>.m41; <DOMMatrixReadOnly>.m42; <DOMMatrixReadOnly>.m43; <DOMMatrixReadOnly>.m44;
+console.log(<DOMMatrix>.m11 * <DOMMatrix>.m22 - <DOMMatrix>.m12 * <DOMMatrix>.m21, <DOMMatrixReadOnly>.m41, <DOMMatrixReadOnly>.m42, <DOMMatrixReadOnly>.m43);
+
+#--- PannerNode: the Web Audio listener geometry, 14 members ---
+# positionX/Y/Z and orientationX/Y/Z are AudioParams (PannerNode.webidl), the rest are plain
+# floats and the two enums are distanceModel/panningModel, whose tokens the binding validates.
+<new PannerNode> = <AudioContext>.createPanner();
+<PannerNode>.coneInnerAngle = <fuzzfloat>; <PannerNode>.coneOuterAngle = <fuzzfloat>; <PannerNode>.coneOuterGain = <fuzzfloat>;
+<PannerNode>.distanceModel = "inverse"; <PannerNode>.distanceModel = "linear"; <PannerNode>.distanceModel = "exponential";
+<PannerNode>.panningModel = "equalpower"; <PannerNode>.panningModel = "HRTF";
+<PannerNode>.maxDistance = <fuzzfloat>; <PannerNode>.refDistance = <fuzzfloat>; <PannerNode>.rolloffFactor = <fuzzfloat>;
+<new AudioParam> = <PannerNode>.positionX; <new AudioParam> = <PannerNode>.positionY; <new AudioParam> = <PannerNode>.positionZ;
+<new AudioParam> = <PannerNode>.orientationX; <new AudioParam> = <PannerNode>.orientationY; <new AudioParam> = <PannerNode>.orientationZ;
+<PannerNode>.positionX.value = <fuzzfloat>; <PannerNode>.orientationY.value = <fuzzfloat>;
+<new double> = <PannerNode>.coneInnerAngle; <new double> = <PannerNode>.maxDistance; <new DOMString> = <PannerNode>.distanceModel; <new DOMString> = <PannerNode>.panningModel;
+
+#--- Window / Document / Navigator: plain state reads, no setup needed ---
+# Each of these getters was evaluated in this build before the rule was written (presence from
+# tools/probe_apis.py, callability from a one-off eval sweep), so they return a value instead of
+# being a swallowed TypeError. Window.fullScreen is read here and never written - its setter is
+# [NeedsCallerType]. InstallTrigger is left out on purpose: reading it is a Firefox-detection
+# trick and there is nothing to fuzz on the object it returns.
+<new boolean> = <Window>.crossOriginIsolated; <new boolean> = <Window>.originAgentCluster; <new boolean> = <Window>.fullScreen;
+<new float> = <Window>.mozInnerScreenX; <new float> = <Window>.mozInnerScreenY;
+<new long> = <Window>.scrollMaxX; <new long> = <Window>.scrollMaxY;
+console.log(<Window>.crossOriginIsolated, <Window>.originAgentCluster, <Window>.fullScreen, <Window>.mozInnerScreenX + <Window>.mozInnerScreenY);
+<new ViewTransition> = <Document>.activeViewTransition;
+<new CustomElementRegistry> = <Document>.customElementRegistry;
+<Document>.selectedStyleSheetSet = "fuzzset"; <Document>.selectedStyleSheetSet = null;
+<new DOMString> = <Document>.selectedStyleSheetSet; <new DOMString> = <Document>.lastStyleSheetSet;
+<new DOMString> = <Document>.preferredStyleSheetSet; <new DOMStringList> = <Document>.styleSheetSets;
+console.log(<Document>.styleSheetSets.length, <Document>.lastStyleSheetSet, <Document>.preferredStyleSheetSet, <Document>.selectedStyleSheetSet);
+<new boolean> = <Document>.mozFullScreen; <new boolean> = <Document>.mozFullScreenEnabled; <new Element> = <Document>.mozFullScreenElement;
+<Document>.adoptedStyleSheets = []; <Document>.adoptedStyleSheets = [<CSSStyleSheet>];
+<new long> = <Document>.adoptedStyleSheets.length;
+console.log(<Document>.adoptedStyleSheets.length, <Document>.activeViewTransition, <Document>.mozFullScreen, <Document>.mozFullScreenElement);
+<new DOMString> = <Navigator>.buildID; <new DOMString> = <Navigator>.doNotTrack; <new DOMString> = <Navigator>.oscpu;
+<new boolean> = <Navigator>.globalPrivacyControl; <new boolean> = <Navigator>.pdfViewerEnabled; <new boolean> = <Navigator>.webdriver;
+console.log(<Navigator>.buildID, <Navigator>.doNotTrack, <Navigator>.oscpu, <Navigator>.globalPrivacyControl, <Navigator>.pdfViewerEnabled, <Navigator>.webdriver);
+
+#--- XMLHttpRequest: response accessors and the two Mozilla anonymity flags ---
+# responseText and responseXML are readable once the request is opened (before open() they throw
+# InvalidStateError), and open() alone sends nothing, so this stays inside the harness origin.
+# responseType is the only writable member of the group and its enum is validated by the binding.
+<XMLHttpRequest>.responseType = ""; <XMLHttpRequest>.responseType = "text"; <XMLHttpRequest>.responseType = "arraybuffer";
+<XMLHttpRequest>.responseType = "blob"; <XMLHttpRequest>.responseType = "document"; <XMLHttpRequest>.responseType = "json";
+<XMLHttpRequest>.open("GET", "test.html", <boolean>); <new DOMString> = <XMLHttpRequest>.responseType;
+<new DOMString> = <XMLHttpRequest>.responseText; <new DOMString> = <XMLHttpRequest>.responseURL;
+<new Document> = <XMLHttpRequest>.responseXML; <new boolean> = <XMLHttpRequest>.mozAnon; <new boolean> = <XMLHttpRequest>.mozSystem;
+console.log(<XMLHttpRequest>.upload, <XMLHttpRequest>.responseText, <XMLHttpRequest>.responseURL, <XMLHttpRequest>.mozAnon, <XMLHttpRequest>.mozSystem);
+
+#--- Performance timing: PerformanceTiming and PerformanceResourceTiming ---
+# performance.timing is deprecated but live on this build, so it is the one way to reach the eleven
+# legacy timestamps. The resource-timing numbers only exist once a subresource has actually loaded,
+# which is why they hang off getEntriesByType("resource") - the images and XHRs a generated case
+# already creates are what put an entry in that list.
+<new PerformanceTiming> = <Performance>.timing;
+<new double> = <PerformanceTiming>.navigationStart; <new double> = <PerformanceTiming>.domLoading;
+<new double> = <PerformanceTiming>.unloadEventStart; <new double> = <PerformanceTiming>.unloadEventEnd;
+<new double> = <PerformanceTiming>.redirectStart; <new double> = <PerformanceTiming>.redirectEnd;
+<new double> = <PerformanceTiming>.domainLookupStart; <new double> = <PerformanceTiming>.domainLookupEnd;
+<new double> = <PerformanceTiming>.connectStart; <new double> = <PerformanceTiming>.connectEnd;
+<new double> = <PerformanceTiming>.secureConnectionStart;
+console.log(<PerformanceTiming>.navigationStart, <PerformanceTiming>.domLoading, <PerformanceTiming>.unloadEventStart, <PerformanceTiming>.connectEnd, <PerformanceTiming>.secureConnectionStart);
+<new PerformanceResourceTiming> = <Performance>.getEntriesByType("resource")[<fuzzint>];
+<new double> = <PerformanceResourceTiming>.connectStart; <new double> = <PerformanceResourceTiming>.connectEnd;
+<new double> = <PerformanceResourceTiming>.domainLookupStart; <new double> = <PerformanceResourceTiming>.domainLookupEnd;
+<new double> = <PerformanceResourceTiming>.redirectStart; <new double> = <PerformanceResourceTiming>.redirectEnd;
+<new double> = <PerformanceResourceTiming>.secureConnectionStart; <new double> = <PerformanceResourceTiming>.workerStart;
+<new double> = <PerformanceResourceTiming>.finalResponseHeadersStart; <new double> = <PerformanceResourceTiming>.firstInterimResponseStart;
+<new DOMString> = <PerformanceResourceTiming>.deliveryType;
+console.log(<PerformanceResourceTiming>.connectStart, <PerformanceResourceTiming>.connectEnd, <PerformanceResourceTiming>.workerStart, <PerformanceResourceTiming>.deliveryType, <PerformanceResourceTiming>.finalResponseHeadersStart);
+
+#--- Shadow DOM scoping: ShadowRoot readonly, HTMLTemplateElement writable mirror ---
+# template.shadowRoot* are the defaults a later attachShadow() inherits, and ShadowRootInit carries
+# the same knobs as a dictionary, so both sides of the pair are reachable synchronously.
+<new ShadowRoot> = <Element>.attachShadow({mode: "open", slotAssignment: "manual", serializable: <boolean>, clonable: <boolean>, delegatesFocus: <boolean>});
+<new boolean> = <ShadowRoot>.clonable; <new boolean> = <ShadowRoot>.serializable;
+<new DOMString> = <ShadowRoot>.slotAssignment; <new CustomElementRegistry> = <ShadowRoot>.customElementRegistry;
+<ShadowRoot>.adoptedStyleSheets = []; <new long> = <ShadowRoot>.adoptedStyleSheets.length;
+<new Element> = <ShadowRoot>.mozFullScreenElement;
+console.log(<ShadowRoot>.clonable, <ShadowRoot>.serializable, <ShadowRoot>.slotAssignment, <ShadowRoot>.customElementRegistry, <ShadowRoot>.mozFullScreenElement);
+<HTMLTemplateElement>.shadowRootMode = "open"; <HTMLTemplateElement>.shadowRootMode = "closed";
+<HTMLTemplateElement>.shadowRootSlotAssignment = "manual"; <HTMLTemplateElement>.shadowRootSlotAssignment = "automatic";
+<HTMLTemplateElement>.shadowRootCustomElementRegistry = "disabled"; <HTMLTemplateElement>.shadowRootCustomElementRegistry = "";
+<HTMLTemplateElement>.shadowRootClonable = <boolean>; <HTMLTemplateElement>.shadowRootDelegatesFocus = <boolean>;
+<HTMLTemplateElement>.shadowRootSerializable = <boolean>;
+<new DOMString> = <HTMLTemplateElement>.shadowRootMode; <new boolean> = <HTMLTemplateElement>.shadowRootClonable;
+<new boolean> = <HTMLTemplateElement>.shadowRootDelegatesFocus; <new boolean> = <HTMLTemplateElement>.shadowRootSerializable;
+<new DOMString> = <HTMLTemplateElement>.shadowRootSlotAssignment; <new DOMString> = <HTMLTemplateElement>.shadowRootCustomElementRegistry;
+
+#--- Media element counters, srcObject and pitch ---
+# The moz*Frames counters are Firefox-only telemetry on HTMLVideoElement; mozFragmentEnd is NaN
+# until a Media Fragment URI is set, which is the interesting part of reading it.
+<new long> = <HTMLVideoElement>.mozParsedFrames; <new long> = <HTMLVideoElement>.mozDecodedFrames;
+<new long> = <HTMLVideoElement>.mozPresentedFrames; <new long> = <HTMLVideoElement>.mozPaintedFrames;
+<new double> = <HTMLVideoElement>.mozFrameDelay; <new boolean> = <HTMLVideoElement>.mozHasAudio;
+console.log(<HTMLVideoElement>.mozParsedFrames + <HTMLVideoElement>.mozDecodedFrames, <HTMLVideoElement>.mozPresentedFrames, <HTMLVideoElement>.mozPaintedFrames, <HTMLVideoElement>.mozHasAudio, <HTMLVideoElement>.mozFrameDelay);
+<HTMLMediaElement>.srcObject = null; <HTMLMediaElement>.srcObject = <MediaStream>;
+<HTMLMediaElement>.preservesPitch = <boolean>; <new boolean> = <HTMLMediaElement>.preservesPitch;
+<new double> = <HTMLMediaElement>.mozFragmentEnd; <new boolean> = <HTMLMediaElement>.mozAudioCaptured;
+console.log(<HTMLMediaElement>.srcObject, <HTMLMediaElement>.mediaKeys, <HTMLMediaElement>.mozFragmentEnd, <HTMLMediaElement>.mozAudioCaptured, <HTMLMediaElement>.preservesPitch);
+
+#--- Element / HTMLElement / HTMLLinkElement surface that was never emitted ---
+# scrollLeftMax and scrollTopMax are unrestricted doubles, currentCSSZoom sits behind
+# layout.css.zoom.enabled (confirmed on this build), and imageSrcset/imageSizes are the
+# HTMLLinkElement-side of the responsive-image attributes.
+<new HTMLElement> = document.createElement("div");
+<new double> = <Element>.currentCSSZoom; <new CustomElementRegistry> = <Element>.customElementRegistry;
+<new double> = <Element>.scrollLeftMax; <new double> = <Element>.scrollTopMax;
+<Element>.scrollLeft = <fuzzint>; <Element>.scrollTop = <fuzzint>;
+console.log(<Element>.scrollLeftMax, <Element>.scrollTopMax, <Element>.currentCSSZoom, <Element>.customElementRegistry);
+<new DOMString> = <HTMLElement>.accessKeyLabel; <HTMLElement>.autocorrect = <boolean>; <new boolean> = <HTMLElement>.autocorrect;
+<HTMLLinkElement>.fetchPriority = "high"; <HTMLLinkElement>.fetchPriority = "low"; <HTMLLinkElement>.fetchPriority = "auto";
+<HTMLLinkElement>.imageSrcset = "fuzz.png 1x, fuzz.png 2x"; <HTMLLinkElement>.imageSizes = "(max-width: 300px) 300px, 800px";
+<HTMLElement>.enterKeyHint = "search"; <HTMLElement>.enterKeyHint = "done"; <new DOMString> = <HTMLElement>.enterKeyHint;
+<new DOMString> = <HTMLLinkElement>.fetchPriority; <new DOMString> = <HTMLLinkElement>.imageSrcset; <new DOMString> = <HTMLLinkElement>.imageSizes;
+console.log(<HTMLElement>.accessKeyLabel, <HTMLElement>.autocorrect, <HTMLElement>.enterKeyHint, <HTMLLinkElement>.fetchPriority, <HTMLLinkElement>.imageSizes);
+
+#--- FontFace descriptor strings ---
+# All five are [SetterThrows] UTF8Strings validated by the font-descriptor parser, so a bad value
+# is the test: "wght 400" is rejected by the variationSettings setter on this build while "normal"
+# and a comma-separated list are accepted.
+<FontFace>.ascentOverride = "100%"; <FontFace>.descentOverride = "10%"; <FontFace>.lineGapOverride = "5%";
+<FontFace>.sizeAdjust = "90%"; <FontFace>.sizeAdjust = "125%"; <FontFace>.variationSettings = "normal";
+<FontFace>.variationSettings = "wght 400";
+<new DOMString> = <FontFace>.ascentOverride; <new DOMString> = <FontFace>.descentOverride;
+<new DOMString> = <FontFace>.lineGapOverride; <new DOMString> = <FontFace>.sizeAdjust; <new DOMString> = <FontFace>.variationSettings;
+console.log(<FontFace>.ascentOverride, <FontFace>.descentOverride, <FontFace>.lineGapOverride, <FontFace>.sizeAdjust, <FontFace>.variationSettings);
+
+#--- Web Audio parameters that are nodes' own members, not js.txt's GainNode set ---
+# minDecibels/maxDecibels/smoothingTimeConstant are validated doubles (setting min above max
+# throws), detune is an AudioParam and loopStart/loopEnd are plain doubles on the buffer source.
+<AnalyserNode>.minDecibels = <fuzzfloat>; <AnalyserNode>.maxDecibels = <fuzzfloat>; <AnalyserNode>.smoothingTimeConstant = <float min=0 max=1>;
+<AnalyserNode>.minDecibels = -90; <AnalyserNode>.maxDecibels = -10; <AnalyserNode>.minDecibels = 10;
+<new double> = <AnalyserNode>.minDecibels; <new double> = <AnalyserNode>.maxDecibels; <new double> = <AnalyserNode>.smoothingTimeConstant;
+<AudioBufferSourceNode>.loopStart = <fuzzfloat>; <AudioBufferSourceNode>.loopEnd = <fuzzfloat>;
+<new AudioParam> = <AudioBufferSourceNode>.detune; <AudioBufferSourceNode>.detune.value = <fuzzfloat>;
+<new double> = <AudioBufferSourceNode>.loopStart; <new double> = <AudioBufferSourceNode>.loopEnd;
+<new AudioParam> = <DynamicsCompressorNode>.attack; <new AudioParam> = <DynamicsCompressorNode>.knee;
+<new float> = <DynamicsCompressorNode>.reduction;
+<DynamicsCompressorNode>.attack.value = <float min=0 max=1>; <DynamicsCompressorNode>.knee.value = <float min=0 max=40>;
+console.log(<AnalyserNode>.minDecibels, <AnalyserNode>.maxDecibels, <AnalyserNode>.smoothingTimeConstant, <AudioBufferSourceNode>.loopStart, <AudioBufferSourceNode>.loopEnd);
+console.log(<DynamicsCompressorNode>.reduction, <DynamicsCompressorNode>.attack.value, <DynamicsCompressorNode>.knee.value, <AudioBufferSourceNode>.detune.value);
+
+#--- Events that have no receiver until they are constructed with the right type ---
+# PointerEvent's values come from the constructor dictionary, not the event object createEvent()
+# would hand back (that path is NotSupportedError for this class). DataTransfer is constructible
+# directly, which is the only way its three Mozilla-only members are reachable.
+<new PointerEvent> = new PointerEvent("pointerdown", {altitudeAngle: <float min=0 max=1.57>, azimuthAngle: <float min=0 max=6.28>, twist: <fuzzint>, tangentialPressure: <float min=-1 max=1>});
+<new double> = <PointerEvent>.altitudeAngle; <new double> = <PointerEvent>.azimuthAngle;
+<new long> = <PointerEvent>.twist; <new float> = <PointerEvent>.tangentialPressure; <new long> = <PointerEvent>.persistentDeviceId;
+console.log(<PointerEvent>.altitudeAngle, <PointerEvent>.azimuthAngle, <PointerEvent>.twist, <PointerEvent>.tangentialPressure, <PointerEvent>.persistentDeviceId);
+<new DataTransfer> = new DataTransfer();
+<new DOMString> = <DataTransfer>.mozCursor; <new boolean> = <DataTransfer>.mozUserCancelled; <new Node> = <DataTransfer>.mozSourceNode;
+console.log(<DataTransfer>.mozCursor, <DataTransfer>.mozUserCancelled, <DataTransfer>.mozSourceNode);
+<new EventTarget> = <Event>.explicitOriginalTarget; <new EventTarget> = <Event>.originalTarget;
+console.log(<Event>.explicitOriginalTarget, <Event>.originalTarget);
+
+#--- WebRTC objects that are constructible without a peer connection ---
+# RTCError and RTCIceCandidate both take a dictionary, so every member below is a plain read of an
+# object the page made itself. candidate strings are parsed by the binding: the one here is a
+# syntactically valid host candidate, which is what makes foundation and component come back
+# non-empty instead of null.
+<new RTCError> = new RTCError({errorDetail: "sdp-syntax-error", sdpLineNumber: <fuzzint>, sctpCauseCode: <fuzzint>, receivedAlert: <fuzzint>, sentAlert: <fuzzint>}, "fuzz error");
+<new RTCError> = new RTCError({errorDetail: "sctp-failure"}, "bare");
+<new DOMString> = <RTCError>.errorDetail; <new long> = <RTCError>.sdpLineNumber; <new long> = <RTCError>.sctpCauseCode;
+<new long> = <RTCError>.receivedAlert; <new long> = <RTCError>.sentAlert;
+console.log(<RTCError>.errorDetail, <RTCError>.sdpLineNumber, <RTCError>.sctpCauseCode, <RTCError>.receivedAlert, <RTCError>.sentAlert);
+<new RTCIceCandidate> = new RTCIceCandidate({candidate: "candidate:1 1 udp 2122260223 10.0.0.1 50000 typ host", sdpMid: "0", sdpMLineIndex: 0, usernameFragment: "fuzzufrag"});
+<new DOMString> = <RTCIceCandidate>.foundation; <new DOMString> = <RTCIceCandidate>.component;
+<new DOMString> = <RTCIceCandidate>.tcpType; <new DOMString> = <RTCIceCandidate>.relatedAddress;
+<new long> = <RTCIceCandidate>.relatedPort; <new DOMString> = <RTCIceCandidate>.usernameFragment;
+console.log(<RTCIceCandidate>.foundation, <RTCIceCandidate>.component, <RTCIceCandidate>.tcpType, <RTCIceCandidate>.relatedAddress, <RTCIceCandidate>.relatedPort, <RTCIceCandidate>.usernameFragment);
+<new boolean> = <RTCPeerConnection>.canTrickleIceCandidates; <new RTCSctpTransport> = <RTCPeerConnection>.sctp;
+<new DOMString> = <RTCPeerConnection>.idpLoginUrl;
+console.log(<RTCPeerConnection>.canTrickleIceCandidates, <RTCPeerConnection>.sctp, <RTCPeerConnection>.idpLoginUrl);
+<new DOMString> = <RTCRtpTransceiver>.currentDirection; <new boolean> = <RTCRtpTransceiver>.stopped;
+<RTCRtpTransceiver>.direction = "sendrecv"; <RTCRtpTransceiver>.direction = "inactive";
+console.log(<RTCRtpTransceiver>.currentDirection, <RTCRtpTransceiver>.stopped, <RTCRtpTransceiver>.direction);
+<new RTCDataChannel> = <RTCPeerConnection>.createDataChannel("lifetimes", {maxPacketLifeTime: <fuzzint>});
+<RTCDataChannel>.bufferedAmountLowThreshold = <fuzzint>;
+<new long> = <RTCDataChannel>.bufferedAmountLowThreshold; <new long> = <RTCDataChannel>.maxPacketLifeTime;
+console.log(<RTCDataChannel>.bufferedAmountLowThreshold, <RTCDataChannel>.maxPacketLifeTime, <RTCDataChannel>.bufferedAmount);
+<new MediaStreamTrack> = <RTCRtpTransceiver>.receiver.track;
+<new RTCTrackEvent> = new RTCTrackEvent("track", {receiver: <RTCRtpReceiver>, track: <MediaStreamTrack>, streams: [], transceiver: <RTCRtpTransceiver>});
+<new RTCRtpTransceiver> = <RTCTrackEvent>.transceiver;
+console.log(<RTCTrackEvent>.streams.length, <RTCTrackEvent>.transceiver, <RTCTrackEvent>.receiver);
+
+#--- One- and two-member surfaces, grouped by how the receiver is made ---
+# Everything below was constructed and read in this build first. The callback-shaped lines (stream
+# controllers, observers, requestMIDIAccess) are the only way to hold those objects at all, and a
+# ReadableStream start callback runs synchronously during construction, so the controller is live
+# inside the one line that creates it.
+<new boolean> = <CloseEvent>.wasClean; console.log(<CloseEvent>.wasClean, <CloseEvent>.code, <CloseEvent>.reason);
+<new Node> = <UIEvent>.rangeParent; <new long> = <UIEvent>.rangeOffset;
+console.log(<UIEvent>.rangeParent, <UIEvent>.rangeOffset, <UIEvent>.detail, <UIEvent>.view);
+<new DOMString> = <File>.webkitRelativePath; console.log(<File>.webkitRelativePath, <File>.name, <File>.size);
+<new boolean> = <IDBKeyRange>.lowerOpen; <new boolean> = <IDBKeyRange>.upperOpen;
+console.log(<IDBKeyRange>.lower, <IDBKeyRange>.upper, <IDBKeyRange>.lowerOpen, <IDBKeyRange>.upperOpen);
+<new long> = <IDBVersionChangeEvent>.newVersion; <new long> = <IDBVersionChangeEvent>.oldVersion;
+console.log(<IDBVersionChangeEvent>.newVersion, <IDBVersionChangeEvent>.oldVersion, <IDBVersionChangeEvent>.dataVersion);
+<new MimeType> = navigator.mimeTypes[<fuzzint>];
+<new Plugin> = <MimeType>.enabledPlugin;
+<new DOMString> = <MimeType>.suffixes; console.log(<MimeType>.suffixes, <MimeType>.type, <MimeType>.description);
+<new long> = <MouseEvent>.mozInputSource; <new long> = <MouseEvent>.mozPressure;
+console.log(<MouseEvent>.mozInputSource, <MouseEvent>.mozPressure, <MouseEvent>.button);
+<VTTCue>.lineAlign = "center"; <VTTCue>.positionAlign = "auto"; <VTTCue>.positionAlign = "line-left";
+<new DOMString> = <VTTCue>.lineAlign; <new DOMString> = <VTTCue>.positionAlign;
+console.log(<VTTCue>.lineAlign, <VTTCue>.positionAlign, <VTTCue>.snapToLines, <VTTCue>.text);
+<new double> = <VisualViewport>.pageLeft; <new double> = <VisualViewport>.pageTop;
+console.log(<VisualViewport>.pageLeft, <VisualViewport>.pageTop, <VisualViewport>.offsetLeft, <VisualViewport>.scale);
+<WaveShaperNode>.curve = new Float32Array([<fuzzfloat>, <fuzzfloat>, <fuzzfloat>]); <WaveShaperNode>.curve = null;
+<WaveShaperNode>.oversample = "2x"; <WaveShaperNode>.oversample = "4x"; <WaveShaperNode>.oversample = "none";
+<new DOMString> = <WaveShaperNode>.oversample; <new Float32Array> = <WaveShaperNode>.curve;
+console.log(<WaveShaperNode>.oversample, <WaveShaperNode>.curve);
+<new AudioParam> = <BiquadFilterNode>.detune; <BiquadFilterNode>.detune.value = <fuzzfloat>;
+<new AudioParam> = <OscillatorNode>.detune; <OscillatorNode>.detune.value = <fuzzfloat>;
+console.log(<BiquadFilterNode>.detune.value, <OscillatorNode>.detune.value, <OscillatorNode>.frequency.value);
+<new long> = <ScriptProcessorNode>.bufferSize; console.log(<ScriptProcessorNode>.bufferSize, <ScriptProcessorNode>.channelCount);
+<new HTMLMediaElement> = <MediaElementAudioSourceNode>.mediaElement;
+console.log(<MediaElementAudioSourceNode>.mediaElement, <MediaElementAudioSourceNode>.playbackRate);
+<new DOMString> = <ClipboardItem>.presentationStyle; console.log(<ClipboardItem>.presentationStyle, <ClipboardItem>.types);
+<new double> = <Performance>.timeOrigin; console.log(<Performance>.timeOrigin, <Performance>.now());
+<new DOMString> = <Screen>.mozOrientation; console.log(<Screen>.mozOrientation, <Screen>.width, <Screen>.availTop);
+<new long> = <Selection>.caretBidiLevel; console.log(<Selection>.caretBidiLevel, <Selection>.isCollapsed, <Selection>.rangeCount);
+<new StorageArea> = <StorageEvent>.storageArea; console.log(<StorageEvent>.storageArea, <StorageEvent>.key, <StorageEvent>.newValue);
+<new SubmitEvent> = new SubmitEvent("submit", {submitter: <HTMLElement>});
+<new HTMLElement> = <SubmitEvent>.submitter; console.log(<SubmitEvent>.submitter, <SubmitEvent>.formData);
+<new DOMString> = <SecurityPolicyViolationEvent>.sample;
+console.log(<SecurityPolicyViolationEvent>.sample, <SecurityPolicyViolationEvent>.blockedURI, <SecurityPolicyViolationEvent>.violatedDirective);
+<new DOMStringList> = <Location>.ancestorOrigins; console.log(<Location>.ancestorOrigins.length, <Location>.href);
+<new MediaEncryptedEvent> = new MediaEncryptedEvent("encrypted", {initDataType: "cenc"});
+<new DOMString> = <MediaEncryptedEvent>.initDataType; console.log(<MediaEncryptedEvent>.initDataType, <MediaEncryptedEvent>.initData);
+<new MediaKeyMessageEvent> = new MediaKeyMessageEvent("ke", {messageType: "license-request", message: new ArrayBuffer(<fuzzint>)});
+<new DOMString> = <MediaKeyMessageEvent>.messageType; console.log(<MediaKeyMessageEvent>.messageType, <MediaKeyMessageEvent>.message.byteLength);
+<new RTCPeerConnectionIceErrorEvent> = new RTCPeerConnectionIceErrorEvent("icecandidateerror", {address: "10.0.0.1", port: <fuzzint>, errorCode: <fuzzint>, errorText: "fuzz"});
+<new DOMString> = <RTCPeerConnectionIceErrorEvent>.errorText;
+console.log(<RTCPeerConnectionIceErrorEvent>.errorText, <RTCPeerConnectionIceErrorEvent>.errorCode, <RTCPeerConnectionIceErrorEvent>.address, <RTCPeerConnectionIceErrorEvent>.port);
+<new RTCDTMFToneChangeEvent> = new RTCDTMFToneChangeEvent("tonechange", {tone: "5"});
+<new DOMString> = <RTCDTMFToneChangeEvent>.tone; console.log(<RTCDTMFToneChangeEvent>.tone);
+<new RTCDataChannel> = <RTCDataChannelEvent>.channel; console.log(<RTCDataChannelEvent>.channel, <RTCDataChannel>.label);
+<new double> = <RTCRtpReceiver>.jitterBufferTarget; console.log(<RTCRtpReceiver>.jitterBufferTarget, <RTCRtpReceiver>.track);
+<new VideoPlaybackQuality> = <HTMLVideoElement>.getVideoPlaybackQuality();
+<new double> = <VideoPlaybackQuality>.creationTime;
+console.log(<VideoPlaybackQuality>.creationTime, <VideoPlaybackQuality>.totalVideoFrames, <VideoPlaybackQuality>.droppedVideoFrames);
+<new DOMString> = <CSSUnitValue>.unit; console.log(<CSSUnitValue>.unit, <CSSUnitValue>.value);
+<new CSSSkew> = new CSSSkew(CSS.deg(<fuzzint>), CSS.deg(<fuzzint>));
+<new double> = <CSSSkew>.ax; <new double> = <CSSSkew>.ay;
+<new CSSNumberish> = <CSSSkewX>.ax; <new CSSNumberish> = <CSSSkewY>.ay;
+console.log(<CSSSkew>.ax, <CSSSkew>.ay, <CSSSkewX>.ax, <CSSSkewY>.ay);
+<new StylePropertyMap> = <CSSStyleRule>.styleMap; console.log(<CSSStyleRule>.styleMap, <CSSStyleRule>.selectorText);
+<new boolean> = <Request>.keepalive; console.log(<Request>.keepalive, <Request>.method, <Request>.mode);
+<new Serial> = navigator.serial; <new boolean> = <Serial>.autoselectPorts; console.log(<Serial>.autoselectPorts);
+<new DOMString> = <TextTrack>.inBandMetadataTrackDispatchType;
+console.log(<TextTrack>.inBandMetadataTrackDispatchType, <TextTrack>.kind, <TextTrack>.mode);
+<HTMLCanvasElement>.mozOpaque = <boolean>;
+<new boolean> = <HTMLCanvasElement>.mozOpaque; <new Location> = <Document>.location;
+console.log(typeof <HTMLCanvasElement>.mozPrintCallback);
+console.log(<HTMLCanvasElement>.mozOpaque, <HTMLCanvasElement>.mozPrintCallback, <HTMLCanvasElement>.width);
+<HTMLScriptElement>.fetchPriority = "high"; <HTMLScriptElement>.noModule = <boolean>;
+<new DOMString> = <HTMLScriptElement>.fetchPriority; <new boolean> = <HTMLScriptElement>.noModule;
+<HTMLImageElement>.fetchPriority = "low"; <new DOMString> = <HTMLImageElement>.fetchPriority;
+<new FileEntry> = <HTMLInputElement>.webkitEntries[<fuzzint>];
+console.log(<HTMLScriptElement>.fetchPriority, <HTMLScriptElement>.noModule, <HTMLImageElement>.fetchPriority, <HTMLInputElement>.webkitEntries);
+<SVGImageElement>.fetchPriority = "high"; <SVGScriptElement>.fetchPriority = "low"; <SVGFEImageElement>.fetchPriority = "auto";
+<new DOMString> = <SVGImageElement>.fetchPriority; <new DOMString> = <SVGScriptElement>.fetchPriority;
+<new DOMString> = <SVGFEImageElement>.fetchPriority;
+console.log(<SVGImageElement>.fetchPriority, <SVGScriptElement>.fetchPriority, <SVGFEImageElement>.fetchPriority);
+<new ReadableStreamDefaultController> = new ReadableStream({start: function(ctrl){ console.log(ctrl.desiredSize, ctrl.strategy, ctrl.error); }});
+<new ReadableByteStreamController> = new ReadableStream({type: "bytes", start: function(ctrl){ console.log(ctrl.desiredSize, ctrl.byobRequest, ctrl.autoAllocateChunkSize); }});
+<new TransformStreamDefaultController> = new TransformStream({start: function(ctrl){ console.log(ctrl.desiredSize, ctrl.transform); }});
+<new WritableStreamDefaultWriter> = new WritableStream().getWriter();
+console.log(<WritableStreamDefaultWriter>.desiredSize, <WritableStreamDefaultWriter>.closed, <WritableStreamDefaultWriter>.ready);
+<new ByteLengthQueuingStrategy> = new ByteLengthQueuingStrategy({highWaterMark: <fuzzint>});
+<new CountQueuingStrategy> = new CountQueuingStrategy({highWaterMark: <fuzzint>});
+<new double> = <ByteLengthQueuingStrategy>.highWaterMark; <new double> = <CountQueuingStrategy>.highWaterMark;
+console.log(<ByteLengthQueuingStrategy>.highWaterMark, <CountQueuingStrategy>.highWaterMark, <ByteLengthQueuingStrategy>.size);
+new ResizeObserver(function(entries, obs){ console.log(entries[0].contentRect); obs.unobserve(entries[0].target); }).observe(<Element>);
+new ResizeObserver(function(entries){ console.log(entries[0].contentBoxSize[<fuzzint>].inlineSize, entries[0].contentBoxSize[<fuzzint>].blockSize); }).observe(<Element>);
+<new ResizeObserverSize> = <ResizeObserverEntry>.contentBoxSize[<fuzzint>];
+console.log(<ResizeObserverSize>.inlineSize, <ResizeObserverSize>.blockSize, <ResizeObserverEntry>.contentRect);
+new IntersectionObserver(function(entries){ console.log(entries[0].isIntersecting, entries[0].intersectionRatio, entries[0].boundingClientRect); }, {threshold: [<float min=0 max=1>]}).observe(<Element>);
+<new boolean> = <IntersectionObserverEntry>.isIntersecting;
+console.log(<IntersectionObserverEntry>.isIntersecting, <IntersectionObserverEntry>.intersectionRatio);
+<new DOMString> = <IntersectionObserver>.scrollMargin; <new Float64Array> = <IntersectionObserver>.thresholds;
+console.log(<IntersectionObserver>.scrollMargin, <IntersectionObserver>.thresholds);
+<new MediaSource> = new MediaSource(); <new SourceBufferList> = <MediaSource>.activeSourceBuffers;
+console.log(<MediaSource>.activeSourceBuffers.length, <MediaSource>.readyState, <MediaSource>.duration);
+navigator.requestMIDIAccess({sysex: <boolean>}).then(function(midi){ console.log(midi.sysexEnabled, midi.inputs, midi.outputs); }, function(err){ });
+
+#--- The last three that still had a content-reachable receiver ---
+# QuotaExceededError is a DOMException subclass with a working constructor, so quota and requested
+# read back null here rather than throwing. defaultPolicy is only non-null under a
+# require-trusted-types-for CSP, which the harness never sets, so its read is the interesting part.
+# AudioProcessingEvent has no content constructor and createEvent() rejects the type, so the
+# buffers are read from inside the ScriptProcessorNode callback, which is the only place the
+# browser hands one to page code.
+<new QuotaExceededError> = new QuotaExceededError();
+<new long> = <QuotaExceededError>.quota; <new long> = <QuotaExceededError>.requested;
+console.log(<QuotaExceededError>.quota, <QuotaExceededError>.requested, <QuotaExceededError>.name);
+<new TrustedTypePolicy> = <TrustedTypePolicyFactory>.defaultPolicy;
+console.log(<TrustedTypePolicyFactory>.defaultPolicy, <TrustedTypePolicyFactory>.emptyHTML, <TrustedTypePolicyFactory>.emptyScript);
+<AudioContext>.createScriptProcessor(1024, 1, 1).onaudioprocess = function(evt){ console.log(evt.inputBuffer.length, evt.outputBuffer.sampleRate, evt.playbackTime); };
+
+#The three remaining queue rows content can actually reach, each one evaluated with
+#tools/check_reads.py. supportedEntryTypes is a static getter on the constructor (it answers 8
+#entries here) and an instance does not carry it, so the class name is written bare rather than
+#as a typed variable. renderedBuffer arrives through the event dictionary, which is not a member
+#position the audit can match, so it is also read back off the event object. anticipatedRemoval
+#only exists on a deprecation report body, and content receives one as a callback argument.
+<new long> = PerformanceObserver.supportedEntryTypes.length;
+<new DOMString> = PerformanceObserver.supportedEntryTypes[<fuzzint>];
+console.log(PerformanceObserver.supportedEntryTypes[<fuzzint>], PerformanceObserver.supportedEntryTypes.length);
+<new AudioBuffer> = <OfflineAudioCompletionEvent>.renderedBuffer;
+console.log(<OfflineAudioCompletionEvent>.renderedBuffer.length, <OfflineAudioCompletionEvent>.renderedBuffer.sampleRate, <OfflineAudioCompletionEvent>.renderedBuffer.duration);
+new ReportingObserver(function(reports){ reports.forEach(function(report){ if (report.body) { console.log(report.body.anticipatedRemoval, report.body.deprecationName, report.body.deprecationType); } }); }, { types:["deprecation"], buffered:true }).observe();
+
+#Document's visibility handler, which the audit had been counting from an XRSession line that no
+#longer exists: onvisibilitychange fires in content, and the only receiver that matters is the
+#document the harness is running in.
+<new EventHandler> = <Document>.onvisibilitychange;
+<Document>.onvisibilitychange = function(evt){ console.log(document.visibilityState, document.hidden); };
+<new DOMString> = <Document>.visibilityState;

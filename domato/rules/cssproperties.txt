@@ -3851,11 +3851,15 @@
 # <DOMString> (it is not otherwise defined for the CSS grammar).
 # ------------------------------------------------------------------
 
-# css.txt uses <DOMString> as an identifier / string.
-<DOMString> = foo
-<DOMString> = bar
-<DOMString> = baz
-<DOMString> = a
+# css.txt uses <DOMString> as an identifier / string. js.txt reaches the same symbol through
+# jshelpers.txt:2239, where a bare `foo` is an undeclared identifier - 4 of 9 creators meant
+# almost half of every <DOMString> in a generated JS statement threw ReferenceError. p= is
+# per-creator in each grammar separately, so the css grammar (these four are its only
+# <DOMString> rules) keeps drawing them uniformly.
+<DOMString p=0.02> = foo
+<DOMString p=0.02> = bar
+<DOMString p=0.02> = baz
+<DOMString p=0.02> = a
 
 # @property syntax descriptor.
 <cssproperty_syntax> = *
