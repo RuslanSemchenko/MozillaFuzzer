@@ -377,8 +377,8 @@
 <GPUExternalTextureBindingLayout> = {  }
 <GPUExternalTextureDescriptor> = { label: <USVString>, colorSpace: <PredefinedColorSpace>, source: <VideoFrame> }
 <GPUExternalTextureDescriptor> = { label: <USVString>, colorSpace: <PredefinedColorSpace>, source: <HTMLVideoElement> }
-<GPUFragmentState> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule>, targets: <GPUColorTargetStateSequence> }
-<GPUFragmentState> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule>, targets: <GPUColorTargetStateSequence> }
+<GPUFragmentState> = { constants: <USVStringDoubleRecord>, entryPoint: <fragmentEntryPoint>, module: <GPUShaderModule>, targets: <GPUColorTargetStateSequence> }
+<GPUFragmentState> = { constants: <USVStringDoubleRecord>, entryPoint: <fragmentEntryPoint>, module: <GPUShaderModule>, targets: <GPUColorTargetStateSequence> }
 <GPUImageCopyBuffer> = { bytesPerRow: <UnsignedLongEnforceRange>, offset: <UnsignedLongLongEnforceRange>, rowsPerImage: <UnsignedLongEnforceRange>, buffer: <GPUBuffer> }
 <GPUImageCopyExternalImage> = { flipY: <Boolean>, origin: <GPUOrigin2DDict>, source: <HTMLCanvasElement> }
 <GPUImageCopyExternalImage> = { flipY: <Boolean>, origin: <GPUOrigin2DDict>, source: <HTMLVideoElement> }
@@ -396,7 +396,7 @@
 <GPUPipelineDescriptorBase> = { label: <USVString>, layout: <GPUPipelineLayout> }
 <GPUPipelineLayoutDescriptor> = { label: <USVString>, bindGroupLayouts: <GPUBindGroupLayoutSequence> }
 <GPUPrimitiveState> = { cullMode: <GPUCullMode>, frontFace: <GPUFrontFace>, stripIndexFormat: <GPUIndexFormat>, topology: <GPUPrimitiveTopology>, unclippedDepth: <Boolean> }
-<GPUProgrammableStage> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule> }
+<GPUProgrammableStage> = { constants: <USVStringDoubleRecord>, entryPoint: <computeEntryPoint>, module: <GPUShaderModule> }
 <GPUQuerySetDescriptor> = { label: <USVString>, count: <UnsignedLongEnforceRange>, pipelineStatistics: <GPUPipelineStatisticNameSequence>, type: <GPUQueryType> }
 <GPUQueueDescriptor> = { label: <USVString> }
 <GPURasterizationStateDescriptor> = { cullMode: <GPUCullMode>, depthBias: <LongEnforceRange>, depthBiasClamp: <Float>, depthBiasSlopeScale: <Float>, frontFace: <GPUFrontFace> }
@@ -422,7 +422,7 @@
 <GPUUncapturedErrorEventInit> = { bubbles: <Boolean>, cancelable: <Boolean>, composed: <Boolean>, error: <GPUError> }
 <GPUVertexAttribute> = { format: <GPUVertexFormat>, offset: <UnsignedLongLongEnforceRange>, shaderLocation: <UnsignedLongEnforceRange> }
 <GPUVertexBufferLayout> = { arrayStride: <UnsignedLongLongEnforceRange>, attributes: <GPUVertexAttributeSequence>, stepMode: <GPUVertexStepMode> }
-<GPUVertexState> = { constants: <USVStringDoubleRecord>, entryPoint: <entrypoint>, module: <GPUShaderModule>, buffers: <GPUVertexBufferLayoutSequence> }
+<GPUVertexState> = { constants: <USVStringDoubleRecord>, entryPoint: <vertexEntryPoint>, module: <GPUShaderModule>, buffers: <GPUVertexBufferLayoutSequence> }
 
 
 <GPUBindGroupEntrySequence> = [<GPUBindGroupEntry>]
@@ -577,7 +577,7 @@ await <GPUBuffer>.mapAsync(<GPUMapMode>,<UnsignedLongLongEnforceRange>,<Unsigned
 <new GPUBindGroupLayout> = <GPUComputePipeline>.getBindGroupLayout(<BindInt>);
 
 #~~~~~~~~~~~~~~~~GPUDevice~~~~~~~~~~~~~~~~#
-<new GPUQueue> = device.queu;
+<new GPUQueue> = device.queue;
 <GPUDevice>.onuncapturederror = null
 <GPUDevice>.label = <USVString>
 <GPUDevice>.destroy();

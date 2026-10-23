@@ -45,16 +45,26 @@ def extract_shader_stages_and_functions(code):
     
     return result
 
+# Every wgsl module in the corpus exposes the same stage contract, so the fallback
+# names double as the contract: a grammar symbol must always have a creator, even for
+# a shader set that lacks that stage (domato-example.wgsl is compute-only).
+_STAGES = {
+    "@compute": ("<computeEntryPoint>", "cs"),
+    "@vertex": ("<vertexEntryPoint>", "vs"),
+    "@fragment": ("<fragmentEntryPoint>", "fs"),
+}
+
 def parse_entrypoints(shaders):
-    entrypoints = []
+    by_stage = {attr: [] for attr in _STAGES}
     for shader in shaders:
-        attr_fn_pairs = extract_shader_stages_and_functions(shader)
-        for attr, fn in attr_fn_pairs:
-            entrypoints.append(fn)
+        for attr, fn in extract_shader_stages_and_functions(shader):
+            if fn not in by_stage[attr]:
+                by_stage[attr].append(fn)
 
     result = ""
-    for entrypoint in entrypoints:
-        result += "<entrypoint> = \"{}\"\n".format(entrypoint)    
+    for attr, (symbol, fallback) in _STAGES.items():
+        for fn in by_stage[attr] or [fallback]:
+            result += "{} = \"{}\"\n".format(symbol, fn)
 
     return result
 
