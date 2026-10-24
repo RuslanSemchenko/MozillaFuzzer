@@ -102,7 +102,7 @@ var fuzzmap2 = device.createBuffer({ size: 16, usage: GPUBufferUsage.MAP_READ })
 <GPUBuffer>.unmap();
 <GPUBuffer>.usage;
 <GPUCanvasContext>.canvas;
-<GPUCanvasContext>.configure(<GPUCanvasConfiguration>);
+<GPUCanvasContext>.configure({ device: device, format: navigator.gpu.getPreferredCanvasFormat() });
 <GPUCanvasContext>.getConfiguration();
 var fuzzgpu = <GPUCanvasContext>; fuzzgpu.configure({ device: device, format: navigator.gpu.getPreferredCanvasFormat() }); fuzzgpu.getCurrentTexture();
 <GPUCanvasContext>.unconfigure();
@@ -160,7 +160,7 @@ var fuzzgpu = <GPUCanvasContext>; fuzzgpu.configure({ device: device, format: na
 <new GPUSampler> = <GPUDevice>.createSampler(<GPUSamplerDescriptor>);
 <new GPUShaderModule> = <GPUDevice>.createShaderModule(<GPUShaderModuleDescriptor>);
 <new GPUTexture> = <GPUDevice>.createTexture(<GPUTextureDescriptor>);
-<GPUDevice>.destroy();
+var fuzzdev2 = await (await navigator.gpu.requestAdapter()).requestDevice(); fuzzdev2.destroy();
 <GPUDevice>.features;
 <GPUDevice>.label;
 <GPUDevice>.label = <DOMString>;

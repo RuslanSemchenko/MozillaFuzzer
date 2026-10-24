@@ -129,7 +129,7 @@ var fzssu1 = new SpeechSynthesisUtterance("fuzz"); var fzsse1 = new SpeechSynthe
 window.reportError(new Error("fuzz"));
 var fzxml1 = document.implementation.createDocument(null, "root"); fzxml1.createCDATASection("fuzz");
 document.execCommand("bold");
-var fzvt1 = document.startViewTransition(function () { }); fzvt1.updateCallbackDone; fzvt1.skipTransition();
+var fzvt1 = document.startViewTransition(function () { }); fzvt1.updateCallbackDone.catch(function (e) { }); fzvt1.skipTransition();
 navigator.credentials.preventSilentAccess().catch(function (e) { });
 var fzssu2 = new SpeechSynthesisUtterance("fuzz"); fzssu2.onerror = function (e) { }; speechSynthesis.speak(fzssu2); speechSynthesis.cancel();
 navigator.requestMediaKeySystemAccess("org.w3.clearkey", [{ initDataTypes: ["cenc"] }]).then(function (a) { a.keySystem; }).catch(function (e) { });
@@ -151,5 +151,24 @@ caches.open("fuzzcache").then(function (fzcch3) { try { fzcch3.addAll([location.
 # --- ImageTrack: selectedTrack exists once tracks.ready resolves -------------
 
 var fzidc4 = new ImageDecoder({ data: (function () { var s = atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="); var u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) { u[i] = s.charCodeAt(i); } return u; })(), type: "image/png" }); fzidc4.tracks.ready.then(function () { try { var fztr4 = fzidc4.tracks.selectedTrack; fzidc4.tracks.length; fzidc4.tracks.selectedIndex; if (fztr4) { fztr4.animated; fztr4.frameCount; fztr4.repetitionCount; fztr4.selected; } } catch (e) { } }).catch(function (e) { });
+
+# --- WebCodecs: the encoder output feeds the decoder --------------------------# The generated rules construct VideoEncoder/VideoDecoder but never connect
+# them: encode() needs a VideoFrame, decode() needs a chunk that only an
+# encoder's output callback produces. vp8 configure+flush was evaluated on this
+# build (chunks=1, decoder flush resolved).
+
+var fzcv9 = document.createElement("canvas"); fzcv9.width = 64; fzcv9.height = 64; var fzcx9 = fzcv9.getContext("2d"); fzcx9.fillRect(0, 0, 64, 64); var fzframe9 = new VideoFrame(fzcv9, { timestamp: 0 }); var fzchunks9 = []; var fzenc9 = new VideoEncoder({ output: function (ch) { try { fzchunks9.push(ch); ch.byteLength; ch.type; ch.timestamp; ch.duration; } catch (e) { } }, error: function (e) { } }); fzenc9.configure({ codec: "vp8", width: 64, height: 64 }); fzenc9.encode(fzframe9); fzframe9.close(); fzenc9.encodeQueueSize; fzenc9.state; fzenc9.flush().then(function () { try { if (!fzchunks9.length) { return; } var fzdec9 = new VideoDecoder({ output: function (f) { try { f.displayWidth; f.displayHeight; f.timestamp; f.close(); } catch (e) { } }, error: function (e) { } }); fzdec9.configure({ codec: "vp8" }); fzdec9.decode(fzchunks9[0]); fzdec9.decodeQueueSize; fzdec9.state; fzdec9.flush().then(function () { try { fzdec9.close(); fzenc9.close(); } catch (e) { } }).catch(function (e) { }); } catch (e) { } }).catch(function (e) { });
+
+# --- Web Animations: ready/finished promises plus commitStyles ----------------
+
+var fzan9 = document.createElement("div"); fzan9.style.width = "10px"; fzan9.style.height = "10px"; (document.body || document.documentElement)?.appendChild(fzan9); var fza9 = fzan9.animate([{ opacity: 1 }, { opacity: 0 }], 100); fza9.onfinish = function () { }; fza9.oncancel = function () { }; fza9.onremove = function () { }; fza9.ready.then(function () { try { fza9.playState; } catch (e) { } }).catch(function (e) { }); fza9.finished.then(function () { try { fzan9.remove(); } catch (e) { } }).catch(function (e) { }); try { fza9.commitStyles(); } catch (e) { } try { fza9.persist(); } catch (e) { } fza9.playbackRate = 2; fza9.currentTime = 50; fza9.play(); fza9.pause(); fza9.reverse(); fza9.updatePlaybackRate(1); fza9.effect.getComputedTiming().progress; fza9.effect.getTiming().duration; fza9.cancel(); fza9.play(); fza9.finish();
+
+# --- Web Locks + BroadcastChannel: the lock exists only inside the callback ---
+
+var fzbch9 = new BroadcastChannel("fuzz"); fzbch9.onmessage = function (e) { try { e.data; } catch (x) { } }; fzbch9.onmessageerror = function (e) { }; fzbch9.postMessage("fuzz"); navigator.locks.request("fuzzlock", { ifAvailable: true }, function (lock) { try { if (lock) { lock.name; lock.mode; lock.clientId; } } catch (e) { } return navigator.locks.query().then(function (s) { try { s.held.length; s.pending.length; if (s.held.length) { s.held[0].name; s.held[0].mode; s.held[0].clientId; } } catch (e) { } try { fzbch9.close(); } catch (e) { } }).catch(function (e) { }); }).catch(function (e) { });
+
+# --- HTMLInputElement.valueAsDate: only a date/time input accepts it ----------
+
+var fzdate1 = document.createElement("input"); fzdate1.type = "date"; fzdate1.valueAsDate = new Date(0); fzdate1.valueAsDate; fzdate1.value = "1970-01-01"; fzdate1.valueAsDate; fzdate1.type = "time"; fzdate1.valueAsDate = new Date(0); fzdate1.valueAsDate;
 
 !end lines

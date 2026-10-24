@@ -138,6 +138,9 @@ DENY_MEMBERS = {
     # speechSynthesis itself is a safe receiver and its voices are readable;
     # only speaking produces audible output
     ("SpeechSynthesis", "speak"): "produces audible output the harness cannot mute",
+    # both accessors are stubs that always throw NS_ERROR_NOT_IMPLEMENTED
+    # (SpeechGrammar.cpp), so every rule spelling it is dead text
+    ("SpeechGrammar", "weight"): "getter and setter are unimplemented",
     # start() captures the default microphone and, with install-on-start on,
     # starts a speech-model download; its pending MozPromise crashed the
     # content process at shutdown (MOZ_CRASH in MozPromise::AssertIsDead).
@@ -324,6 +327,10 @@ DENY_CREATORS = {
     # document (a DOMParser or XSLT result) throws WrongDocumentError; the
     # manual creator and XPathEvaluator.evaluate have no such coupling
     ("Document", "evaluate"),
+    # Document.getSelection is null on a document without a browsing context
+    # (createHTMLDocument, evaluated); a null variable is then reused by every
+    # Selection rule. document.getSelection() is the reliable creator.
+    ("Document", "getSelection"),
     # a <Document> receiver from DOMParser or XSLT is an XMLDocument, where
     # createElement("audio") returns a plain Element: the typed variable would
     # have none of the HTML interface's members. The suppliers create HTML
@@ -388,6 +395,24 @@ EXTRA_ROOTS = {
     ("NodeFilter", "({ acceptNode: function(node) { return NodeFilter.FILTER_ACCEPT; } })"),
 }
 
+# A generated line can remove document.body and document.documentElement
+# (document.open, Element.remove). Re-creating a root keeps the statement in
+# the live document, where Selection ranges and text layout still work; a
+# detached-document body does not (evaluated: addRange then throws).
+ATTACH_ROOT = (
+    "(document.body || document.documentElement"
+    ' || document.appendChild(document.createElement("html")))'
+)
+
+# A node whose parent is an element, not a Document/DocumentType: Range
+# boundary methods reject the generated pool's Document-rooted nodes with
+# InvalidNodeTypeError.
+APPENDED_NODE = (
+    '(function () { var n = document.createElement("div"); '
+    + ATTACH_ROOT
+    + ".appendChild(n); return n; })()"
+)
+
 # Members whose generated argument list must be replaced. The default mapper
 # produces type-correct values, but some members need a value that is valid in
 # a second sense: a selector, a URL that does not hit the network, an async XHR.
@@ -402,6 +427,7 @@ MEMBER_ARG_OVERRIDES = {
     ("Element", "querySelectorAll"): '"div"',
     ("Element", "closest"): '"div"',
     ("Element", "matches"): '"div"',
+    ("Element", "mozMatchesSelector"): '"div"',
     ("Element", "insertAdjacentHTML"): '"beforeend", "text"',
     ("XMLHttpRequest", "open"): '"GET", "fuzz", true',
     ("URL", "constructor"): '"http://127.0.0.1/fuzz", document.baseURI',
@@ -434,6 +460,13 @@ MEMBER_ARG_OVERRIDES = {
     # version 0 is TypeError ("0 (Zero) is not a valid database version");
     # a fresh name at version 1 opens and upgrades from scratch
     ("IDBFactory", "open"): '"fuzzdb", 1',
+    # a boolean or object is not a valid IndexedDB key and every method
+    # validates its arguments with DataError; strings are always valid keys
+    ("IDBKeyRange", "bound"): '"a", "b"',
+    ("IDBKeyRange", "lowerBound"): '"fuzz"',
+    ("IDBKeyRange", "only"): '"fuzz"',
+    ("IDBKeyRange", "upperBound"): '"fuzz"',
+    ("IDBFactory", "cmp"): '"a", "b"',
     # a custom element name needs a hyphen and a definition may not be
     # repeated, so each line uses a fresh numbered name
     ("CustomElementRegistry", "define"): '"fuzz-el" + <fuzzint>, function() { }',
@@ -467,7 +500,6 @@ MEMBER_ARG_OVERRIDES = {
     ("Document", "createAttribute"): '"fuzz"',
     ("Document", "createAttributeNS"): 'null, "fuzz"',
     ("Document", "createProcessingInstruction"): '"fuzz", "fuzz"',
-    ("Document", "createExpression"): '"//div"',
     ("Document", "evaluate"): '"//div", document',
     ("DOMParser", "parseFromString"): '"<lt>div<gt>fuzz<lt>/div<gt>", "text/html"',
     ("Element", "attachShadow"): '{ mode: "open" }',
@@ -633,6 +665,112 @@ MEMBER_ARG_OVERRIDES = {
     # unit type constants are 1..5 and an unknown value throws NotSupportedError
     ("SVGAngle", "convertToSpecifiedUnits"): "1",
     ("SVGAngle", "newValueSpecifiedUnits"): "1, 90",
+    # the pooled Node is often the Document or a DocumentType, which these five
+    # Range methods reject; an appended div always has an element parent
+    ("Range", "setStartBefore"): APPENDED_NODE,
+    ("Range", "setStartAfter"): APPENDED_NODE,
+    ("Range", "setEndBefore"): APPENDED_NODE,
+    ("Range", "setEndAfter"): APPENDED_NODE,
+    ("Range", "selectNode"): APPENDED_NODE,
+    # offset 84 was out of range for every receiver; 0 is valid for any node
+    ("Selection", "collapse"): "<Node>, 0",
+    # the receiver's text is usually shorter than the random offset
+    ("CharacterData", "substringData"): "0, 1",
+    # the pooled Event was already dispatched ("no longer usable"); a new one
+    # must be created per call
+    ("EventTarget", "dispatchEvent"): 'new Event("fuzz")',
+    # observe() without an options object is a TypeError
+    ("PerformanceObserver", "observe"): '{ type: "mark" }',
+    # unit type constants are 1..9 (SVG_LENGTHTYPE_NUMBER is 1)
+    ("SVGLength", "convertToSpecifiedUnits"): "1",
+    ("SVGLength", "newValueSpecifiedUnits"): "1, 0.5",
+    # the three frequency/magnitude/phase arrays must have equal lengths
+    ("BiquadFilterNode", "getFrequencyResponse"): (
+        "new Float32Array(8), new Float32Array(8), new Float32Array(8)"
+    ),
+    # a zero vector throws InvalidAccessError
+    ("SVGMatrix", "rotateFromVector"): "1, 1",
+    # the color must parse; arbitrary corpus text usually does not
+    ("CanvasGradient", "addColorStop"): '0.5, "red"',
+    # check() parses a font shorthand, and random strings throw SyntaxError
+    ("FontFaceSet", "check"): '"12px serif"',
+    # the generated index can exceed the sheet's rule count
+    ("CSSStyleSheet", "addRule"): '"div", "color: red", 0',
+    # list-valued properties only; color is not and append rejects it
+    ("StylePropertyMap", "append"): '"transition-property", "opacity"',
+    ("StylePropertyMap", "set"): '"color", "red"',
+    ("StylePropertyMap", "get"): '"color"',
+    ("StylePropertyMap", "has"): '"color"',
+    ("StylePropertyMap", "delete"): '"color"',
+    # a generated name is often not a valid header token (space, comma, NUL)
+    # and a generated value may contain control bytes; fixed tokens always pass
+    ("Headers", "append"): '"x-fuzz", "fuzz"',
+    ("Headers", "set"): '"x-fuzz", "fuzz"',
+    ("Headers", "get"): '"x-fuzz"',
+    ("Headers", "has"): '"x-fuzz"',
+    ("Headers", "delete"): '"x-fuzz"',
+    # only 301/302/303/307/308 are valid statuses
+    ("Response", "redirect"): '"fuzz", 302',
+    # a generated status outside 200..599 is RangeError; 200 is valid
+    ("Response", "json"): "1, { status: 200 }",
+    # a generated absolute URL is cross-origin and throws SecurityError; an
+    # empty URL leaves the current one untouched (no '#' here: Domato strips
+    # everything after '#' on a rule line, even inside a string)
+    ("History", "pushState"): 'null, "", ""',
+    ("History", "replaceState"): 'null, "", ""',
+    # a true flag requires a message; the generated anchor element is usually
+    # not a shadow-including descendant of the internals host
+    ("ElementInternals", "setValidity"): '{ valueMissing: true }, "fuzz"',
+    # compressed formats are not valid canvas formats; the preferred format is
+    ("GPUCanvasContext", "configure"): (
+        "{ device: device, format: navigator.gpu.getPreferredCanvasFormat() }"
+    ),
+    # the callback must be callable; the generated argument was null
+    ("HTMLVideoElement", "requestVideoFrameCallback"): "function() { }",
+    ("Window", "requestAnimationFrame"): "function() { }",
+    ("Window", "requestIdleCallback"): "function() { }",
+    ("Window", "queueMicrotask"): "function() { }",
+    ("FontFaceSet", "forEach"): "function() { }",
+    # a dirty rectangle with a non-positive or out-of-image size throws; the
+    # three-argument form applies the whole image
+    ("CanvasRenderingContext2D", "putImageData"): "<ImageData>, 0, 0",
+    ("OffscreenCanvasRenderingContext2D", "putImageData"): "<ImageData>, 0, 0",
+    # a negative radius throws RangeError; positive values are valid
+    ("CanvasRenderingContext2D", "roundRect"): "0, 0, 10, 10, 2",
+    ("OffscreenCanvasRenderingContext2D", "roundRect"): "0, 0, 10, 10, 2",
+    ("Path2D", "roundRect"): "0, 0, 10, 10, 2",
+    # a generated codec string is never valid; vp8 is always supported
+    ("VideoDecoder", "configure"): '{ codec: "vp8" }',
+    ("VideoEncoder", "configure"): '{ codec: "vp8", width: 2, height: 2 }',
+    # a generated codec string or channel count is rejected; opus/48k/mono is
+    # a supported configuration
+    ("AudioDecoder", "configure"): (
+        '{ codec: "opus", sampleRate: 48000, numberOfChannels: 1 }'
+    ),
+    ("AudioEncoder", "configure"): (
+        '{ codec: "opus", sampleRate: 48000, numberOfChannels: 1 }'
+    ),
+    # the generated dictionary pairs values that violate position <= duration
+    ("MediaSession", "setPositionState"): (
+        "{ duration: 10, playbackRate: 1, position: 0 }"
+    ),
+    # an empty preference list restores the default codecs
+    ("RTCRtpTransceiver", "setCodecPreferences"): "[]",
+    # the callback is required and the generated one is null
+    ("HTMLCanvasElement", "toBlob"): "function() { }",
+    # a generated easing string is often invalid ('null') and iterations or
+    # duration may be negative; a linear 100ms timing is always accepted
+    ("AnimationEffect", "updateTiming"): '{ duration: 100, easing: "linear" }',
+    # a random string is not a valid ByteString argument
+    ("XMLHttpRequest", "getResponseHeader"): '"content-type"',
+    # setKeyframes takes a sequence of keyframe objects; a scalar is TypeError
+    ("KeyframeEffect", "setKeyframes"): "[{ opacity: 0 }]",
+    # from() needs an (async) iterable; a plain object throws "undefined is
+    # not a function" from the iterator lookup
+    ("ReadableStream", "from"): "[]",
+    # data: is not an accepted beacon scheme; a relative URL posts to the
+    # harness server like the generated XHR lines already do
+    ("Navigator", "sendBeacon"): '"fuzz", new Uint8Array(0)',
 }
 
 # Attribute setters whose generated value is rejected or destroys harness
@@ -641,15 +779,23 @@ MEMBER_ARG_OVERRIDES = {
 ATTRIBUTE_VALUE_OVERRIDES = {
     # assigning an invalid keyword to contentEditable throws SyntaxError
     ("HTMLElement", "contentEditable"): '"true"',
+    # a resolved current time cannot be set back to null (TypeError); a number
+    # is valid on both idle and document-timeline animations
+    ("Animation", "currentTime"): "100",
+    # "stopped" is rejected by the setter; the four current directions are not
+    ("RTCRtpTransceiver", "direction"): '"sendrecv"',
+    # the setter accepts milliseconds in [0, 4000] or null; a random float is
+    # rejected with RangeError
+    ("RTCRtpReceiver", "jitterBufferTarget"): "100",
+    # the setter requires readyState "open", which needs an attached media
+    # element and therefore a later task; a fresh source is always closed
+    ("MediaSource", "duration"): None,
     # volume and playback rates are range-checked, and a negative rate throws
     ("HTMLMediaElement", "volume"): "<float min=0 max=1>",
     ("HTMLMediaElement", "playbackRate"): "<float min=0.5 max=2>",
     ("HTMLMediaElement", "defaultPlaybackRate"): "<float min=0.5 max=2>",
-    # maxLength is a long, and any value below -1 throws IndexSizeError
-    ("HTMLInputElement", "maxLength"): "<fuzzuint>",
-    ("HTMLTextAreaElement", "maxLength"): "<fuzzuint>",
-    ("HTMLInputElement", "minLength"): "<fuzzuint>",
-    ("HTMLTextAreaElement", "minLength"): "<fuzzuint>",
+    # size==0 throws IndexSizeError; every other value is accepted
+    ("HTMLInputElement", "size"): "1",
     # only a body/frameset may be assigned; the alternative loses the body
     # that every generated markup variable was read from
     ("Document", "body"): None,
@@ -657,11 +803,24 @@ ATTRIBUTE_VALUE_OVERRIDES = {
     ("Document", "domain"): "document.location.hostname",
     # only the three constants are valid; anything else throws SyntaxError
     ("SVGSVGElement", "zoomAndPan"): "2",
+    # same for an animated enumeration: the only supplier is
+    # SVGClipPathElement.clipPathUnits, where userSpaceOnUse (1) is valid
+    ("SVGAnimatedEnumeration", "baseVal"): "1",
     # these parse a CSS length/angle string; arbitrary text throws SyntaxError
     ("SVGLength", "valueAsString"): '"1px"',
     ("SVGAngle", "valueAsString"): '"1deg"',
+    # a curve needs at least two entries, and "custom" is not settable
+    ("WaveShaperNode", "curve"): "new Float32Array([1, 1])",
+    ("OscillatorNode", "type"): '"sine"',
+    # pseudoElement parses as a selector and throws SyntaxError on arbitrary text
+    ("KeyframeEffect", "pseudoElement"): "null",
     # WebVTT setters validate their range and throw IndexSizeError outside it
     ("VTTRegion", "lines"): "<fuzzuint>",
+    ("VTTRegion", "width"): "<float min=0 max=100>",
+    ("VTTRegion", "regionAnchorX"): "<float min=0 max=100>",
+    ("VTTRegion", "regionAnchorY"): "<float min=0 max=100>",
+    ("VTTRegion", "viewportAnchorX"): "<float min=0 max=100>",
+    ("VTTRegion", "viewportAnchorY"): "<float min=0 max=100>",
     ("VTTCue", "position"): "<float min=0 max=100>",
     ("VTTCue", "size"): "<float min=0 max=100>",
     # the PannerNode distances must be non-negative, maxDistance/refDistance
@@ -682,8 +841,10 @@ ATTRIBUTE_VALUE_OVERRIDES = {
     ("FontFace", "descentOverride"): '"normal"',
     ("FontFace", "lineGapOverride"): '"normal"',
     ("FontFace", "sizeAdjust"): '"100%"',
-    # valueAsDate only accepts a Date or null
-    ("HTMLInputElement", "valueAsDate"): "new Date(0)",
+    # valueAsDate throws InvalidStateError on every input whose type is not
+    # date/time; the setter is skipped and stateful.txt exercises it on a
+    # type=date input, while the read line above still covers the member
+    ("HTMLInputElement", "valueAsDate"): None,
     # these setters take a CSSNumericValue whose unit must match the property
     # (a length for translate/perspective, an angle for rotate/skew)
     ("CSSPerspective", "length"): "CSS.px(1)",
@@ -724,10 +885,74 @@ ATTRIBUTE_VALUE_OVERRIDES = {
     # unsigned short enums are range-checked; align is 1..9, meetOrSlice 1..2
     ("SVGPreserveAspectRatio", "align"): "1",
     ("SVGPreserveAspectRatio", "meetOrSlice"): "1",
+    # maxDecibels must stay above minDecibels and vice versa; the defaults are
+    # -100 and -30, a random float can cross the other bound
+    ("AnalyserNode", "minDecibels"): "-100",
+    ("AnalyserNode", "maxDecibels"): "-30",
+    # artwork is a sequence of MediaImage dictionaries; the generic object
+    # sequence is not one, and an empty sequence is valid
+    ("MediaMetadata", "artwork"): "[]",
 }
 
+# Selection methods operate on the current selection, whose range a pooled
+# receiver rarely has; build a range over a fresh text node first. Evaluated:
+# collapseToEnd/removeRange/extend/setPosition all succeed with this setup.
+SELECTION_WITH_RANGE = (
+    'var fzsn = document.createTextNode("fuzz");'
+    " " + ATTACH_ROOT + ".appendChild(fzsn);"
+    " var fzsr = document.createRange(); fzsr.selectNodeContents(fzsn);"
+    # Document.getSelection returns null for a createHTMLDocument document
+    # (evaluated), and that null becomes a pooled Selection variable
+    " var fzsel = {r} || document.getSelection();"
+    " fzsel.removeAllRanges(); fzsel.addRange(fzsr);"
+)
+
+# A pooled FileReader that is already LOADING refuses every readAs* call;
+# abort it first so the statement always reaches the read.
+FILEREADER_FREE = 'var fzfr = {r}; if (fzfr.readyState === 1) { fzfr.abort(); }'
+
+# The char-position/extent members need laid-out SVG text; a pooled element is
+# detached, so build a rendered <text> in the same line (evaluated: no throw).
+SVG_TEXT_LAYOUT = (
+    'var fzns = "http://www.w3.org/2000/svg";'
+    ' var fzsvg = document.createElementNS(fzns, "svg");'
+    ' fzsvg.setAttribute("width", "100"); fzsvg.setAttribute("height", "100");'
+    ' var fztxt = document.createElementNS(fzns, "text");'
+    ' fztxt.setAttribute("x", "5"); fztxt.setAttribute("y", "20");'
+    ' fztxt.textContent = "fuzz"; fzsvg.appendChild(fztxt);'
+    " " + ATTACH_ROOT + ".appendChild(fzsvg);"
+)
+
+# Fresh receivers for members whose argument is an index into a per-object
+# array: a pooled node/buffer is the wrong shape (evaluated).
+FRESH_AUDIO_BUFFER = 'var fzbuf = new AudioBuffer({ length: 16, sampleRate: 8000, numberOfChannels: 1 });'
+FRESH_AUDIO_DATA = (
+    "var fzad = new AudioData({ format: \"f32\", sampleRate: 8000,"
+    " numberOfFrames: 4, numberOfChannels: 1, timestamp: 0, data: new Float32Array(4) });"
+)
+FRESH_AUDIO_GRAPH = (
+    "var fzactx = new AudioContext(); var fzga = fzactx.createGain();"
+    " var fzgb = fzactx.createGain();"
+)
+FRESH_VIDEO_FRAME = (
+    'var fzcv = document.createElement("canvas"); fzcv.width = 2; fzcv.height = 2;'
+    ' fzcv.getContext("2d").fillRect(0, 0, 1, 1);'
+    " var fzvf = new VideoFrame(fzcv, { timestamp: 0 });"
+)
+# A timed animation inside a live svg: getSimpleDuration needs the duration,
+# getStartTime needs a current interval (beginElement creates one).
+SVG_ANIMATION = (
+    'var fzns3 = "http://www.w3.org/2000/svg";'
+    ' var fzsvg3 = document.createElementNS(fzns3, "svg");'
+    ' var fzanim3 = document.createElementNS(fzns3, "animate");'
+    ' fzanim3.setAttribute("dur", "1s");'
+    ' fzanim3.setAttribute("attributeName", "x");'
+    " fzsvg3.appendChild(fzanim3);" + ATTACH_ROOT + ".appendChild(fzsvg3);"
+)
+
 # Whole-statement replacements for members whose useful call needs more than
-# a fixed argument list. {r} is the generated receiver.
+# a fixed argument list. {r} is the generated receiver. They also replace an
+# attribute's bare read line when the member is an attribute.
 STATEMENT_OVERRIDES = {
     # popErrorScope on an empty stack rejects, and the rejection escapes the
     # synchronous line guard; push a scope first so the pop resolves. Bind the
@@ -773,30 +998,27 @@ STATEMENT_OVERRIDES = {
     # SMIL timing only works inside an SVG time container; the grammar's
     # animation elements are either detached or live under a non-SVG parent.
     # Bind the receiver once: two placeholders may resolve to two elements.
-    # document.body can be removed by a generated Element.remove() line, so
-    # fall back to the document element.
-    # A generated Element.remove() can detach the document element itself, so
-    # both document.body and document.documentElement may be null; the time
-    # container only exists when there is still a root to insert the svg into.
+    # ATTACH_ROOT re-creates a root when the case removed the document element,
+    # so there is always a live container for the svg.
     ("SVGAnimationElement", "beginElement"): (
         'var fuzzanim = {r}; var fuzzsvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");'
-        " fuzzsvg.appendChild(fuzzanim); var fuzzroot = document.body || document.documentElement;"
-        " if (fuzzroot) { fuzzroot.appendChild(fuzzsvg); fuzzanim.beginElement(); }"
+        " fuzzsvg.appendChild(fuzzanim);" + ATTACH_ROOT + ".appendChild(fuzzsvg);"
+        " fuzzanim.beginElement();"
     ),
     ("SVGAnimationElement", "endElement"): (
         'var fuzzanim = {r}; var fuzzsvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");'
-        " fuzzsvg.appendChild(fuzzanim); var fuzzroot = document.body || document.documentElement;"
-        " if (fuzzroot) { fuzzroot.appendChild(fuzzsvg); fuzzanim.endElement(); }"
+        " fuzzsvg.appendChild(fuzzanim);" + ATTACH_ROOT + ".appendChild(fuzzsvg);"
+        " fuzzanim.endElement();"
     ),
     ("SVGAnimationElement", "beginElementAt"): (
         'var fuzzanim = {r}; var fuzzsvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");'
-        " fuzzsvg.appendChild(fuzzanim); var fuzzroot = document.body || document.documentElement;"
-        " if (fuzzroot) { fuzzroot.appendChild(fuzzsvg); fuzzanim.beginElementAt(0); }"
+        " fuzzsvg.appendChild(fuzzanim);" + ATTACH_ROOT + ".appendChild(fuzzsvg);"
+        " fuzzanim.beginElementAt(0);"
     ),
     ("SVGAnimationElement", "endElementAt"): (
         'var fuzzanim = {r}; var fuzzsvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");'
-        " fuzzsvg.appendChild(fuzzanim); var fuzzroot = document.body || document.documentElement;"
-        " if (fuzzroot) { fuzzroot.appendChild(fuzzsvg); fuzzanim.endElementAt(0); }"
+        " fuzzsvg.appendChild(fuzzanim);" + ATTACH_ROOT + ".appendChild(fuzzsvg);"
+        " fuzzanim.endElementAt(0);"
     ),
     # an earlier unconfigure() line may have left the pooled context bare
     ("GPUCanvasContext", "getCurrentTexture"): (
@@ -823,13 +1045,27 @@ STATEMENT_OVERRIDES = {
         " if (fuzzmsg) { fuzzmsg.lineNum; fuzzmsg.linePos; fuzzmsg.offset; fuzzmsg.length;"
         " fuzzmsg.message; fuzzmsg.type; }"
     ),
+    # a pooled sheet imported from markup may still be loading, and every rule
+    # operation then throws "Can't access rules of still-loading style sheet";
+    # a constructed sheet is always ready (evaluated)
+    ("CSSStyleSheet", "insertRule"): (
+        'var fuzzsheet0 = new CSSStyleSheet();'
+        ' fuzzsheet0.insertRule("div { color: red; }", 0);'
+    ),
+    ("CSSStyleSheet", "addRule"): (
+        'var fuzzsheet1 = new CSSStyleSheet();'
+        ' fuzzsheet1.addRule("div", "color: red", 0);'
+    ),
+    ("CSSStyleSheet", "cssRules"): "new CSSStyleSheet().cssRules;",
     # deleteRule at an index past the end throws; insert the rule in the same
     # line so the delete has a target
     ("CSSStyleSheet", "deleteRule"): (
-        'var fuzzsheet = {r}; fuzzsheet.insertRule("div { color: red; }", 0); fuzzsheet.deleteRule(0);'
+        'var fuzzsheet = new CSSStyleSheet();'
+        ' fuzzsheet.insertRule("div { color: red; }", 0); fuzzsheet.deleteRule(0);'
     ),
     ("CSSStyleSheet", "removeRule"): (
-        'var fuzzsheet2 = {r}; fuzzsheet2.insertRule("div { color: red; }", 0); fuzzsheet2.removeRule(0);'
+        'var fuzzsheet2 = new CSSStyleSheet();'
+        ' fuzzsheet2.insertRule("div { color: red; }", 0); fuzzsheet2.removeRule(0);'
     ),
     # attachShadow only accepts a valid shadow host; a plain div always is one
     ("Element", "attachShadow"): (
@@ -842,6 +1078,22 @@ STATEMENT_OVERRIDES = {
     ),
     ("HTMLInputElement", "stepDown"): (
         'var fuzznum = {r}; fuzznum.type = "number"; fuzznum.value = "1"; fuzznum.stepDown();'
+    ),
+    # selection* throw InvalidStateError on input types that do not support
+    # text selection (number, date, ...); a fresh text input does (evaluated)
+    ("HTMLInputElement", "selectionStart"): (
+        'var fzs1 = document.createElement("input"); fzs1.value = "fuzz"; fzs1.selectionStart = 2;'
+    ),
+    ("HTMLInputElement", "selectionEnd"): (
+        'var fzs2 = document.createElement("input"); fzs2.value = "fuzz"; fzs2.selectionEnd = 2;'
+    ),
+    ("HTMLInputElement", "selectionDirection"): (
+        'var fzs3 = document.createElement("input"); fzs3.value = "fuzz";'
+        ' fzs3.selectionDirection = "forward";'
+    ),
+    ("HTMLInputElement", "setSelectionRange"): (
+        'var fzs4 = document.createElement("input"); fzs4.value = "fuzz";'
+        " fzs4.setSelectionRange(0, 1);"
     ),
     # abort() rejects the writer's stored closed/ready promises with its
     # reason; a later bare read of those would then be unhandled, so attach
@@ -869,6 +1121,455 @@ STATEMENT_OVERRIDES = {
         'var fuzzxhr2 = {r}; fuzzxhr2.open("GET", "fuzz", true);'
         ' fuzzxhr2.setRequestHeader("fuzz", "fuzz");'
     ),
+    # withCredentials throws while a send is in flight; a fresh request is idle
+    ("XMLHttpRequest", "withCredentials"): (
+        "var fuzzxhr3 = new XMLHttpRequest(); fuzzxhr3.withCredentials = false;"
+    ),
+    # a second getReader on a locked stream throws; only a pooled stream can be
+    # locked, so fall back to a fresh one (evaluated: no throw)
+    ("ReadableStream", "getReader"): (
+        "var fuzzrs = {r}; if (fuzzrs.locked) { fuzzrs = new ReadableStream(); } fuzzrs.getReader();"
+    ),
+    # pipeThrough needs an unlocked source; a fresh pair is unlocked (evaluated)
+    ("ReadableStream", "pipeThrough"): (
+        "var fuzzpp = {r}; if (fuzzpp.locked) { fuzzpp = new ReadableStream(); }"
+        " fuzzpp.pipeThrough({ readable: new ReadableStream(), writable: new WritableStream() });"
+    ),
+    # the generated sender belongs to another connection ("This sender was not
+    # created by this PeerConnection"); take one from the receiver itself
+    ("RTCPeerConnection", "removeTrack"): (
+        'var fuzzpc = {r}; var fuzzsender = fuzzpc.addTransceiver("audio").sender;'
+        " fuzzpc.removeTrack(fuzzsender);"
+    ),
+    # a close() on a pooled connection makes every later member throw "Peer
+    # connection is closed"; close a throwaway connection instead (evaluated)
+    ("RTCPeerConnection", "close"): (
+        "var fuzzclosepc = new RTCPeerConnection(); fuzzclosepc.close();"
+    ),
+    # resume() throws unless the recorder is recording; the pooled one is often
+    # inactive, so build a fresh recorder on a canvas stream (evaluated)
+    ("MediaRecorder", "resume"): (
+        'var fuzzrec = new MediaRecorder(document.createElement("canvas").captureStream(5));'
+        " fuzzrec.start(); fuzzrec.resume(); fuzzrec.pause(); fuzzrec.resume(); fuzzrec.stop();"
+    ),
+    # pause() throws unless the recorder is recording (evaluated)
+    ("MediaRecorder", "pause"): (
+        'var fuzzrec2 = new MediaRecorder(document.createElement("canvas").captureStream(5));'
+        " fuzzrec2.start(); fuzzrec2.pause(); fuzzrec2.stop();"
+    ),
+    ("MediaRecorder", "requestData"): (
+        'var fuzzrec3 = new MediaRecorder(document.createElement("canvas").captureStream(5));'
+        " fuzzrec3.start(); fuzzrec3.requestData(); fuzzrec3.stop();"
+    ),
+    # the provider must be a valid domain; a random string usually is not, and
+    # the failure surfaces as NS_ERROR_UNEXPECTED (evaluated: example.com ok)
+    ("RTCPeerConnection", "setIdentityProvider"): (
+        'var fuzzidp = new RTCPeerConnection();'
+        ' fuzzidp.setIdentityProvider("example.com", { protocol: "default" });'
+        " fuzzidp.close();"
+    ),
+    # the pooled range's boundaries can sit on a Document, which makes
+    # insertNode/surroundContents throw HierarchyRequestError every time; a
+    # fresh range over a text node is valid (evaluated)
+    ("Range", "insertNode"): (
+        'var fuzzrn = document.createTextNode("fuzz");'
+        " " + ATTACH_ROOT + ".appendChild(fuzzrn);"
+        " var fuzzrr = document.createRange(); fuzzrr.selectNodeContents(fuzzrn);"
+        ' fuzzrr.insertNode(document.createElement("span"));'
+    ),
+    ("Range", "surroundContents"): (
+        'var fuzzrt = document.createTextNode("fuzz");'
+        " " + ATTACH_ROOT + ".appendChild(fuzzrt);"
+        " var fuzzrs2 = document.createRange(); fuzzrs2.selectNodeContents(fuzzrt);"
+        ' fuzzrs2.surroundContents(document.createElement("span"));'
+    ),
+    # the Selection singleton keeps whatever range the last line left; these
+    # members throw without one (evaluated with the setup above)
+    ("Selection", "extend"): SELECTION_WITH_RANGE + " fzsel.extend(fzsn, 0);",
+    ("Selection", "collapseToEnd"): SELECTION_WITH_RANGE + " fzsel.collapseToEnd();",
+    ("Selection", "collapseToStart"): SELECTION_WITH_RANGE + " fzsel.collapseToStart();",
+    ("Selection", "removeRange"): SELECTION_WITH_RANGE + " fzsel.removeRange(fzsr);",
+    ("Selection", "setPosition"): SELECTION_WITH_RANGE + " fzsel.setPosition(fzsn, 0);",
+    ("Selection", "setBaseAndExtent"): (
+        SELECTION_WITH_RANGE + " fzsel.setBaseAndExtent(fzsn, 0, fzsn, 0);"
+    ),
+    # the context node must belong to the receiver's document; a pooled
+    # Document from DOMParser is not the global one (WrongDocumentError)
+    ("Document", "evaluate"): (
+        "var fzdx = {r};"
+        ' fzdx.evaluate("//div", fzdx.documentElement || fzdx, null, 0, null);'
+    ),
+    # moveBefore only moves within one tree; pooled nodes come from different
+    # ones. Build the parent, the moved node and the reference in the same line.
+    ("Document", "moveBefore"): (
+        'var fzdm = document.createComment("fuzz");'
+        " var fzdoc = {r}; fzdoc.appendChild(fzdm); fzdoc.moveBefore(fzdm, null);"
+    ),
+    ("DocumentFragment", "moveBefore"): (
+        "var fzdf = {r};"
+        ' var fzda = document.createElement("span"); var fzdb = document.createElement("b");'
+        " fzdf.appendChild(fzda); fzdf.appendChild(fzdb); fzdf.moveBefore(fzda, fzdb);"
+    ),
+    ("Element", "moveBefore"): (
+        "var fzde = {r};"
+        ' var fzea = document.createElement("span"); var fzeb = document.createElement("b");'
+        " fzde.appendChild(fzea); fzde.appendChild(fzeb); fzde.moveBefore(fzea, fzeb);"
+    ),
+    # to() converts between compatible units; a pooled sum or a number has no
+    # px, so use a fresh length (evaluated)
+    ("CSSNumericValue", "to"): 'CSS.px(1).to("px");',
+    # toSum() fails for units outside length/angle/time/number/percent; px is
+    # always in the sum parser (evaluated)
+    ("CSSNumericValue", "toSum"): "CSS.px(1).toSum();",
+    # a pooled signal may already be aborted, and the check then throws
+    ("AbortSignal", "throwIfAborted"): (
+        "new AbortController().signal.throwIfAborted();"
+    ),
+    # a pooled reader may have been used by an earlier readAs* line; abort it
+    # first (evaluated) and each call reaches the read
+    ("FileReader", "readAsArrayBuffer"): FILEREADER_FREE + " fzfr.readAsArrayBuffer(new Blob([\"fuzz\"]));",
+    ("FileReader", "readAsBinaryString"): FILEREADER_FREE + " fzfr.readAsBinaryString(new Blob([\"fuzz\"]));",
+    ("FileReader", "readAsDataURL"): FILEREADER_FREE + " fzfr.readAsDataURL(new Blob([\"fuzz\"]));",
+    ("FileReader", "readAsText"): FILEREADER_FREE + " fzfr.readAsText(new Blob([\"fuzz\"]));",
+    # responseText/responseXML only read when responseType is ""/text or
+    # document; a pooled XHR may have had responseType set by an earlier line
+    ("XMLHttpRequest", "responseText"): (
+        "var fzxrt = new XMLHttpRequest(); fzxrt.responseText;"
+    ),
+    ("XMLHttpRequest", "responseXML"): (
+        "var fzxrx = new XMLHttpRequest(); fzxrx.responseXML;"
+    ),
+    # the index arguments into a pooled object point past its channels; build a
+    # buffer with a known shape in the same line (evaluated)
+    ("AudioBuffer", "copyFromChannel"): (
+        FRESH_AUDIO_BUFFER + " fzbuf.copyFromChannel(new Float32Array(16), 0, 0);"
+    ),
+    ("AudioBuffer", "getChannelData"): FRESH_AUDIO_BUFFER + " fzbuf.getChannelData(0);",
+    # the pooled AudioData may have a format/plane count the options reject
+    ("AudioData", "allocationSize"): FRESH_AUDIO_DATA + " fzad.allocationSize({ planeIndex: 0 });",
+    ("AudioData", "copyTo"): (
+        FRESH_AUDIO_DATA
+        + ' fzad.copyTo(new ArrayBuffer(16), { planeIndex: 0, frameOffset: 0, frameCount: 1, format: "f32" });'
+    ),
+    # connect's output/input indexes must exist on the destination; a fresh
+    # graph has one output and one input on each gain node, and the AudioParam
+    # overload is reached through gain (evaluated)
+    ("AudioNode", "connect"): (
+        FRESH_AUDIO_GRAPH
+        + " fzga.connect(fzgb); fzga.connect(fzgb, 0, 0); fzga.connect(fzgb.gain);"
+        " fzactx.close();"
+    ),
+    # pooled DOM nodes come from different parents, so every one of these
+    # throws NotFoundError; build a parent and its children in one line
+    ("Node", "insertBefore"): (
+        'var fznp = document.createElement("div"); var fzna = document.createElement("span");'
+        ' var fznb = document.createElement("b"); fznp.appendChild(fznb);'
+        " fznp.insertBefore(fzna, fznb);"
+    ),
+    ("Node", "removeChild"): (
+        'var fznp2 = document.createElement("div"); var fzna2 = document.createElement("span");'
+        " fznp2.appendChild(fzna2); fznp2.removeChild(fzna2);"
+    ),
+    ("Node", "replaceChild"): (
+        'var fznp3 = document.createElement("div"); var fzna3 = document.createElement("span");'
+        ' var fznb3 = document.createElement("b"); fznp3.appendChild(fzna3);'
+        " fznp3.replaceChild(fznb3, fzna3);"
+    ),
+    # the pooled track does not contain the pooled cue
+    ("TextTrack", "removeCue"): (
+        'var fzvid = document.createElement("video");'
+        ' var fztrack = fzvid.addTextTrack("subtitles");'
+        ' var fzcue = new VTTCue(0, 1, "fuzz"); fztrack.addCue(fzcue);'
+        " fztrack.removeCue(fzcue);"
+    ),
+    # compareBoundaryPoints requires one tree and a HOW constant in 0..3
+    ("Range", "compareBoundaryPoints"): (
+        "var fzrc = {r}; fzrc.compareBoundaryPoints(0, fzrc);"
+    ),
+    ("Range", "comparePoint"): (
+        'var fzcpn = document.createTextNode("fuzz");'
+        " " + ATTACH_ROOT + ".appendChild(fzcpn);"
+        " var fzcrp = document.createRange(); fzcrp.selectNodeContents(fzcpn);"
+        " fzcrp.comparePoint(fzcpn, 0);"
+    ),
+    # a pooled XPathResult need not be a node result
+    ("XPathResult", "singleNodeValue"): (
+        'document.evaluate("//body", document, null,'
+        " XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;"
+    ),
+    # the pooled result is an iterator (ANY_TYPE), so every snapshot/string/
+    # number/boolean accessor throws "Result is not a ..."; evaluate a small
+    # expression of the matching result type instead (evaluated)
+    ("XPathResult", "snapshotLength"): (
+        'document.evaluate("//div", document, null,'
+        " XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength;"
+    ),
+    ("XPathResult", "snapshotItem"): (
+        'document.evaluate("//div", document, null,'
+        " XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null).snapshotItem(0);"
+    ),
+    ("XPathResult", "stringValue"): (
+        'document.evaluate("string(//div)", document, null,'
+        " XPathResult.STRING_TYPE, null).stringValue;"
+    ),
+    ("XPathResult", "numberValue"): (
+        'document.evaluate("count(//div)", document, null,'
+        " XPathResult.NUMBER_TYPE, null).numberValue;"
+    ),
+    ("XPathResult", "booleanValue"): (
+        'document.evaluate("boolean(//div)", document, null,'
+        " XPathResult.BOOLEAN_TYPE, null).booleanValue;"
+    ),
+    # the generated typed array has a random length; 2D matrix init needs 6
+    ("DOMMatrix", "fromFloat32Array"): (
+        "DOMMatrix.fromFloat32Array(new Float32Array([1, 0, 0, 1, 0, 0]));"
+    ),
+    ("DOMMatrix", "fromFloat64Array"): (
+        "DOMMatrix.fromFloat64Array(new Float64Array([1, 0, 0, 1, 0, 0]));"
+    ),
+    ("DOMMatrixReadOnly", "fromFloat32Array"): (
+        "DOMMatrixReadOnly.fromFloat32Array(new Float32Array([1, 0, 0, 1, 0, 0]));"
+    ),
+    ("DOMMatrixReadOnly", "fromFloat64Array"): (
+        "DOMMatrixReadOnly.fromFloat64Array(new Float64Array([1, 0, 0, 1, 0, 0]));"
+    ),
+    # getSimpleDuration throws while the duration is indefinite; set one on an
+    # animation that is inside a live svg. getStartTime also needs a current
+    # interval, which beginElement creates (evaluated: returns 0).
+    ("SVGAnimationElement", "getSimpleDuration"): (
+        SVG_ANIMATION + " fzanim3.getSimpleDuration();"
+    ),
+    ("SVGAnimationElement", "getStartTime"): (
+        SVG_ANIMATION + " fzanim3.beginElement(); fzanim3.getStartTime();"
+    ),
+    # no layout information for detached text; use freshly laid-out <text>
+    ("SVGTextContentElement", "getExtentOfChar"): SVG_TEXT_LAYOUT + " fztxt.getExtentOfChar(0);",
+    ("SVGTextContentElement", "getStartPositionOfChar"): SVG_TEXT_LAYOUT + " fztxt.getStartPositionOfChar(0);",
+    ("SVGTextContentElement", "getEndPositionOfChar"): SVG_TEXT_LAYOUT + " fztxt.getEndPositionOfChar(0);",
+    ("SVGTextContentElement", "getRotationOfChar"): SVG_TEXT_LAYOUT + " fztxt.getRotationOfChar(0);",
+    # consolidate() mutates the list, and the only pooled SVGTransformList is
+    # an animated value ("Animated values cannot be set"); a fresh baseVal
+    # list is writable (evaluated)
+    ("SVGTransformList", "consolidate"): (
+        'var fzcns = "http://www.w3.org/2000/svg";'
+        ' var fzcsvg = document.createElementNS(fzcns, "svg");'
+        " var fzcl = fzcsvg.transform.baseVal;"
+        " fzcl.appendItem(fzcsvg.createSVGTransform());"
+        " fzcl.consolidate();"
+    ),
+    # a pooled element has no parent, and the setter needs one to replace it
+    ("HTMLElement", "outerText"): (
+        'var fzot = document.createElement("div");'
+        " " + ATTACH_ROOT + ".appendChild(fzot); fzot.outerText = \"fuzz\";"
+    ),
+    # valueAsNumber throws when the input's type does not support it
+    ("HTMLInputElement", "valueAsNumber"): (
+        'var fzni = document.createElement("input"); fzni.type = "number";'
+        " fzni.valueAsNumber = 1;"
+    ),
+    # a pooled canvas may already have a context, after which the mozOpaque
+    # setter fails; a fresh canvas accepts it (evaluated)
+    ("HTMLCanvasElement", "mozOpaque"): (
+        'var fzmo = document.createElement("canvas"); fzmo.mozOpaque = false;'
+    ),
+    # a pooled Attr is already owned by another element
+    ("Element", "setAttributeNode"): (
+        'var fzse = document.createElement("div");'
+        ' fzse.setAttributeNode(document.createAttribute("data-fuzz"));'
+    ),
+    ("Element", "setAttributeNodeNS"): (
+        'var fzse2 = document.createElement("div");'
+        ' fzse2.setAttributeNodeNS(document.createAttributeNS("urn:x", "p:b"));'
+    ),
+    # the pooled frame may have been closed by a VideoFrame.close() line
+    ("VideoFrame", "allocationSize"): FRESH_VIDEO_FRAME + " fzvf.allocationSize();",
+    ("VideoFrame", "copyTo"): (
+        FRESH_VIDEO_FRAME
+        + " var fzvsz = fzvf.allocationSize();"
+        " fzvf.copyTo(new ArrayBuffer(fzvsz)).catch(function(e) { });"
+    ),
+    # start() rejects a second call on the same node and a negative time
+    ("AudioScheduledSourceNode", "start"): (
+        "var fzsac = new AudioContext(); var fzosc = fzsac.createOscillator();"
+        " fzosc.start(0); fzsac.close();"
+    ),
+    ("AudioBufferSourceNode", "start"): (
+        "var fzsac2 = new AudioContext(); var fzbs = fzsac2.createBufferSource();"
+        " fzbs.buffer = fzsac2.createBuffer(1, 1, 8000); fzbs.start(0); fzsac2.close();"
+    ),
+    # decode()/encode() reject an unconfigured codec, and a pooled one may be
+    # closed; build, configure, run and close in one line (evaluated)
+    ("AudioDecoder", "decode"): (
+        "var fzadc = new AudioDecoder({ output: function() { }, error: function() { } });"
+        ' fzadc.configure({ codec: "opus", sampleRate: 48000, numberOfChannels: 1 });'
+        ' fzadc.decode(new EncodedAudioChunk({ type: "key", timestamp: 0, data: new Uint8Array([1, 2, 3, 4]) }));'
+        " fzadc.flush().catch(function(e) { }); fzadc.close();"
+    ),
+    ("AudioEncoder", "encode"): (
+        "var fzaec = new AudioEncoder({ output: function() { }, error: function() { } });"
+        ' fzaec.configure({ codec: "opus", sampleRate: 48000, numberOfChannels: 1 });'
+        ' fzaec.encode(new AudioData({ format: "f32", sampleRate: 48000, numberOfFrames: 4,'
+        " numberOfChannels: 1, timestamp: 0, data: new Float32Array(4) }));"
+        " fzaec.flush().catch(function(e) { }); fzaec.close();"
+    ),
+    ("VideoEncoder", "encode"): (
+        FRESH_VIDEO_FRAME
+        + " var fzvec = new VideoEncoder({ output: function() { }, error: function() { } });"
+        ' fzvec.configure({ codec: "vp8", width: 2, height: 2 });'
+        " fzvec.encode(fzvf); fzvec.flush().catch(function(e) { }); fzvec.close();"
+    ),
+    ("VideoDecoder", "decode"): (
+        'var fzvdc = new VideoDecoder({ output: function() { }, error: function() { } });'
+        ' fzvdc.configure({ codec: "vp8" });'
+        ' fzvdc.decode(new EncodedVideoChunk({ type: "key", timestamp: 0, data: new Uint8Array([1, 2, 3, 4]) }));'
+        " fzvdc.flush().catch(function(e) { }); fzvdc.close();"
+    ),
+    # a pooled geometry element is detached, so it has no path to measure
+    ("SVGGeometryElement", "getPointAtLength"): (
+        'var fzgns = "http://www.w3.org/2000/svg";'
+        ' var fzgsvg = document.createElementNS(fzgns, "svg");'
+        ' var fzgpath = document.createElementNS(fzgns, "path");'
+        ' fzgpath.setAttribute("d", "M0 0 L10 10"); fzgsvg.appendChild(fzgpath);'
+        " " + ATTACH_ROOT + ".appendChild(fzgsvg); fzgpath.getPointAtLength(0);"
+    ),
+    # requiredExtensions/systemLanguage start empty, so any index throws
+    # "Index out of range"; the attribute fills the reflected list (evaluated)
+    ("SVGStringList", "getItem"): (
+        'var fzlns = "http://www.w3.org/2000/svg";'
+        ' var fzlel = document.createElementNS(fzlns, "text");'
+        ' fzlel.setAttribute("systemLanguage", "en");'
+        " fzlel.systemLanguage.getItem(0);"
+    ),
+    # showModal() throws unless the dialog is connected (evaluated)
+    ("HTMLDialogElement", "showModal"): (
+        'var fzdlg = document.createElement("dialog");'
+        " " + ATTACH_ROOT + ".appendChild(fzdlg); fzdlg.showModal(); fzdlg.close();"
+    ),
+    # maxLength/minLength reject each other's already-set values (a pooled
+    # input with maxLength=0 rejects minLength=256); set each on a fresh
+    # element (evaluated)
+    ("HTMLInputElement", "maxLength"): (
+        'var fzmx = document.createElement("input"); fzmx.maxLength = 10;'
+    ),
+    ("HTMLInputElement", "minLength"): (
+        'var fzmn = document.createElement("input"); fzmn.minLength = 2;'
+    ),
+    ("HTMLTextAreaElement", "maxLength"): (
+        'var fztx = document.createElement("textarea"); fztx.maxLength = 10;'
+    ),
+    ("HTMLTextAreaElement", "minLength"): (
+        'var fztn = document.createElement("textarea"); fztn.minLength = 2;'
+    ),
+    # the pooled node may be a ChannelSplitter/Merger with a fixed count;
+    # a fresh gain node accepts the setter (evaluated)
+    ("AudioNode", "channelCount"): (
+        "var fzcc = new AudioContext().createGain(); fzcc.channelCount = 2;"
+    ),
+    # a scheduled value-curve event makes every later event/value assignment
+    # throw "Can't add events during a curve event"; use a fresh param
+    ("AudioParam", "value"): (
+        "var fzapv = new AudioContext().createGain().gain; fzapv.value = 1;"
+    ),
+    ("AudioParam", "setTargetAtTime"): (
+        "var fzapt = new AudioContext().createGain().gain; fzapt.setTargetAtTime(1, 0, 0.5);"
+    ),
+    # supports() is only defined for certain reflected attributes; classList
+    # (the pooled list) always throws "does not define any supported tokens"
+    ("DOMTokenList", "supports"): (
+        'var fzra = document.createElement("a"); fzra.rel = "noopener";'
+        ' fzra.relList.supports("noopener");'
+    ),
+    # a pooled MediaList usually is empty, so deletion throws NotFoundError
+    ("MediaList", "deleteMedium"): (
+        'var fzms = new CSSStyleSheet(); fzms.media.mediaText = "screen";'
+        ' fzms.media.deleteMedium("screen");'
+    ),
+    # a locked stream makes tee() throw; fall back to a fresh stream
+    ("ReadableStream", "tee"): (
+        "var fzts = {r}; if (fzts.locked) { fzts = new ReadableStream(); } fzts.tee();"
+    ),
+    # a pooled writer may have errored or closed, and desiredSize then throws
+    # "Missing stream"; the getter works on a fresh writer (evaluated)
+    ("WritableStreamDefaultWriter", "desiredSize"): (
+        "new WritableStream().getWriter().desiredSize;"
+    ),
+    # a pooled stream may already be locked by an earlier getWriter()
+    ("WritableStream", "getWriter"): "new WritableStream().getWriter();",
+    # a pooled connection may have been closed by a generated close() line
+    ("RTCPeerConnection", "pendingLocalDescription"): (
+        "var fzpl = new RTCPeerConnection(); fzpl.pendingLocalDescription; fzpl.close();"
+    ),
+    ("RTCPeerConnection", "pendingRemoteDescription"): (
+        "var fzpr = new RTCPeerConnection(); fzpr.pendingRemoteDescription; fzpr.close();"
+    ),
+    # commitStyles throws "Target is not rendered" for a detached animation
+    ("Animation", "commitStyles"): (
+        'var fzce = document.createElement("div");'
+        " " + ATTACH_ROOT + ".appendChild(fzce);"
+        ' var fzca = fzce.animate([{ opacity: 0 }], 100); fzca.commitStyles(); fzca.cancel();'
+    ),
+    # offsets past the text node throw IndexSizeError; a fresh text at 0 works
+    ("Range", "isPointInRange"): (
+        'var fzipn = document.createTextNode("fuzz");'
+        " " + ATTACH_ROOT + ".appendChild(fzipn);"
+        " var fzipr = document.createRange(); fzipr.selectNodeContents(fzipn);"
+        " fzipr.isPointInRange(fzipn, 0);"
+    ),
+    # the generated ArrayBuffer is smaller than the chunk; size it exactly
+    ("EncodedAudioChunk", "copyTo"): (
+        'var fzeca = new EncodedAudioChunk({ type: "key", timestamp: 0,'
+        " data: new Uint8Array([1, 2, 3, 4]) });"
+        " fzeca.copyTo(new ArrayBuffer(fzeca.byteLength));"
+    ),
+    ("EncodedVideoChunk", "copyTo"): (
+        'var fzevc = new EncodedVideoChunk({ type: "key", timestamp: 0,'
+        " data: new Uint8Array([1, 2, 3, 4]) });"
+        " fzevc.copyTo(new ArrayBuffer(fzevc.byteLength));"
+    ),
+    # the pooled device is shared with every other webgpu line; destroying it
+    # makes all later calls fail with OperationError. An adapter can only be
+    # consumed once, so request a fresh one and destroy its device.
+    ("GPUDevice", "destroy"): (
+        "var fuzzdev2 = await (await navigator.gpu.requestAdapter()).requestDevice();"
+        " fuzzdev2.destroy();"
+    ),
+    # the buffer can be set once per source node; the pooled node usually had
+    # one set by an earlier line, so build a source and a buffer together
+    ("AudioBufferSourceNode", "buffer"): (
+        "var fzabsc = new AudioContext();"
+        " var fzabuf = fzabsc.createBuffer(1, 1, 48000);"
+        " var fzabsn = fzabsc.createBufferSource(); fzabsn.buffer = fzabuf;"
+    ),
+    # setRangeText throws InvalidStateError on a non-text input type; a fresh
+    # default input/textarea is always text
+    ("HTMLInputElement", "setRangeText"): (
+        'var fzsrt = document.createElement("input"); fzsrt.value = "fuzz";'
+        ' fzsrt.setRangeText("fuzz", 0, 0, "end");'
+    ),
+    ("HTMLTextAreaElement", "setRangeText"): (
+        'var fzsrta = document.createElement("textarea"); fzsrta.value = "fuzz";'
+        ' fzsrta.setRangeText("fuzz", 0, 0, "end");'
+    ),
+    # a pooled iterator result is invalidated by any document mutation; a
+    # fresh iterator over the current document is not
+    ("XPathResult", "iterateNext"): (
+        'document.evaluate("//div", document, null,'
+        " XPathResult.ORDERED_NODE_ITERATOR_TYPE, null).iterateNext();"
+    ),
+    # close() rejects the eagerly-created completed promise and the track
+    # list's ready promise (AbortError "Closed decoder"); attach both handlers
+    # before closing the pooled decoder
+    ("ImageDecoder", "close"): (
+        "var fzidc = {r}; fzidc.completed.catch(function (e) { });"
+        " fzidc.tracks.ready.catch(function (e) { }); fzidc.close();"
+    ),
+    # these throw InvalidStateError on a non-HTML document; the global
+    # document in the harness page is always HTML
+    ("Document", "queryCommandEnabled"): 'document.queryCommandEnabled("fuzz");',
+    ("Document", "queryCommandIndeterm"): 'document.queryCommandIndeterm("fuzz");',
+    ("Document", "queryCommandState"): 'document.queryCommandState("fuzz");',
+    ("Document", "queryCommandSupported"): 'document.queryCommandSupported("fuzz");',
+    ("Document", "queryCommandValue"): 'document.queryCommandValue("fuzz");',
 }
 
 # A few constructors are the only way to get commonly used objects and are
@@ -1984,6 +2685,10 @@ class Emitter:
     def add_line(self, line: str) -> None:
         if not line or line in self.line_seen:
             return
+        # grammar.py _remove_comments cuts a rule line at the first '#', even
+        # inside a string literal; a '#' here silently truncates the statement
+        if "#" in line:
+            raise ValueError(f"rule line contains '#': {line}")
         self.line_seen.add(line)
         self.lines.append(line)
 
@@ -2037,6 +2742,10 @@ class Emitter:
                         self.emit_method(iface, member, signature, receiver)
 
     def emit_attribute(self, iface: str, member: str, signature: dict, receiver: str) -> None:
+        statement_override = STATEMENT_OVERRIDES.get((iface, member))
+        if statement_override is not None:
+            self.add_line(statement_override.replace("{r}", receiver))
+            return
         # A bare read of a promise attribute leaves its rejection unhandled:
         # writer.ready/closed reject with whatever abort() was given, and that
         # surfaces as an unhandledrejection with no line in the case.

@@ -36,6 +36,13 @@ _N_ADDITIONAL_HTMLVARS = 5
 
 _HTML_TAGS = list(_HTML_TYPES)
 
+# createElement applies no legacy aliases, so a tag the parser rewrites needs
+# the rewritten name here or the variable has the wrong type.
+_CREATE_TAGS = {'image': 'img'}
+
+def create_tag_name(tag):
+    return _CREATE_TAGS.get(tag, tag)
+
 def generate_html_elements(ctx, n):
     for i in range(n):
         tag = random.choice(_HTML_TAGS)
@@ -43,7 +50,7 @@ def generate_html_elements(ctx, n):
         ctx['htmlvarctr'] += 1
         varname = 'htmlvar%05d' % ctx['htmlvarctr']
         ctx['htmlvars'].append({'name': varname, 'type': tagtype})
-        ctx['htmlvargen'] += '/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname + ' = document.createElement(\"' + tag + '\"); //' + tagtype + '\n'
+        ctx['htmlvargen'] += '/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname + ' = document.createElement(\"' + create_tag_name(tag) + '\"); //' + tagtype + '\n'
 
 
 _ALL_TAG_TYPES = {}
@@ -72,7 +79,7 @@ def add_html_ids(matchobj, ctx):
         elif prefix == 'mathmlvar':
             fallback = 'document.createElementNS("http://www.w3.org/1998/Math/MathML", "' + tagname + '")'
         else:
-            fallback = 'document.createElement("' + tagname + '")'
+            fallback = 'document.createElement("' + create_tag_name(tagname) + '")'
         ctx['htmlvargen'] += ('/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname +
                               ' = document.getElementById(\"' + varname + '\") || ' + fallback + '; //' + tagtype + '\n')
         return matchobj.group(0) + 'id=\"' + varname + '\" '

@@ -146,20 +146,28 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9782 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9671 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-47.1 s with `creators 0 | roots 319 | cascades 0 | async/no-line 0`: no rule that declares a typed
-variable threw, no null receiver was left behind by a failed creator, and no unhandled rejection
-escaped. The 604 caught errors in 319 groups are ordinary API validation (detached SVG layout,
-index bounds, node-parent and document mismatches). `creators 0` is the fastest check for the
-dead-text class described below; run it after any creator or argument-override change. When the
-thrown object has no stack (a DOMException raised through a promise), the collector records its
-own stack so the rule line is still named, and `__fz_err` frames are skipped when mapping.
+about 37 s with `51 row(s), 26 group(s); 3 systematic; creators 0 | roots 25 | cascades 0 |
+async/no-line 1`. The three systematic rows are all `<RTCDataChannel>.send()`: a channel from
+`createDataChannel` stays "connecting" until a real peer negotiates SCTP, and send() throws
+InvalidStateError unless readyState is "open". The other rows are validation on random receivers
+or arguments (appendChild of a Document or an Attribute, selectSubString past the text, a
+MediaSource duration while closed) and one intermittent `console console.error` with no line.
+`creators 0` is the fastest check for the dead-text class described below; run it after any
+creator or argument-override change. When the thrown object has no stack (a DOMException raised
+through a promise), the collector records its own stack so the rule line is still named, and
+`__fz_err` frames are skipped when mapping.
+
+A scan is only valid if the page actually ran. Check `grep SyntaxError results/scan/firefox.log`
+and the scanned report for `fuzzall is not defined`: both mean the first inline script (which
+defines `fuzzall`) did not parse or execute, so every generated line on that page was dead while
+the report could still say `0 systematic`.
 
 Two sweeps closed most of this session's work and both are worth remembering as defect shapes,
 not as line counts:
@@ -263,6 +271,46 @@ the audit still reads the member name out of the dead text that depended on it:
   compiles the check out and drops the undispatched promise silently. It is also a microphone surface, so
   `SpeechRecognition.start` and `install` are refused in `DENY_MEMBERS`; the constructor,
   `abort`/`stop` and the event/attribute members stay emitted.
+
+The sweep after that crash closed the last systematic thrown-line classes. The lasting shapes:
+
+- Domato's rule parser cuts every line at the first `#`, even inside a JS string literal
+  (`grammar.py: _remove_comments`). A URL written as `"#fuzz"` became an unterminated string:
+  `SyntaxError: "" string literal contains an unescaped line break` at load killed the whole
+  first script, so `onload=fuzzall()` threw `ReferenceError: fuzzall is not defined` and the
+  page executed none of its generated lines - 8 of 16 pages in one scan, while the report still
+  printed `0 systematic`. `add_line` in the generator now raises on any `#`, and `common.txt`
+  spells a literal one as `<hash>`.
+- Fresh receivers are the fix for once-only attributes and pooled state. `AudioBufferSourceNode.buffer`
+  can be set once per node (second line: InvalidStateError); `ImageDecoder.close()` rejects the
+  eagerly-created `completed` promise and the track list's `ready` promise, so its override
+  attaches a `catch` to both before closing a pooled decoder; `WritableStream.getWriter()` throws
+  on a locked pooled stream; `HTMLInputElement.setRangeText` needs a text input; and
+  `RTCRtpTransceiver.direction = "stopped"` is rejected while "sendrecv" is accepted.
+- Some setters cannot succeed synchronously, so they are suppressed instead of fuzzed:
+  `MediaSource.duration` requires readyState "open", which needs an attached media element and a
+  later task. `SpeechGrammar.weight` is a stub in Gecko - both accessors throw
+  NS_ERROR_NOT_IMPLEMENTED (`SpeechGrammar.cpp`) - so it is in `DENY_MEMBERS`; the name-based
+  audit still calls it covered because `FontFace.weight` reads the same name.
+- WebGPU: `GPUDevice.destroy()` on the pooled device turns every later buffer call into
+  OperationError("Invalid buffer"), and an adapter can be consumed only once ("The adapter has
+  already been consumed"), so the override requests a fresh adapter and destroys that device.
+- Argument/value classes with one accepted answer: `StylePropertyMap.append` only takes
+  list-valued properties ("transition-property"); `EncodedAudioChunk`/`EncodedVideoChunk.copyTo`
+  needs an ArrayBuffer of exactly `byteLength` (there is no `allocationSize()`);
+  `ElementInternals.setValidity` needs a message when a flag is true; `Headers` names must be
+  tokens; `History.pushState`/`replaceState` reject cross-origin URLs but accept an empty one;
+  `ReadableStream.from({})` throws "undefined is not a function" while `from([])` works;
+  `Response.json` with a generated status is RangeError; `AudioNode.channelCountMode = "max"` is
+  NotSupportedError on Panner/Convolver/DynamicsCompressor and "clamped-max" is InvalidStateError
+  on Merger/Splitter, so no single value is valid for a random node; `XPathResult.iterateNext`
+  is invalidated by any document mutation (a fresh iterator over the current document is not).
+- Accepted systematic classes that cannot be opened from a generated synchronous line:
+  `<RTCDataChannel>.send()` (never open without a peer), `RTCDTMFSender.insertDTMF`
+  (`CanSendDTMF` needs a negotiated transceiver; even a valid tone throws), `TimeRanges.start/end`
+  (empty ranges), `IDBRequest.result/error` (request not finished), plus the deliberate
+  `window.reportError(new Error("fuzz"))` line in `stateful.txt` that exercises the window error
+  hook.
 
 ## How much of a case each domain gets
 
