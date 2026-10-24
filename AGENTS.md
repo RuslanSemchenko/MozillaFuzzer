@@ -114,13 +114,13 @@ rules files in this tree. Re-run everything - they go stale the moment a rules f
 (1101 interfaces), 10932 members.
 
 `python3 tools/audit_rules.py` on that inventory: 937 types considered, 790 not gated off at
-interface level (147 gated), 57 interfaces with at least one missing member. Across those 790:
-5593 members reachable, 144 missing (142 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
-five work orders are empty), 12 word-only, 0 parsed-but-unreachable, 286 whose only gate is a
+interface level (147 gated), 56 interfaces with at least one missing member. Across those 790:
+5597 members reachable, 143 missing (141 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+five work orders are empty), 9 word-only, 0 parsed-but-unreachable, 286 whose only gate is a
 `[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 88 pref-off excluded before
 queuing.
 
-All 57 queue blocks carry a NOTE, so the 144 are an adjudicated refusal rather than a to-do
+All 56 queue blocks carry a NOTE, so the 143 are an adjudicated refusal rather than a to-do
 list: `FuzzingFunctions` (namespace compiled out of this build), the WebAuthn response classes
 (`AuthenticatorResponse` and its two subclasses, `PublicKeyCredential` - a real credential needs
 an authenticator), the report bodies (`CSPViolationReportBody`, `DeprecationReportBody`,
@@ -129,14 +129,15 @@ an authenticator), the report bodies (`CSPViolationReportBody`, `DeprecationRepo
 `showPicker`, the `Window` and `Navigator` dialogs), the no-receiver types (`Gamepad*`,
 `SpeechSynthesisVoice`, `Element` pointer capture, `History`), the legacy classes
 (`MouseScrollEvent`, `ScrollAreaEvent`, `TimeEvent`, `MediaStreamError`, `MediaKeyError`,
-`PaintRequest`, `IDBKeyRange`, `IntlUtils`, `PermissionsPolicy`, `Node`, `Directory` and the
-`FileSystem*Entry` pair, `CookieStoreManager`, `LegacyMozTCPSocket`, `RTCIdentityProviderRegistrar`),
+`PaintRequest`, `IntlUtils`, `PermissionsPolicy`, `Node`, `Directory` and
+`FileSystemDirectoryEntry`/`FileSystemDirectoryReader`, `CookieStoreManager`,
+`LegacyMozTCPSocket`, `RTCIdentityProviderRegistrar`),
 the `WebTransport` family, and the WebGL extension objects. Each NOTE states the reason *as
 evaluated in the page*, not as read from the IDL.
 
-`python3 tools/probe_apis.py` probed all 977 queued candidates on the same build with Grizzly's
+`python3 tools/probe_apis.py` probed all 976 queued candidates on the same build with Grizzly's
 prefs (the default bucket is `all` = `needs_probe` + `missing`): 188 `present` (176 prototype,
-7 instance, 4 static, 1 `getExtension(webgl2)`), 789 `not-exposed`, and 53 interfaces the page has
+7 instance, 4 static, 1 `getExtension(webgl2)`), 788 `not-exposed`, and 53 interfaces the page has
 no receiver for at all (`unprobeable`, kept separate so a WebGL extension object or a worker-only
 interface is not reported as a browser denial). Present is exposure, not callability *or*
 obtainability: `'Geolocation' in window` is true while `navigator.geolocation` is undefined here,
@@ -145,15 +146,15 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9807 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9788 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 8 --case-timeout 45` reports 8/8 cases in
-21.0 s with `creators 0 | roots 193 | cascades 0`: no rule that declares a typed variable threw,
-and no null receiver was left behind by a failed creator. The 314 caught errors in 194 groups are
+22.8 s with `creators 0 | roots 216 | cascades 0`: no rule that declares a typed variable threw,
+and no null receiver was left behind by a failed creator. The 308 caught errors in 216 groups are
 ordinary API validation (detached SVG layout, index bounds, node-parent and document mismatches).
 `creators 0` is the fastest check for the dead-text class described below; run it after any
 creator or argument-override change.
@@ -172,7 +173,27 @@ not as line counts:
 - A constructor's callback argument must be callable. `<EventHandler>` expands to a read of an
   `on*` property, which is `null` on a fresh object, so all 18 lines of the form
   `new IntersectionObserver(<EventHandler>)` threw and registered no variable - the observer
-  surfaces looked covered and were not. Callbacks are inline `function(...){...}` now.
+  surfaces looked covered and were not. Callbacks are inline `function(...){...}` now. One
+  survivor of this class turned up later: `new PerformanceObserver(<EventHandler>)` had never
+  received the override, so it threw "Argument 1 is not an object" and every `takeRecords()` read
+  cascaded off the null variable. When adding a callback-taking constructor, grep for every
+  other observer-shaped API in the same commit.
+
+- A `CSSNumericValue` receiver is not necessarily convertible. `to()` and `toSum()` both build
+  a Servo `SumValue` (`servo/components/style/typed_om/sum_value.rs`), and its unit parser
+  (`NoCalcNumeric::parse_unit_value`) knows only length, angle, time, number and percent. A
+  `CSS.Hz(1)` receiver - which `CSS.Hz` makes easy to write - throws "Failed to create a sum
+  value", so a `newvar{...CSSMathSum} = <CSSNumericValue>.toSum()` creator left a null. Both
+  are statements now and the constructor `new CSSMathSum(1, 2)` is the creator; `add`/`sub`/
+  `mul` are safe because they never build a SumValue.
+
+- `document.all` is an `IsHTMLDDA` object: `ToBoolean(document.all)` is `false`, so the
+  harness's `if (!var) { var = GetVariable(fuzzervars, ...) }` fallback after every creator
+  replaced it with `null`, and four of eight scanned cases cascaded on `var.length`. It is a
+  `DENY_CREATORS` entry now and `domato/rules/stateful.txt` reads the collection in one
+  statement (`var a = document.all; a.length; a.item(0); a.namedItem("fuzz")`). Any other
+  creator whose result the harness might test for truthiness has the same trap; the scan's
+  cascade section is how you find out.
 
 A third sweep was a deletion. 202 rule lines across `js.txt` and `webapis.txt` were built on
 interfaces this build does not expose at all - every `XR*` name (`navigator.xr` is undefined and

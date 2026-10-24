@@ -305,6 +305,10 @@ DENY_CREATORS = {
     # random CSSNumericValue is usually not convertible to px
     ("CSSStyleSheet", "cssRules"),
     ("CSSNumericValue", "to"),
+    # toSum builds a Servo SumValue, whose unit parser knows only length,
+    # angle, time, number and percent: a CSS.Hz()/CSS.dpi() receiver throws
+    # "Failed to create a sum value". The constructor is the reliable creator.
+    ("CSSNumericValue", "toSum"),
     # a canvas transferred to an OffscreenCanvas cannot capture a stream
     ("HTMLCanvasElement", "captureStream"),
     # an animated value refuses every setter ("Animated values cannot be set");
@@ -337,6 +341,11 @@ DENY_CREATORS = {
     # creators above build their own connection instead
     ("RTCPeerConnection", "addTrack"),
     ("RTCPeerConnection", "addTransceiver"),
+    # document.all is an IsHTMLDDA object: ToBoolean(document.all) is false, so
+    # the harness's "if (!var) var = GetVariable(...)" fallback replaces it with
+    # null and every later member read dereferences null. The stateful scenario
+    # reads the collection directly instead; <Document>.all stays a statement.
+    ("Document", "all"),
 }
 
 # Nullable IDL returns whose receiver always hands back a non-null object on
@@ -924,6 +933,8 @@ CONSTRUCTOR_ARG_OVERRIDES = {
     "IntersectionObserver": "function() { }, {}",
     "ResizeObserver": "function() { }",
     "MutationObserver": "function() { }",
+    # the generated <EventHandler> is a null on* read; the constructor rejects it
+    "PerformanceObserver": "function() { }",
     # <EventHandler> is a null on* read, which the required callback rejects
     "ReportingObserver": "function() { }",
     "MediaElementAudioSourceNode": '<AudioContext>, { mediaElement: document.createElement("audio") }',
