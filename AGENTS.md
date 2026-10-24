@@ -255,7 +255,12 @@ the audit still reads the member name out of the dead text that depended on it:
   dispatched))` at `MozillaPromise.h:548`, ASan SEGV in `MOZ_CrashSequence`, stack
   `SpeechRecognitionBackend::EnsureModelsInstalled` -> `ThenValueBase::AssertIsDead` ->
   `~MozPromise` -> `LazyIdleThread::Shutdown` -> `AppShutdown`. Reproduced by a generated case;
-  deleting the `start()` line removed it. It is also a microphone surface, so
+  deleting the `start()` line removed it. The check that fired is not `MOZ_ASSERT`: `MozPromise.h`
+  guards it with `#ifdef MOZ_DIAGNOSTIC_ASSERT_ENABLED`, and `moz.configure:159` turns that on for
+  `moz_debug | milestone.is_nightly | moz_dev_edition`. The mozconfig has no `--enable-debug`, but
+  a local mozilla-central build is Nightly (`NIGHTLY_BUILD 1`), so the diagnostic assert is live -
+  the ASan SEGV is `MOZ_Crash` reporting under `MOZ_ASAN`, not memory corruption. Beta/Release
+  compiles the check out and drops the undispatched promise silently. It is also a microphone surface, so
   `SpeechRecognition.start` and `install` are refused in `DENY_MEMBERS`; the constructor,
   `abort`/`stop` and the event/attribute members stay emitted.
 
@@ -481,7 +486,8 @@ declarations would fight over one object.
 - Anything `[Func]`-gated that `probe_apis.py` has not confirmed present.
 - `FuzzingFunctions.crash` / `FuzzingFunctions.killGPUProcess` / `memoryPressure` - they end
   the session rather than fuzzing it. The rest of that namespace is normally fair game, but
-  this checkout is an ASan debug build without `--enable-fuzzing`, so the *whole* namespace
+  this checkout is an ASan Nightly-milestone build without `--enable-fuzzing` (`MOZ_DEBUG` is
+  off; `MOZ_DIAGNOSTIC_ASSERT_ENABLED` comes from `NIGHTLY_BUILD`), so the *whole* namespace
   is compiled out: `grep -c FuzzingFunctions libxul.so` is 0 where the control string
   `structuredClone` is 19, and `probe_apis.py` finds no global. On a build that does
   configure fuzzing, re-probe before adding any of it back.
