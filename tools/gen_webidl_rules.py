@@ -302,8 +302,10 @@ DENY_CREATORS = {
     ("WritableStream", "getWriter"),
     ("ReadableStream", "getReader"),
     # an imported sheet's cssRules throws while it is still loading, and a
-    # random CSSNumericValue is usually not convertible to px
+    # random CSSNumericValue is usually not convertible to px; "rules" is the
+    # legacy alias of cssRules with the same loading check
     ("CSSStyleSheet", "cssRules"),
+    ("CSSStyleSheet", "rules"),
     ("CSSNumericValue", "to"),
     # toSum builds a Servo SumValue, whose unit parser knows only length,
     # angle, time, number and percent: a CSS.Hz()/CSS.dpi() receiver throws
@@ -337,10 +339,11 @@ DENY_CREATORS = {
     # transform calls stay as statements.
     ("XSLTProcessor", "transformToDocument"),
     ("XSLTProcessor", "transformToFragment"),
-    # both throw InvalidStateError on a closed pooled connection; the manual
-    # creators above build their own connection instead
+    # all three throw InvalidStateError on a closed pooled connection; the
+    # manual creators above build their own connection instead
     ("RTCPeerConnection", "addTrack"),
     ("RTCPeerConnection", "addTransceiver"),
+    ("RTCPeerConnection", "createDataChannel"),
     # document.all is an IsHTMLDDA object: ToBoolean(document.all) is false, so
     # the harness's "if (!var) var = GetVariable(...)" fallback replaces it with
     # null and every later member read dereferences null. The stateful scenario
@@ -1456,6 +1459,13 @@ class Emitter:
                     "RTCRtpTransceiver",
                     '(function () { var pc = new RTCPeerConnection();'
                     ' return pc.addTransceiver("audio"); })()',
+                ),
+                # same closed-connection trap as the sender; the channel keeps
+                # its connection reachable for the lifetime of the variable
+                (
+                    "RTCDataChannel",
+                    '(function () { var pc = new RTCPeerConnection();'
+                    ' return pc.createDataChannel("fuzz"); })()',
                 ),
             ]
             svg_values = {

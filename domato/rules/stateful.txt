@@ -78,7 +78,7 @@ var fzdt2 = new DataTransfer(); fzdt2.items.add(new File(["fuzz"], "fuzz.txt", {
 
 # --- CSS rules: construct a CSSStyleSheet and read the rule objects ----------
 
-var fzc1 = new CSSStyleSheet(); fzc1.insertRule("div { color: red; }", 0); var fzcr1 = fzc1.cssRules[0]; fzcr1.selectorText; fzcr1.styleMap; fzcr1.cssText; fzcr1.parentRule;
+var fzc1 = new CSSStyleSheet(); fzc1.insertRule("div { color: red; }", 0); fzc1.cssRules.length; fzc1.cssRules.item(0).selectorText; var fzcr1 = fzc1.cssRules[0]; fzcr1.selectorText; fzcr1.styleMap; fzcr1.cssText; fzcr1.parentRule;
 var fzc2 = new CSSStyleSheet(); fzc2.insertRule("@container fuzz (min-width: 1px) { color: red; }", 0); var fzcr2 = fzc2.cssRules[0]; fzcr2.conditionText; fzcr2.containerName; fzcr2.containerQuery; fzcr2.conditions;
 var fzc3 = new CSSStyleSheet(); fzc3.insertRule("@font-feature-values Fuzz { @styleset { nice: 1; } }", 0); var fzcr3 = fzc3.cssRules[0]; fzcr3.fontFamily; fzcr3.valueText;
 var fzc4 = new CSSStyleSheet(); fzc4.insertRule("@font-palette-values --fuzz { font-family: fuzz; base-palette: 1; override-colors: 0 red; }", 0); var fzcr4 = fzc4.cssRules[0]; fzcr4.fontFamily; fzcr4.basePalette; fzcr4.overrideColors;
@@ -115,7 +115,7 @@ var fzdiv1 = document.createElement("div"); fzdiv1.setAttribute("data-fuzz", "1"
 # document.all is an IsHTMLDDA object, so truthiness tests see it as false and a
 # generated "if (!var)" guard would replace it with null; read it in one line.
 var fzall1 = document.all; fzall1.length; fzall1.item(0); fzall1.namedItem("fuzz");
-var fzdiv2 = document.createElement("div"); (document.body || document.documentElement)?.appendChild(fzdiv2); fzdiv2.requestFullscreen().catch(function () { }); fzdiv2.mozRequestFullScreen(); fzdiv2.requestPointerLock(); fzdiv2.remove();
+var fzdiv2 = document.createElement("div"); (document.body || document.documentElement)?.appendChild(fzdiv2); fzdiv2.requestFullscreen().catch(function () { }); var fzfs2 = fzdiv2.mozRequestFullScreen(); if (fzfs2 && fzfs2.catch) { fzfs2.catch(function () { }); } var fzlp2 = fzdiv2.requestPointerLock(); if (fzlp2 && fzlp2.catch) { fzlp2.catch(function () { }); } fzdiv2.remove();
 var fzbtn1 = document.createElement("button"); fzbtn1.setAttribute("popover", "auto"); (document.body || document.documentElement)?.appendChild(fzbtn1); fzbtn1.showPopover(); fzbtn1.hidePopover(); fzbtn1.togglePopover(); fzbtn1.click(); fzbtn1.remove();
 var fzform1 = document.createElement("form"); fzform1.onsubmit = function (e) { e.preventDefault(); }; fzform1.requestSubmit();
 var fzel1 = document.createElement("div"); fzel1.setAttribute("a", "1"); fzel1.setAttributeNS("urn:x", "p:b", "2"); var fznm1 = fzel1.attributes; fznm1.removeNamedItem("a"); fznm1.removeNamedItemNS("urn:x", "b");

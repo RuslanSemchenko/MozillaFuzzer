@@ -64,7 +64,9 @@ window.__fz_err = function (e) {
         kind: "caught",
         name: String((e && e.name) || "Error"),
         message: String(e && e.message !== undefined ? e.message : e),
-        stack: String((e && e.stack) || "")
+        // a DOMException from a promise has no stack; the collector's own
+        // stack still names the lineguard that caught it
+        stack: String((e && e.stack) || (new Error("collector")).stack || "")
       });
     }
   } catch (x) {}
@@ -350,8 +352,15 @@ def read_inputs(paths: list[Path]) -> list[str]:
 
 def site_line(stack: str) -> int | None:
     """The first frame in the case file - the line that threw."""
-    match = STACK_SITE.search(stack or "")
-    return int(match.group(1)) if match else None
+    for frame in (stack or "").splitlines():
+        # a DOMException with no stack of its own carries the collector's
+        # stack, whose first frame is the collector itself; the caller is next
+        if "__fz_err" in frame:
+            continue
+        match = STACK_SITE.search(frame)
+        if match:
+            return int(match.group(1))
+    return None
 
 
 def normalize(text: str) -> str:

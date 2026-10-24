@@ -146,18 +146,20 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9788 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9782 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
-`MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 8 --case-timeout 45` reports 8/8 cases in
-22.8 s with `creators 0 | roots 216 | cascades 0`: no rule that declares a typed variable threw,
-and no null receiver was left behind by a failed creator. The 308 caught errors in 216 groups are
-ordinary API validation (detached SVG layout, index bounds, node-parent and document mismatches).
-`creators 0` is the fastest check for the dead-text class described below; run it after any
-creator or argument-override change.
+`MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
+47.1 s with `creators 0 | roots 319 | cascades 0 | async/no-line 0`: no rule that declares a typed
+variable threw, no null receiver was left behind by a failed creator, and no unhandled rejection
+escaped. The 604 caught errors in 319 groups are ordinary API validation (detached SVG layout,
+index bounds, node-parent and document mismatches). `creators 0` is the fastest check for the
+dead-text class described below; run it after any creator or argument-override change. When the
+thrown object has no stack (a DOMException raised through a promise), the collector records its
+own stack so the rule line is still named, and `__fz_err` frames are skipped when mapping.
 
 Two sweeps closed most of this session's work and both are worth remembering as defect shapes,
 not as line counts:
@@ -222,13 +224,15 @@ the audit still reads the member name out of the dead text that depended on it:
   document, so those suppliers are unchanged. Same family: `<Document>.evaluate("//div",
   document)` throws `WrongDocumentError` when the receiver came from DOMParser or XSLT, so that
   creator is refused and `document.evaluate` / `XPathEvaluator` supply `XPathResult` instead.
-- Receiver state, not argument shape, is the other source. `RTCPeerConnection.addTrack` and
-  `addTransceiver` throw `InvalidStateError("Peer connection is closed")` once an earlier line
-  closed the pooled connection; `RTCRtpSender.dtmf` is `null` on a video sender (`mDtmf` is
-  created only for an audio conduit); `XSLTProcessor.transformToDocument/Fragment` throws
-  `NS_ERROR_NOT_INITIALIZED` on the zero-argument constructor or after `reset()`. Those creators
-  now build their own receiver (a fresh `RTCPeerConnection`, an audio transceiver, an imported
-  stylesheet) or are refused as creators while the call stays in the statement pool.
+- Receiver state, not argument shape, is the other source. `RTCPeerConnection.addTrack`,
+  `addTransceiver` and `createDataChannel` throw `InvalidStateError("Peer connection is closed")`
+  once an earlier line closed the pooled connection; `RTCRtpSender.dtmf` is `null` on a video
+  sender (`mDtmf` is created only for an audio conduit); `XSLTProcessor.transformToDocument/Fragment`
+  throws `NS_ERROR_NOT_INITIALIZED` on the zero-argument constructor or after `reset()`;
+  `CSSStyleSheet.cssRules` and its legacy alias `.rules` throw "still-loading style sheet" after an
+  imported sheet is inserted. Those creators now build their own receiver (a fresh
+  `RTCPeerConnection`, an audio transceiver, an imported stylesheet) or are refused as creators
+  while the call stays in the statement pool.
 - `IDBFactory.open(name, 0)` is a `TypeError` ("0 (Zero) is not a valid database version"), so
   the version overload got a fixed `"fuzzdb", 1`.
 - `Location.search = ...` navigates the harness page (`GET /case0.html?fuzz`) and the case never
