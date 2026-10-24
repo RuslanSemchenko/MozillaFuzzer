@@ -73,7 +73,12 @@ runcount["eventhandler5"]++; if(runcount["eventhandler5"] > 2) { return; }
 
 function fuzzall() {
   for (var i = 0; i < window.__apiFuzzers.length; i++) {
-    try { window.__apiFuzzers[i](); } catch (e) { }
+    try {
+      // webgpuFuzzer is async: a rejected await never reaches this catch, it
+      // surfaces as an unhandledrejection with no line in the case
+      var pending = window.__apiFuzzers[i]();
+      if (pending && pending.catch) { pending.catch(function (e) { }); }
+    } catch (e) { }
   }
   jsfuzzer();
 }

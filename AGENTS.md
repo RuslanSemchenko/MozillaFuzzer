@@ -19,9 +19,15 @@ before opening a rules file.
 | `domato/rules/tagattributes.txt` | per-element attribute values | `*Element` interfaces route here |
 | `domato/rules/css.txt` + `cssproperties.txt` | CSS grammar | `rules` is a live entry point |
 | `domato/rules/svg.txt`, `mathml.txt` (+ `*attrvalues.txt`) | SVG / MathML | included by `html.txt` |
-| `domato/canvas/canvas.txt` | Canvas 2D statements | own grammar, own `!lineguard`, `!varformat fuzzvar%05d` |
-| `domato/webgl/webgl.txt` | WebGL 1/2 statements | same, separate grammar |
-| `domato/webgpu/webgpu.txt` + `webgpuhelpers.txt` | WebGPU statements | needs `<computeEntryPoint>`/`<vertexEntryPoint>`/`<fragmentEntryPoint>`/`<BindInt>` derived from the WGSL corpus |
+| `domato/rules/canvas.txt` (+ `canvashelpers.txt`) | Canvas 2D statements | own grammar, own `!lineguard`, `!varformat fuzzvar%05d` |
+| `domato/rules/webgl.txt` (+ `webglhelpers.txt`) | WebGL 1/2 statements | same, separate grammar |
+| `domato/rules/webgpu.txt` + `webgpuhelpers.txt` | WebGPU statements | needs `<computeEntryPoint>`/`<vertexEntryPoint>`/`<fragmentEntryPoint>`/`<BindInt>` derived from the WGSL corpus |
+| `domato/rules/wgsl/*.wgsl` | WGSL corpus | entry points and binding numbers the WebGPU grammar expands; parsed by `domato/wgsl_grammar.py` |
+
+There is one rules directory. The graphics grammars are still parsed as separate
+`Grammar` objects (see "How much of a case each domain gets"), but their text
+lives in `domato/rules/` with everything else - an include in any of them is a
+sibling file name, never `../rules/...`.
 
 `grz_domato/template.html` is the harness the generated code is dropped into. It
 declares `freememory`, `GetVariable`, `SetVariable`, `fuzzervars`, and one guarded
@@ -101,40 +107,56 @@ confirms) are what produce a claim.
 
 ## Current state (last verified run)
 
-Every figure below is from the command written next to it, run on 2026-10-23 with the
+Every figure below is from the command written next to it, run on 2026-10-24 with the
 rules files in this tree. Re-run everything - they go stale the moment a rules file changes.
 
-`python3 tools/extract_idl.py --source /home/ruslan/firefox` -> 847 files, 2225 types
-(1101 interfaces), 5973 members.
+`python3 tools/extract_idl.py --source /home/ruslan/firefox` -> 847 files, 2362 types
+(1101 interfaces), 10932 members.
 
-`python3 tools/audit_rules.py` on that inventory: 937 types considered, 785 not gated off at
-interface level (152 gated), 37 interfaces with at least one missing member. Across those 785:
-5601 members reachable, 89 missing (87 -> `webapis.txt`, 2 -> `css.txt`; the other five work
-orders are empty), 65 word-only, 2 parsed-but-unreachable, 241 whose only gate is a `[Func]` the
-audit cannot evaluate, and 423 chrome-only / 98 pref-off excluded before queuing.
+`python3 tools/audit_rules.py` on that inventory: 937 types considered, 790 not gated off at
+interface level (147 gated), 57 interfaces with at least one missing member. Across those 790:
+5593 members reachable, 144 missing (142 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+five work orders are empty), 12 word-only, 0 parsed-but-unreachable, 286 whose only gate is a
+`[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 88 pref-off excluded before
+queuing.
 
-All 37 queue blocks carry a NOTE, so the 89 are an adjudicated refusal rather than a to-do
-list: `FuzzingFunctions` (namespace compiled out of this build), the EME chain (`MediaKeys`,
-`MediaKeySystemAccess`, `MediaKeySession`, `MediaKeyError` - no CDM, so no receiver), the
-negotiation-gated RTC types (`RTCIceTransport`, `RTCSctpTransport`, `RTCDTMFSender`,
-`RTCCertificate`, `RTCIceCandidatePair`), the three report-body classes plus `FetchObserver`
-and `CSSImportRule`, the async-only `CryptoKey` / `IDBTransaction` / `IDBIndex` / `SourceBuffer`
-receivers, `AudioWorkletNode`, `PictureInPictureEvent`, `TaskPriorityChangeEvent`, `PaintRequest`,
-`WebTransport` and its datagram stream, `GamepadPose` and `FileSystemEntry`, and the two dialogs
-(`Window`, `Navigator`). Each NOTE states the reason *as evaluated in the page*, not as read from
-the IDL.
+All 57 queue blocks carry a NOTE, so the 144 are an adjudicated refusal rather than a to-do
+list: `FuzzingFunctions` (namespace compiled out of this build), the WebAuthn response classes
+(`AuthenticatorResponse` and its two subclasses, `PublicKeyCredential` - a real credential needs
+an authenticator), the report bodies (`CSPViolationReportBody`, `DeprecationReportBody`,
+`IntegrityViolationReportBody`) plus `FetchObserver`, the permission/UI surfaces (`Clipboard`,
+`Geolocation`, `MIDIAccess`, `Serial`, `GetUserMediaRequest`, `HTMLInputElement`/`HTMLSelectElement`
+`showPicker`, the `Window` and `Navigator` dialogs), the no-receiver types (`Gamepad*`,
+`SpeechSynthesisVoice`, `Element` pointer capture, `History`), the legacy classes
+(`MouseScrollEvent`, `ScrollAreaEvent`, `TimeEvent`, `MediaStreamError`, `MediaKeyError`,
+`PaintRequest`, `IDBKeyRange`, `IntlUtils`, `PermissionsPolicy`, `Node`, `Directory` and the
+`FileSystem*Entry` pair, `CookieStoreManager`, `LegacyMozTCPSocket`, `RTCIdentityProviderRegistrar`),
+the `WebTransport` family, and the WebGL extension objects. Each NOTE states the reason *as
+evaluated in the page*, not as read from the IDL.
 
-`python3 tools/probe_apis.py` probed 740 queued members on the same build with Grizzly's prefs:
-131 `present` (126 prototype, 3 instance, 2 static), 609 `not-exposed`, and 49 interfaces the
-page has no receiver for at all (`unprobeable`, kept separate so a WebGL extension object or a
-worker-only interface is not reported as a browser denial). Of the 131 present, 75 are emitted in
-reachable rule text; the other 56 are exactly the NOTE'd refusals above.
+`python3 tools/probe_apis.py` probed all 977 queued candidates on the same build with Grizzly's
+prefs (the default bucket is `all` = `needs_probe` + `missing`): 188 `present` (176 prototype,
+7 instance, 4 static, 1 `getExtension(webgl2)`), 789 `not-exposed`, and 53 interfaces the page has
+no receiver for at all (`unprobeable`, kept separate so a WebGL extension object or a worker-only
+interface is not reported as a browser denial). Present is exposure, not callability *or*
+obtainability: `'Geolocation' in window` is true while `navigator.geolocation` is undefined here,
+so its members probe `present:prototype` and there is still no receiver. Of the 188, 17 are
+emitted in reachable rule text; the rest are the refused interfaces above or members the generator
+refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
+because the template already consumed that adapter).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 42,047 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9807 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
+
+`MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 8 --case-timeout 45` reports 8/8 cases in
+21.0 s with `creators 0 | roots 193 | cascades 0`: no rule that declares a typed variable threw,
+and no null receiver was left behind by a failed creator. The 314 caught errors in 194 groups are
+ordinary API validation (detached SVG layout, index bounds, node-parent and document mismatches).
+`creators 0` is the fastest check for the dead-text class described below; run it after any
+creator or argument-override change.
 
 Two sweeps closed most of this session's work and both are worth remembering as defect shapes,
 not as line counts:
@@ -168,6 +190,50 @@ three of those names were being counted from a dead line that merely spelled the
 that lower number is the true one. If you are about to write rules for an interface,
 `'Name' in window` in `check_reads.py` costs one page load.
 
+The 2026-10-24 sweeps were all the same shape - a creator that throws registers no variable, and
+the audit still reads the member name out of the dead text that depended on it:
+
+- `document.createElement` on an `XMLDocument` (a DOMParser or XSLT result) returns a plain
+  `Element` whatever the tag name is. A creator line typed `HTMLAudioElement` then registered a
+  variable with none of the HTML interface's members, and every later `captureStream()` on it
+  threw "is not a function". HTML element creators now run on the global `document` (always an
+  HTML document); `createElementNS` with the SVG/MathML/XHTML namespaces is fine on an XML
+  document, so those suppliers are unchanged. Same family: `<Document>.evaluate("//div",
+  document)` throws `WrongDocumentError` when the receiver came from DOMParser or XSLT, so that
+  creator is refused and `document.evaluate` / `XPathEvaluator` supply `XPathResult` instead.
+- Receiver state, not argument shape, is the other source. `RTCPeerConnection.addTrack` and
+  `addTransceiver` throw `InvalidStateError("Peer connection is closed")` once an earlier line
+  closed the pooled connection; `RTCRtpSender.dtmf` is `null` on a video sender (`mDtmf` is
+  created only for an audio conduit); `XSLTProcessor.transformToDocument/Fragment` throws
+  `NS_ERROR_NOT_INITIALIZED` on the zero-argument constructor or after `reset()`. Those creators
+  now build their own receiver (a fresh `RTCPeerConnection`, an audio transceiver, an imported
+  stylesheet) or are refused as creators while the call stays in the statement pool.
+- `IDBFactory.open(name, 0)` is a `TypeError` ("0 (Zero) is not a valid database version"), so
+  the version overload got a fixed `"fuzzdb", 1`.
+- `Location.search = ...` navigates the harness page (`GET /case0.html?fuzz`) and the case never
+  posts its report; every navigation setter on `Location` is refused, only `hash` and the getters
+  remain. In `stateful.txt`, `document.body.appendChild(...)` became
+  `(document.body || document.documentElement)?.appendChild(...)`, because a generated line can
+  remove the body and every observer scenario died with it.
+- WebIDL strips one leading underscore from the exposed identifier: IDL `_any`, `_includes` and
+  `_exception` are the page-visible `any`, `includes` and `exception`. The emitter strips it and
+  the audit normalizes both sides; before that, `TaskSignal._any(...)` and `AbortSignal._any(...)`
+  were guaranteed TypeErrors that the audit still counted.
+- A `check_reads.py` batch is evaluated in one page, so two expressions that declare the same
+  `var` clobber each other and a later one can read the earlier one's value - every candidate
+  must run inside its own function. A WebCrypto ML-KEM keypair must request the
+  `encapsulateKey`/`decapsulateKey` usages in `generateKey`, or `encapsulate`/`decapsulate`
+  reject: usages restrict the key, they are not defaulted.
+- **Crash found 2026-10-24:** `SpeechRecognition.start()` installs the speech model and crashed
+  the content process at shutdown with `MOZ_CRASH(MozPromise::ThenValue created from 'StartImpl'
+  destroyed without being either disconnected, resolved, or rejected (dispatchRv: not
+  dispatched))` at `MozillaPromise.h:548`, ASan SEGV in `MOZ_CrashSequence`, stack
+  `SpeechRecognitionBackend::EnsureModelsInstalled` -> `ThenValueBase::AssertIsDead` ->
+  `~MozPromise` -> `LazyIdleThread::Shutdown` -> `AppShutdown`. Reproduced by a generated case;
+  deleting the `start()` line removed it. It is also a microphone surface, so
+  `SpeechRecognition.start` and `install` are refused in `DENY_MEMBERS`; the constructor,
+  `abort`/`stop` and the event/attribute members stay emitted.
+
 ## How much of a case each domain gets
 
 Measured by counting guarded statements in the blocks of 25 generated cases
@@ -195,7 +261,7 @@ through a context; `EXTENSION_PREFIXES` in the probe is the list of names that g
 treatment, and an extension interface missing from it is reported `unprobeable` instead of
 answered.
 
-The WebGPU grammar can only be as varied as `domato/webgpu/wgsl/*.wgsl` allows - entry
+The WebGPU grammar can only be as varied as `domato/rules/wgsl/*.wgsl` allows - entry
 points and binding numbers come from those shaders - so a new WGSL corpus is worth more there
 than new rules. `tools/check_wgsl.py` is how you know a corpus change compiled.
 
@@ -265,9 +331,9 @@ compile here and what the fix was:
 
 ## Routing an interface
 
-1. `GPU*` -> `webgpu/webgpu.txt`; `WebGL*`, `EXT_*`, `OES_*`, `OVR_*`, `WEBGL_*`, `ANGLE_*`,
-   `MOZ_debug` -> `webgl/webgl.txt`; `CanvasRenderingContext2D`, `OffscreenCanvas*`, `Path2D`,
-   `ImageData`, `ImageBitmap`, ... -> `canvas/canvas.txt`.
+1. `GPU*` -> `rules/webgpu.txt`; `WebGL*`, `EXT_*`, `OES_*`, `OVR_*`, `WEBGL_*`, `ANGLE_*`,
+   `MOZ_debug` -> `rules/webgl.txt`; `CanvasRenderingContext2D`, `OffscreenCanvas*`, `Path2D`,
+   `ImageData`, `ImageBitmap`, ... -> `rules/canvas.txt`.
 2. `SVG*` -> `svg.txt`; `MML*` -> `mathml.txt`; CSS-ish -> `css.txt`; `*Element` ->
    `tagattributes.txt`.
 3. everything else -> `webapis.txt`.
@@ -296,7 +362,7 @@ declarations would fight over one object.
 - `rules/js.txt` lines go inside a **synchronous** function guarded by
   `try { <line> } catch(e) { }`. `await` in a `js.txt`/`webapis.txt` line is a syntax
   error, and a syntax error kills the entire `<script>` - not one line, the whole
-  case's JS. Async work belongs in `webgpu/webgpu.txt`, whose block is `async`.
+  case's JS. Async work belongs in `rules/webgpu.txt`, whose block is `async`.
 - Throw only what the guard can swallow and only where a bad argument is the point.
   A rule that reliably throws does not crash the browser, it just stops that object
   being used again by later lines, so the interesting part of the API never runs.
@@ -416,7 +482,7 @@ declarations would fight over one object.
 4. `python3 tools/audit_rules.py` re-run shows the member in `reachable`, not in
    `missing` and not in `parsed but unreachable`. If the member only arrives through a
    dictionary or a callback argument, say so in a `NOTES` entry instead of bending the rules.
-5. If the commit touched `domato/webgpu/wgsl/`, `python3 tools/check_wgsl.py` exits 0.
+5. If the commit touched `domato/rules/wgsl/`, `python3 tools/check_wgsl.py` exits 0.
    Compilation is a verdict from `getCompilationInfo`; pipeline success is a verdict from
    a validation error scope - "the call did not throw" is neither, which is how a
    compute-only module used to be reported as `render=ok`.

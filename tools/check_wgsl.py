@@ -1,4 +1,4 @@
-"""Compile every domato/webgpu/wgsl/*.wgsl in one foreground Firefox page.
+"""Compile every domato/rules/wgsl/*.wgsl in one foreground Firefox page.
 
 The corpus is the ceiling on what the WebGPU grammar can say, so a module that does
 not compile is worse than a missing module: the grammar pairs entry points by stage
@@ -23,7 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FIREFOX = Path("/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox")
-WGSL_DIR = ROOT / "domato" / "webgpu" / "wgsl"
+WGSL_DIR = ROOT / "domato" / "rules" / "wgsl"
 PROFILE = ROOT / "results" / "wgsl_check_prof"
 
 PAGE = """<!doctype html><html><body><script>

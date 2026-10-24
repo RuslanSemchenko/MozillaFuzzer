@@ -334,6 +334,21 @@ def main() -> int:
     targets = []
     for entry in report:
         members = selected_members(entry, args.bucket)
+        if args.bucket == "all":
+            # The queue only holds gated members that are not yet emitted. The
+            # emitter also consults this file for gated members that are already
+            # covered (Window.caches, say), and a re-probe that omits them would
+            # delete those rules - so ask about every [Func]/[Trial] member the
+            # inventory knows, reachable or not.
+            iface_attrs = idl.get(entry["name"], {}).get("attrs", {})
+            if not any(key in iface_attrs for key in ("ChromeOnly", "SystemPrincipal", "MozSystem")):
+                for member, slot in idl.get(entry["name"], {}).get("members", {}).items():
+                    if member == "constructor":
+                        continue
+                    attrs = slot.get("attrs", {})
+                    if attrs.get("Func") or attrs.get("Trial"):
+                        members.append(member)
+            members = sorted(set(members))
         if not members or (args.only and entry["name"] not in args.only):
             continue
         attrs = idl.get(entry["name"], {}).get("attrs", {})

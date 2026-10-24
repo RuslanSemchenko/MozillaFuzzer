@@ -18,7 +18,10 @@ from pathlib import Path
 # declaration: an optional run of [attrs] blocks, then the kind, then the name
 _ATTR_BLOCK = r"(?:\[[^\]]*\]\s*)*"
 _KINDS = r"interface\ mixin|interface|namespace|dictionary|callback\ interface|callback|enum|typedef"
-_DECL = re.compile(rf"({_ATTR_BLOCK})({_KINDS})\s+([A-Za-z0-9_]+)")
+# `callback constructor Name = any ();` is valid WebIDL (CustomElementConstructor).
+# Without the optional keyword the callback is recorded under the name
+# "constructor", which erases the real type name.
+_DECL = re.compile(rf"({_ATTR_BLOCK})({_KINDS})(?:\s+constructor)?\s+([A-Za-z0-9_]+)")
 _MEMBER_ATTR = re.compile(r"^\s*((?:\[[^\]]*\]\s*)+)")
 _ATTR_SPLIT = re.compile(r"\s*,\s*(?![^\[\(]*[\]\)])")
 # The trailing ';' is optional because parse_file() splits the body on ';' before
@@ -39,6 +42,184 @@ _SPECIAL_OP = re.compile(r"^(?:static\s+)?(?:getter|setter|deleter|stringifier|l
 _CONST = re.compile(r"\bconst\s+\S.*?\s+([A-Za-z0-9_]+)\s*=")
 _REL = re.compile(r"([A-Za-z0-9_]+)\s+(?:includes|implements)\s+([A-Za-z0-9_]+)\s*;")
 _ENUM_VALUE = re.compile(r'^\s*"([^"]+)"')
+# typedef is scanned separately because the declaration matcher reads the alias
+# as the name (`typedef DOMString Foo;` -> name DOMString): a rule generator that
+# resolves typedefs needs the alias and the declared name the right way round.
+_TYPEDEF = re.compile(r"\btypedef\s+(?P<type>.+?)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*;", re.S)
+# Whole-declaration parsers, kept separate from the tolerant name-only patterns
+# above: the audit only needs a member name to exist, while a rule generator needs
+# the argument list, the return type and which arguments are optional.
+_ATTR_DECL = re.compile(
+    r"^(?P<prefix>(?:(?:static|inherit|readonly|stringifier)\s+)*)attribute\s+"
+    r"(?P<type>.+?)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*$",
+    re.S,
+)
+_OP_DECL = re.compile(
+    r"^(?P<prefix>(?:(?:static|stringifier|getter|setter|deleter|creator|legacycaller)\s+)*)"
+    r"(?P<ret>.+?)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*\((?P<args>.*)\)\s*$",
+    re.S,
+)
+_CONSTRUCTOR_DECL = re.compile(r"^constructor\s*\((?P<args>.*)\)\s*$", re.S)
+_CONST_DECL = re.compile(
+    r"^const\s+(?P<type>.+?)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?P<value>.+?)\s*$",
+    re.S,
+)
+_SPECIAL_PREFIX = re.compile(r"^(?:static\s+)?(?:getter|setter|deleter|legacycaller)\b")
+_TYPE_ATTR = re.compile(r"\[[^\]]*\]\s*")
+
+
+def _split_top(text: str, separator: str = ",") -> list[str]:
+    """Split on a separator that is not inside <> () [] {} or a string."""
+    parts, start, depth, quote = [], 0, 0, None
+    for index, char in enumerate(text):
+        if quote:
+            if char == quote and text[index - 1] != "\\":
+                quote = None
+        elif char in "\"'":
+            quote = char
+        elif char in "<([{":
+            depth += 1
+        elif char in ">)]}":
+            depth -= 1
+        elif char == separator and depth == 0:
+            parts.append(text[start:index])
+            start = index + 1
+    parts.append(text[start:])
+    return parts
+
+
+def _top_level(text: str, symbol: str) -> int:
+    """Index of the first top-level `symbol`, or -1."""
+    depth, quote = 0, None
+    for index, char in enumerate(text):
+        if quote:
+            if char == quote and text[index - 1] != "\\":
+                quote = None
+        elif char in "\"'":
+            quote = char
+        elif char in "<([{":
+            depth += 1
+        elif char in ">)]}":
+            depth -= 1
+        elif char == symbol and depth == 0:
+            return index
+    return -1
+
+
+def parse_arguments(raw: str) -> list[dict]:
+    """Parse a WebIDL argument list into name/type/optional/default records."""
+    args = []
+    for item in _split_top(raw):
+        item = item.strip()
+        if not item:
+            continue
+        optional = bool(re.match(r"^optional\b", item))
+        if optional:
+            item = item[len("optional"):].strip()
+        default = None
+        at = _top_level(item, "=")
+        if at != -1:
+            default = item[at + 1 :].strip()
+            item = item[:at].strip()
+        type_attrs = sorted(set(re.findall(r"\[([^\]]*)\]", item)))
+        item = _TYPE_ATTR.sub("", item).strip()
+        variadic = False
+        if "..." in item:
+            item = item.replace("...", " ")
+            variadic = True
+        match = re.match(r"^(?P<type>.+?)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)$", item, re.S)
+        if match:
+            arg_type, arg_name = match.group("type"), match.group("name")
+        else:
+            arg_type, arg_name = item, None
+        args.append(
+            {
+                "name": arg_name,
+                "type": re.sub(r"\s+", " ", arg_type).strip(),
+                "optional": optional,
+                "variadic": variadic,
+                "default": default,
+                "attrs": type_attrs,
+            }
+        )
+    return args
+
+
+def _strip_type_attrs(value: str) -> str:
+    return re.sub(r"\s+", " ", _TYPE_ATTR.sub("", value)).strip()
+
+
+def parse_declaration(member: str) -> dict | None:
+    """Turn one top-level member declaration into a signature record."""
+    member = member.strip()
+    if not member:
+        return None
+    if _SPECIAL_PREFIX.match(member):
+        # A named special operation is still not part of the ordinary callable
+        # surface (it is how [] / String() behave); the name-only extractor
+        # deliberately skips it and so does this parser.
+        return None
+    match = _CONSTRUCTOR_DECL.match(member)
+    if match:
+        return {"kind": "constructor", "args": parse_arguments(match.group("args"))}
+    match = _CONST_DECL.match(member)
+    if match:
+        return {
+            "kind": "const",
+            "name": match.group("name"),
+            "type": _strip_type_attrs(match.group("type")),
+            "value": match.group("value").strip(),
+        }
+    match = _ATTR_DECL.match(member)
+    if match:
+        prefix = match.group("prefix")
+        return {
+            "kind": "attribute",
+            "name": match.group("name"),
+            "type": _strip_type_attrs(match.group("type")),
+            "readonly": "readonly" in prefix,
+            "static": "static" in prefix,
+        }
+    match = _OP_DECL.match(member)
+    if match:
+        prefix = match.group("prefix")
+        return {
+            "kind": "method",
+            "name": match.group("name"),
+            "return": _strip_type_attrs(match.group("ret")),
+            "args": parse_arguments(match.group("args")),
+            "static": "static" in prefix,
+        }
+    return None
+
+
+def parse_dictionary_body(body: str) -> list[dict]:
+    members = []
+    for item in body.split(";"):
+        item = item.strip()
+        if not item or item.startswith("//"):
+            continue
+        required = bool(re.match(r"^required\b", item))
+        if required:
+            item = item[len("required"):].strip()
+        default = None
+        at = _top_level(item, "=")
+        if at != -1:
+            default = item[at + 1 :].strip()
+            item = item[:at].strip()
+        item = _TYPE_ATTR.sub("", item).strip()
+        match = re.match(r"^(?P<type>.+?)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)$", item, re.S)
+        if not match:
+            continue
+        members.append(
+            {
+                "name": match.group("name"),
+                "type": re.sub(r"\s+", " ", match.group("type")).strip(),
+                "required": required,
+                "default": default,
+            }
+        )
+    return members
 
 
 def strip_comments(text: str) -> str:
@@ -125,6 +306,10 @@ def parse_file(path: Path) -> dict:
                 "partial": False,
                 "parent": None,
                 "values": [],
+                "dict_members": [],
+                "callback_return": None,
+                "callback_args": [],
+                "typedef_type": None,
             },
         )
         parent = re.search(r":\s*([A-Za-z0-9_]+)", between)
@@ -139,6 +324,14 @@ def parse_file(path: Path) -> dict:
                 set(entry["values"])
                 | {value.group(1) for value in (_ENUM_VALUE.match(line.strip()) for line in body.split(",")) if value}
             )
+        elif kind == "dictionary":
+            entry["dict_members"] = parse_dictionary_body(body)
+        elif kind == "callback":
+            signature = re.search(r"=\s*(?P<ret>.+?)\s*\((?P<args>.*)\)\s*$", between, re.S)
+            if signature:
+                entry["callback_return"] = _strip_type_attrs(signature.group("ret"))
+                entry["callback_args"] = parse_arguments(signature.group("args"))
+            entry["typedef_type"] = "callback"
         else:
             for member in body.split(";"):
                 member = member.strip()
@@ -148,24 +341,51 @@ def parse_file(path: Path) -> dict:
                 member_attrs = parse_attrs(lead.group(1)) if lead else {}
                 if lead:
                     member = member[lead.end() :].strip()
+                declared = parse_declaration(member)
                 for pattern, mkind, group in ((_ATTRIBUTE, "attribute", 1), (_OPERATION, "method", 2), (_CONST, "const", 1)):
                     if pattern is _OPERATION and _SPECIAL_OP.match(member):
                         continue
                     found = pattern.search(member)
                     if found:
-                        slot = entry["members"].setdefault(found.group(group), {"kinds": set(), "attrs": {}})
+                        slot = entry["members"].setdefault(found.group(group), {"kinds": set(), "attrs": {}, "signatures": []})
                         slot["kinds"].add(mkind)
                         merge_attrs(slot["attrs"], member_attrs)
+                        if declared and declared.get("name") == found.group(group):
+                            slot["signatures"].append(declared)
                         break
                 if _CONSTRUCTOR.search(member):
-                    slot = entry["members"].setdefault("constructor", {"kinds": set(), "attrs": {}})
+                    slot = entry["members"].setdefault("constructor", {"kinds": set(), "attrs": {}, "signatures": []})
                     slot["kinds"].add("constructor")
                     merge_attrs(slot["attrs"], member_attrs)
+                    if declared and declared.get("kind") == "constructor":
+                        slot["signatures"].append(declared)
         position = end
         if position >= len(text):
             break
     for target, mixin in _REL.findall(text):
         includes.setdefault(target, []).append(mixin)
+    for match in _TYPEDEF.finditer(text):
+        alias = _strip_type_attrs(match.group("type"))
+        name = match.group("name")
+        entry = types.setdefault(
+            name,
+            {
+                "name": name,
+                "kind": "typedef",
+                "source": path.name,
+                "attrs": {},
+                "members": {},
+                "partial": False,
+                "parent": None,
+                "values": [],
+                "dict_members": [],
+                "callback_return": None,
+                "callback_args": [],
+                "typedef_type": None,
+            },
+        )
+        entry["kind"] = "typedef"
+        entry["typedef_type"] = alias
     return {"types": types, "includes": includes}
 
 
@@ -189,13 +409,36 @@ def main() -> int:
             files += 1
             parsed = parse_file(path)
             for name, entry in parsed["types"].items():
-                target = types.setdefault(name, {**entry, "members": {}, "attrs": {}, "values": []})
+                target = types.setdefault(
+                    name,
+                    {
+                        "name": name,
+                        "kind": entry["kind"],
+                        "source": entry["source"],
+                        "members": {},
+                        "attrs": {},
+                        "values": [],
+                        "dict_members": [],
+                        "callback_return": None,
+                        "callback_args": [],
+                        "typedef_type": None,
+                        "partial": False,
+                        "parent": None,
+                    },
+                )
                 for member, slot in entry["members"].items():
-                    merged = target["members"].setdefault(member, {"kinds": set(), "attrs": {}})
+                    merged = target["members"].setdefault(member, {"kinds": set(), "attrs": {}, "signatures": []})
                     merged["kinds"] |= slot["kinds"]
                     merge_attrs(merged["attrs"], slot["attrs"])
+                    for signature in slot.get("signatures", ()):
+                        if signature not in merged["signatures"]:
+                            merged["signatures"].append(signature)
                 merge_attrs(target["attrs"], entry["attrs"])
                 target["values"] = sorted(set(target["values"]) | set(entry["values"]))
+                target["dict_members"] = target["dict_members"] or entry["dict_members"]
+                target["callback_return"] = target["callback_return"] or entry["callback_return"]
+                target["callback_args"] = target["callback_args"] or entry["callback_args"]
+                target["typedef_type"] = target["typedef_type"] or entry["typedef_type"]
                 target["partial"] = target["partial"] or entry["partial"]
                 target["parent"] = target["parent"] or entry["parent"]
             for name, mixin in parsed["includes"].items():
@@ -211,12 +454,29 @@ def main() -> int:
             if not source:
                 continue
             for member, slot in source["members"].items():
-                merged = entry["members"].setdefault(member, {"kinds": set(), "attrs": {}})
+                merged = entry["members"].setdefault(member, {"kinds": set(), "attrs": {}, "signatures": []})
                 merged["kinds"] |= slot["kinds"]
                 merge_attrs(merged["attrs"], slot["attrs"])
+                for signature in slot.get("signatures", ()):
+                    if signature not in merged["signatures"]:
+                        merged["signatures"].append(signature)
 
     for entry in types.values():
-        entry["members"] = {k: {"kinds": sorted(v["kinds"]), "attrs": v["attrs"]} for k, v in sorted(entry["members"].items())}
+        entry.setdefault("dict_members", [])
+        entry.setdefault("callback_return", None)
+        entry.setdefault("callback_args", [])
+        entry.setdefault("typedef_type", None)
+        entry["members"] = {
+            k: {
+                "kinds": sorted(v["kinds"]),
+                "attrs": v["attrs"],
+                "signatures": sorted(
+                    v.get("signatures", ()),
+                    key=lambda item: (item.get("kind", ""), item.get("name", ""), len(item.get("args", ()))),
+                ),
+            }
+            for k, v in sorted(entry["members"].items())
+        }
         entry["values"] = sorted(entry["values"])
         entry["includes"] = sorted(set(includes.get(entry["name"], ())))
 

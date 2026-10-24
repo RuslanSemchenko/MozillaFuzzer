@@ -17,8 +17,11 @@ Usage (run it yourself - it opens a Firefox window):
   python3 tools/check_reads.py --dump exprs.json > results/audit/reads.json
 
 exprs.json is {"name": "expression"}; the expression is evaluated with eval(), so a `var` inside
-it is allowed and each one runs in its own scope. Expressions that resolve asynchronously should
-report through a side channel and be read back in a second run.
+it is allowed and each one runs in its own scope. If an expression returns a thenable it is
+awaited for `--settle` milliseconds and the verdict says `resolved:` or `REJECTED`; the page
+posts its report only after every promise has settled (or timed out). Return the chain -
+`x.then(...).catch(...)` - if the receiver is only usable asynchronously; an expression that
+merely *starts* async work and evaluates to undefined can only be judged syntactically.
 
 eval() here is the point, not an accident: the strings are JS the operator wrote into the JSON
 file, the page is served from 127.0.0.1 to a Firefox this script starts and stops, and nothing
@@ -42,28 +45,53 @@ sys.path.insert(0, str(ROOT))
 FIREFOX = Path("/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox")
 
 PAGE = """<!doctype html><meta charset=utf-8><title>read check</title><body><script>
-const results = [];
-for (const cand of %TARGETS%) {
-  let value = null, status = "ok";
-  try { value = String(eval(cand.expr)); } catch (err) { status = "THREW " + err.name + ": " + err.message; }
-  results.push({name: cand.name, expr: cand.expr, status, value});
-}
-fetch("/report", {method: "POST", body: JSON.stringify(results)});
+const results = new Array(%TARGETS%.length);
+const pending = [];
+function describe(v) { try { return String(v); } catch (e) { return "<unstringifiable>"; } }
+%TARGETS%.forEach(function (cand, i) {
+  try {
+    // eval in its own function: a `var i` (or `var results`) in the candidate
+    // would otherwise clobber this callback's locals and silently drop the row
+    const r = (function () { return eval(cand.expr); })();
+    if (r && typeof r.then === "function") {
+      pending.push(new Promise(function (done) {
+        const timer = setTimeout(function () {
+          results[i] = {name: cand.name, expr: cand.expr, status: "PENDING after %SETTLE%ms", value: null};
+          done();
+        }, %SETTLE%);
+        Promise.resolve(r).then(function (v) {
+          clearTimeout(timer);
+          results[i] = {name: cand.name, expr: cand.expr, status: "ok", value: "resolved: " + describe(v)};
+          done();
+        }, function (err) {
+          clearTimeout(timer);
+          results[i] = {name: cand.name, expr: cand.expr, status: "REJECTED " + (err && err.name) + ": " + (err && err.message), value: null};
+          done();
+        });
+      }));
+      return;
+    }
+    results[i] = {name: cand.name, expr: cand.expr, status: "ok", value: describe(r)};
+  } catch (err) { results[i] = {name: cand.name, expr: cand.expr, status: "THREW " + err.name + ": " + err.message, value: null}; }
+});
+Promise.all(pending).then(function () {
+  fetch("/report", {method: "POST", body: JSON.stringify(results)});
+});
 </script></body>"""
 
 
-def build_page(expressions: dict[str, str]) -> str:
+def build_page(expressions: dict[str, str], settle: int) -> str:
     payload = [{"name": name, "expr": expr} for name, expr in expressions.items()]
-    return PAGE.replace("%TARGETS%", json.dumps(payload))
+    return PAGE.replace("%TARGETS%", json.dumps(payload)).replace("%SETTLE%", str(settle))
 
 
-def collect(expressions: dict[str, str], firefox: Path, profile: Path, timeout: int) -> list[dict] | None:
+def collect(expressions: dict[str, str], firefox: Path, profile: Path, timeout: int, settle: int, browser_log: Path | None = None, headless: bool = False) -> list[dict] | None:
     """Serve the page and wait for the browser to post the verdicts back."""
     result: dict = {}
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
-            body = build_page(expressions).encode("utf-8")
+            body = build_page(expressions, settle).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html")
             self.end_headers()
@@ -83,10 +111,15 @@ def collect(expressions: dict[str, str], firefox: Path, profile: Path, timeout: 
     url = f"http://127.0.0.1:{httpd.server_address[1]}/readcheck.html"
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
+    log = open(browser_log, "wb") if browser_log else None
+    command = [str(firefox)]
+    if headless:
+        command.append("--headless")
+    command += ["--no-remote", "--profile", str(profile), url]
     proc = subprocess.Popen(
-        [str(firefox), "--no-remote", "--profile", str(profile), url],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        command,
+        stdout=log or subprocess.DEVNULL,
+        stderr=log or subprocess.DEVNULL,
     )
     deadline = time.monotonic() + timeout
     while "data" not in result and time.monotonic() < deadline:
@@ -98,6 +131,8 @@ def collect(expressions: dict[str, str], firefox: Path, profile: Path, timeout: 
     except subprocess.TimeoutExpired:
         proc.kill()
     httpd.shutdown()
+    if log is not None:
+        log.close()
     if "data" not in result:
         print(f"NO CALLBACK after {timeout}s - the page never reported to {url}", file=sys.stderr)
         return None
@@ -110,8 +145,15 @@ def main() -> int:
     parser.add_argument("--firefox", type=Path, default=FIREFOX)
     parser.add_argument("--profile", type=Path, default=ROOT / "results" / "readcheck_prof")
     parser.add_argument("--timeout", type=int, default=90)
+    parser.add_argument("--settle", type=int, default=5000, help="ms to wait for a returned promise")
     parser.add_argument("--variant", default="fuzzing", help="Grizzly prefs template variant")
     parser.add_argument("--dump", type=Path, help="also write the raw verdicts as JSON here")
+    parser.add_argument(
+        "--browser-log",
+        type=Path,
+        help="capture the browser's own stdout/stderr here; a page that never reports usually crashed",
+    )
+    parser.add_argument("--headless", action="store_true", help="run without a window (for crash isolation)")
     args = parser.parse_args()
 
     expressions = json.loads(Path(args.expressions).read_text(encoding="utf-8"))
@@ -122,7 +164,7 @@ def main() -> int:
     template = PrefPicker.load_template(PrefPicker.lookup_template("browser-fuzzing.yml"))
     template.create_prefsjs(args.profile / "prefs.js", variant=args.variant)
 
-    rows = collect(expressions, args.firefox, args.profile, args.timeout)
+    rows = collect(expressions, args.firefox, args.profile, args.timeout, args.settle, args.browser_log, args.headless)
     if rows is None:
         return 1
     if args.dump:

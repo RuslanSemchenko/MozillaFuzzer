@@ -42,10 +42,11 @@ def _load_domato():
 
 
 def _load_by_path(name: str, path: Path):
-    """Load a Domato sub-generator under a private module name.
+    """Load a Domato helper under a private module name.
 
-    Each API directory ships its own ``generator.py``; importing them normally
-    would collide with the root ``generator`` module already in sys.modules.
+    Importing by path keeps it from colliding with the root ``generator``
+    module already in sys.modules and avoids depending on ``domato`` being a
+    package.
     """
     spec = importlib.util.spec_from_file_location(name, str(path))
     module = importlib.util.module_from_spec(spec)
@@ -105,12 +106,12 @@ class DomatoAdapter(Adapter):
         ones: sharing one Grammar object would merge their <line> pools and
         dilute each API's code, and their !lineguard/!varformat directives would
         fight over the settings of the combined object."""
-        canvas = _parse_grammar(self._gen, DOMATO_DIR / "canvas" / "canvas.txt")
-        webgl = _parse_grammar(self._gen, DOMATO_DIR / "webgl" / "webgl.txt")
+        canvas = _parse_grammar(self._gen, DOMATO_DIR / "rules" / "canvas.txt")
+        webgl = _parse_grammar(self._gen, DOMATO_DIR / "rules" / "webgl.txt")
         self._webgpu_tools = _load_by_path(
-            "_domato_webgpu", DOMATO_DIR / "webgpu" / "generator.py"
+            "_domato_webgpu", DOMATO_DIR / "wgsl_grammar.py"
         )
-        shaders_dir = DOMATO_DIR / "webgpu" / "wgsl"
+        shaders_dir = DOMATO_DIR / "rules" / "wgsl"
         self._shader_sources = tuple(
             sorted(path.read_text(encoding="utf-8", errors="replace") for path in shaders_dir.glob("*.wgsl"))
         )
@@ -130,10 +131,12 @@ class DomatoAdapter(Adapter):
         extra = (
             self._webgpu_tools.parse_entrypoints(shaders)
             + "\n"
+            + self._webgpu_tools.parse_stage_descriptors(shaders)
+            + "\n"
             + self._webgpu_tools.parse_bindings(shaders)
             + "\n"
         )
-        grammar = _parse_grammar(self._gen, DOMATO_DIR / "webgpu" / "webgpu.txt", extra)
+        grammar = _parse_grammar(self._gen, DOMATO_DIR / "rules" / "webgpu.txt", extra)
         return grammar, shaders
 
     def generate(self, testcase: TestCase, server_map: ServerMap) -> None:

@@ -62,7 +62,19 @@ def add_html_ids(matchobj, ctx):
         ctx[ctr_key] += 1
         varname = '%s%05d' % (prefix, ctx[ctr_key])
         ctx['htmlvars'].append({'name': varname, 'type': tagtype})
-        ctx['htmlvargen'] += '/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname + ' = document.getElementById(\"' + varname + '\"); //' + tagtype + '\n'
+        # The parser drops or relocates a tag that the surrounding insertion
+        # mode does not allow (svg inside select, tr outside table, anything
+        # inside template), and then getElementById returns null: every rule
+        # that reads a member off that variable throws. The fallback keeps the
+        # typed receiver alive even when the markup did not survive parsing.
+        if prefix == 'svgvar':
+            fallback = 'document.createElementNS("http://www.w3.org/2000/svg", "' + tagname + '")'
+        elif prefix == 'mathmlvar':
+            fallback = 'document.createElementNS("http://www.w3.org/1998/Math/MathML", "' + tagname + '")'
+        else:
+            fallback = 'document.createElement("' + tagname + '")'
+        ctx['htmlvargen'] += ('/* newvar{' + varname + ':' + tagtype + '} */ var ' + varname +
+                              ' = document.getElementById(\"' + varname + '\") || ' + fallback + '; //' + tagtype + '\n')
         return matchobj.group(0) + 'id=\"' + varname + '\" '
     return matchobj.group(0)
 
@@ -70,7 +82,10 @@ def add_html_ids(matchobj, ctx):
 def generate_function_body(jsgrammar, htmlctx, num_lines):
     js = ''
     js += 'var fuzzervars = {};\n\n'
-    js += "SetVariable(fuzzervars, window, 'Window');\nSetVariable(fuzzervars, document, 'Document');\nSetVariable(fuzzervars, document.body.firstChild, 'Element');\n\n"
+    # document.body, not body.firstChild: the first child is a whitespace text
+    # node in the harness, and every Element rule reading a Text receiver throws.
+    js += ("SetVariable(fuzzervars, window, 'Window');\nSetVariable(fuzzervars, document, 'Document');\n"
+           "SetVariable(fuzzervars, document.body || document.documentElement, 'Element');\n\n")
     js += '//beginjs\n'
     js += htmlctx['htmlvargen']
     js += jsgrammar._generate_code(num_lines, htmlctx['htmlvars'])

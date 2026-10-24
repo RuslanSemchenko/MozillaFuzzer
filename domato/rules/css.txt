@@ -1,3119 +1,374 @@
-#   Copyright 2017 Google Inc. All Rights Reserved.
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
+#   Firefox CSS grammar. The generator asks for <rules>, so that symbol is the
+#   live entry point; <root> exists for standalone Domato runs.
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-
+#   '#' is the Domato comment marker and is cut from every rule line before
+#   parsing, so every selector id and hex colour is written with <hash>.
 
 !include common.txt
 
-<element p=0.5> = <tagname>
-<element p=0.3> = <svgtagname>
-<element p=0.1> = <mathmltagname>
-
-<element> = <element>:first-child
-<element> = <element>::first-letter
-<element> = <element>::first-line
-<element> = <element>::before
-<element> = <element>::after
-
-#todo better selectors
-<selector> = <selector>, <selector>
-<selector> = <element>
-<selector> = .<class>
-<selector> = <hash><elementid>
-<selector> = <selector2>
-
-<selector2> = *
-<selector2> = ::selection
-<selector2> = <element> <element>
-<selector2> = <element><gt><element>
-<selector2> = <element>+<element>
-<selector2> = <element>~<element>
-<selector2> = <element>::after
-<selector2> = <element>::before
-<selector2> = <element>:first-child
-<selector2> = <element>::first-letter
-<selector2> = <element>::first-line
-<selector2> = <element>:first-of-type
-<selector2> = <element>:last-child
-<selector2> = <element>:last-of-type
-<selector2> = :not(<element>)
-<selector2> = <element>:nth-child(<fuzzint>)
-<selector2> = <element>:nth-last-child(2)
-<selector2> = <element>:nth-last-of-type(2)
-<selector2> = <element>:nth-of-type(2)
-<selector2> = <element>:only-of-type
-<selector2> = <element>:only-child
-<selector2> = a:link
-<selector2> = a:active
-<selector2> = a:hover
-<selector2> = a:visited
-<selector2> = input:checked
-<selector2> = input:disabled
-<selector2> = input:enabled
-<selector2> = input:focus
-<selector2> = input:in-range
-<selector2> = input:invalid
-<selector2> = input:optional
-<selector2> = input:out-of-range
-<selector2> = input:read-only
-<selector2> = input:read-write
-<selector2> = input:required
-<selector2> = input:valid
-<selector2> = :root
-<selector2> = <element>:empty
-<selector2> = <element>:has(<element>)
-<selector2> = <element>:is(<selector>, <selector>)
-<selector2> = <element>:where(<selector>, <selector>)
-<selector2> = <element>:focus-visible
-<selector2> = <element>:focus-within
-<selector2> = <element>:modal
-<selector2> = <element>:fullscreen
-<selector2> = <element>:defined
-<selector2> = <element>:user-valid
-<selector2> = <element>:user-invalid
-<selector2> = <element>:dir(rtl)
-<selector2> = <element>:lang(en)
-<selector2> = <element>:target
-<selector2> = <element>:checked
-<selector2> = <element>:indeterminate
-<selector2> = <element>:placeholder-shown
-<selector2> = <element>:popover-open
-<selector2> = <element>:nth-child(2n+1)
-<selector2> = <element>:nth-last-child(2n)
-<selector2> = <element>:has(><element>)
-<selector2> = :is(<element>, <element>):not(:first-child)
-<selector2> = <element>:nth-child(2n+1 of .<class>)
-<selector2> = <element>:nth-last-child(odd)
-<selector2> = <element>:nth-of-type(even)
-<selector2> = <element>:host
-<selector2> = <element>:host(<element>)
-<selector2> = ::view-transition
-<selector2> = ::view-transition-group(root)
-<selector2> = ::view-transition-old(root)
-<selector2> = ::view-transition-new(root)
-
-#at rules
-<fontfacerule> = @font-face
-
-#todo all rules
-<rule p=0.95> = <selector> { <declaration> }
-<rule> = <fontfacerule> { <fontfacedeclaration> }
-<rule p=0.08> = @media <cssmediaquery> { <selector> { <declaration5> } }
-<rule p=0.08> = @supports <csssupportscondition> { <selector> { <declaration5> } }
-<rule p=0.08> = @container <csscontainername> (<csscontainercondition>) { <selector> { <declaration5> } }
-<rule p=0.06> = @layer <csslayername> { <selector> { <declaration5> } }
-<rule p=0.06> = @scope (<selector>) to (<selector>) { <selector> { <declaration5> } }
-<rule p=0.04> = @starting-style { <selector> { <declaration5> } }
-<rule p=0.04> = @keyframes fuzz-keyframes { from { <csskeyframedeclaration> } to { <csskeyframedeclaration> } }
-<rule p=0.03> = @property --fuzz-number { syntax: "<lt>number<gt>"; inherits: false; initial-value: <fuzzfloat>; }
-
-<cssmediaquery> = screen and (min-width: <fuzzint min=1 max=1200>px)
-<cssmediaquery> = (prefers-reduced-motion: reduce)
-<cssmediaquery> = (prefers-color-scheme: dark)
-<cssmediaquery> = print
-
-<csssupportscondition> = (display: grid)
-<csssupportscondition> = (display: flex)
-<csssupportscondition> = (selector(:has(*)))
-<csssupportscondition> = (container-type: inline-size)
-
-<csscontainername> = card
-<csscontainername> = sidebar
-<csscontainername> = layout
-
-<csscontainercondition> = min-width: <fuzzint min=1 max=1200>px
-<csscontainercondition> = max-width: <fuzzint min=1 max=1200>px
-<csscontainercondition> = orientation: landscape
-<csscontainercondition> = orientation: portrait
-
-<csslayername> = base
-<csslayername> = components
-<csslayername> = overrides
-
-<csskeyframedeclaration> = opacity: <float min=0 max=1>; transform: translateX(<fuzzint>px);
-<csskeyframedeclaration> = opacity: <float min=0 max=1>; color: <color>;
-<csskeyframedeclaration> = transform: rotate(<fuzzint min=0 max=360>deg) scale(<float min=0 max=2>);
-
-<fontfacedeclaration> = <fontfacedescriptor>;
-<fontfacedeclaration> = <fontfacedescriptor>; <fontfacedescriptor>; <fontfacedescriptor>;
-<fontfacedeclaration> = <fontfacedescriptor>; <fontfacedescriptor>; <fontfacedescriptor>; <fontfacedescriptor>; <fontfacedescriptor>; <fontfacedescriptor>;
-
-<fontfacedescriptor> = ascent-override: <cssproperty_ascent-override>
-<fontfacedescriptor> = descent-override: <cssproperty_descent-override>
-<fontfacedescriptor> = font-display: <cssproperty_font-display>
-<fontfacedescriptor> = font-family: <cssproperty_font-family>
-<fontfacedescriptor> = font-stretch: <cssproperty_font-stretch>
-<fontfacedescriptor> = font-style: <cssproperty_font-style>
-<fontfacedescriptor> = font-weight: <cssproperty_font-weight>
-<fontfacedescriptor> = line-gap-override: <cssproperty_line-gap-override>
-<fontfacedescriptor> = size-adjust: <cssproperty_size-adjust>
-<fontfacedescriptor> = src: <cssproperty_font-src>
-<fontfacedescriptor> = unicode-range: <cssproperty_unicode-range>
-<fontfacedescriptor> = font-variant: <cssproperty_font-variant>
-
-<rules root=true> = <rule10><rule10><rule10><rule10><rule10>
-<rule10> = <rulenl><rulenl><rulenl><rulenl><rulenl><rulenl><rulenl><rulenl><rulenl><rulenl>
-<rulenl> = <rule><newline>
-
-<declaration> = <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>
-
-<declaration5> = <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>; <cssproperty>
-
-<cssvar> = --cssvara
-<cssvar> = --cssvarb
-<cssvar> = --cssvarc
-<cssvar> = --cssvard
-
-<cssproperty> = <cssvar>: <cssproperty_value>
-<cssproperty> = <cssproperty_name>: var(<cssvar>)
-
-# Automatically extracted
-
-<cssproperty_name> = -ms-flex-align
-<cssproperty_name> = -ms-font-feature-settings
-<cssproperty_name> = -ms-text-combine-horizontal
-<cssproperty_name> = -ms-user-select
-<cssproperty_name> = -webkit-align-content
-<cssproperty_name> = -webkit-align-items
-<cssproperty_name> = -webkit-align-self
-<cssproperty_name> = -webkit-animation
-<cssproperty_name> = -webkit-animation-delay
-<cssproperty_name> = -webkit-animation-direction
-<cssproperty_name> = -webkit-animation-duration
-<cssproperty_name> = -webkit-animation-fill-mode
-<cssproperty_name> = -webkit-animation-iteration-count
-<cssproperty_name> = -webkit-animation-name
-<cssproperty_name> = -webkit-animation-play-state
-<cssproperty_name> = -webkit-animation-timing-function
-<cssproperty_name> = -webkit-app-region
-<cssproperty_name> = -webkit-appearance
-<cssproperty_name> = -webkit-backface-visibility
-<cssproperty_name> = -webkit-background-clip
-<cssproperty_name> = -webkit-background-origin
-<cssproperty_name> = -webkit-background-size
-<cssproperty_name> = -webkit-border-after
-<cssproperty_name> = -webkit-border-after-color
-<cssproperty_name> = -webkit-border-after-width
-<cssproperty_name> = -webkit-border-before
-<cssproperty_name> = -webkit-border-before-color
-<cssproperty_name> = -webkit-border-before-style
-<cssproperty_name> = -webkit-border-before-width
-<cssproperty_name> = -webkit-border-bottom-left-radius
-<cssproperty_name> = -webkit-border-bottom-right-radius
-<cssproperty_name> = -webkit-border-end
-<cssproperty_name> = -webkit-border-end-color
-<cssproperty_name> = -webkit-border-end-width
-<cssproperty_name> = -webkit-border-image
-<cssproperty_name> = -webkit-border-radius
-<cssproperty_name> = -webkit-border-start
-<cssproperty_name> = -webkit-border-start-color
-<cssproperty_name> = -webkit-border-start-width
-<cssproperty_name> = -webkit-border-top-left-radius
-<cssproperty_name> = -webkit-border-top-right-radius
-<cssproperty_name> = -webkit-border-vertical-spacing
-<cssproperty_name> = -webkit-box-align
-<cssproperty_name> = -webkit-box-decoration-break
-<cssproperty_name> = -webkit-box-direction
-<cssproperty_name> = -webkit-box-flex
-<cssproperty_name> = -webkit-box-flex-group
-<cssproperty_name> = -webkit-box-lines
-<cssproperty_name> = -webkit-box-ordinal-group
-<cssproperty_name> = -webkit-box-orient
-<cssproperty_name> = -webkit-box-pack
-<cssproperty_name> = -webkit-box-reflect
-<cssproperty_name> = -webkit-box-shadow
-<cssproperty_name> = -webkit-box-sizing
-<cssproperty_name> = -webkit-clip-path
-<cssproperty_name> = -webkit-color-correction
-<cssproperty_name> = -webkit-column-break-after
-<cssproperty_name> = -webkit-column-break-before
-<cssproperty_name> = -webkit-column-break-inside
-<cssproperty_name> = -webkit-column-count
-<cssproperty_name> = -webkit-column-fill
-<cssproperty_name> = -webkit-column-gap
-<cssproperty_name> = -webkit-column-rule
-<cssproperty_name> = -webkit-column-rule-color
-<cssproperty_name> = -webkit-column-rule-style
-<cssproperty_name> = -webkit-column-rule-width
-<cssproperty_name> = -webkit-column-span
-<cssproperty_name> = -webkit-column-width
-<cssproperty_name> = -webkit-columns
-<cssproperty_name> = -webkit-direction
-<cssproperty_name> = -webkit-filter
-<cssproperty_name> = -webkit-flex
-<cssproperty_name> = -webkit-flex-direction
-<cssproperty_name> = -webkit-flex-wrap
-<cssproperty_name> = -webkit-flow-from
-<cssproperty_name> = -webkit-flow-into
-<cssproperty_name> = -webkit-font-feature-settings
-<cssproperty_name> = -webkit-font-smoothing
-<cssproperty_name> = -webkit-highlight
-<cssproperty_name> = -webkit-hyphenate-character
-<cssproperty_name> = -webkit-hyphens
-<cssproperty_name> = -webkit-justify-content
-<cssproperty_name> = -webkit-line-break
-<cssproperty_name> = -webkit-line-clamp
-<cssproperty_name> = -webkit-locale
-<cssproperty_name> = -webkit-logical-height
-<cssproperty_name> = -webkit-logical-width
-<cssproperty_name> = -webkit-margin-after
-<cssproperty_name> = -webkit-margin-after-collapse
-<cssproperty_name> = -webkit-margin-before
-<cssproperty_name> = -webkit-margin-before-collapse
-<cssproperty_name> = -webkit-margin-bottom-collapse
-<cssproperty_name> = -webkit-margin-collapse
-<cssproperty_name> = -webkit-margin-end
-<cssproperty_name> = -webkit-margin-start
-<cssproperty_name> = -webkit-margin-top-collapse
-<cssproperty_name> = -webkit-marquee-speed
-<cssproperty_name> = -webkit-mask
-<cssproperty_name> = -webkit-mask-box-image
-<cssproperty_name> = -webkit-mask-box-image-outset
-<cssproperty_name> = -webkit-mask-box-image-repeat
-<cssproperty_name> = -webkit-mask-box-image-slice
-<cssproperty_name> = -webkit-mask-box-image-source
-<cssproperty_name> = -webkit-mask-box-image-width
-<cssproperty_name> = -webkit-mask-clip
-<cssproperty_name> = -webkit-mask-composite
-<cssproperty_name> = -webkit-mask-image
-<cssproperty_name> = -webkit-mask-origin
-<cssproperty_name> = -webkit-mask-position
-<cssproperty_name> = -webkit-mask-repeat
-<cssproperty_name> = -webkit-mask-repeat-y
-<cssproperty_name> = -webkit-mask-size
-<cssproperty_name> = -webkit-min-logical-height
-<cssproperty_name> = -webkit-nbsp-mode
-<cssproperty_name> = -webkit-opacity
-<cssproperty_name> = -webkit-overflow-scrolling
-<cssproperty_name> = -webkit-padding-after
-<cssproperty_name> = -webkit-padding-before
-<cssproperty_name> = -webkit-padding-end
-<cssproperty_name> = -webkit-padding-start
-<cssproperty_name> = -webkit-perspective
-<cssproperty_name> = -webkit-perspective-origin
-<cssproperty_name> = -webkit-perspective-origin-x
-<cssproperty_name> = -webkit-perspective-origin-y
-<cssproperty_name> = -webkit-print-color-adjust
-<cssproperty_name> = -webkit-rtl-ordering
-<cssproperty_name> = -webkit-ruby-position
-<cssproperty_name> = -webkit-shape-margin
-<cssproperty_name> = -webkit-shape-outside
-<cssproperty_name> = -webkit-tap-highlight-color
-<cssproperty_name> = -webkit-text-combine
-<cssproperty_name> = -webkit-text-decorations-in-effect
-<cssproperty_name> = -webkit-text-emphasis
-<cssproperty_name> = -webkit-text-emphasis-color
-<cssproperty_name> = -webkit-text-emphasis-position
-<cssproperty_name> = -webkit-text-emphasis-style
-<cssproperty_name> = -webkit-text-fill-color
-<cssproperty_name> = -webkit-text-orientation
-<cssproperty_name> = -webkit-text-security
-<cssproperty_name> = -webkit-text-stroke
-<cssproperty_name> = -webkit-text-stroke-color
-<cssproperty_name> = -webkit-text-stroke-width
-<cssproperty_name> = -webkit-transform
-<cssproperty_name> = -webkit-transform-origin
-<cssproperty_name> = -webkit-transform-style
-<cssproperty_name> = -webkit-transition
-<cssproperty_name> = -webkit-transition-delay
-<cssproperty_name> = -webkit-transition-duration
-<cssproperty_name> = -webkit-transition-property
-<cssproperty_name> = -webkit-transition-timing-function
-<cssproperty_name> = -webkit-user-drag
-<cssproperty_name> = -webkit-user-modify
-<cssproperty_name> = -webkit-user-select
-<cssproperty_name> = -webkit-wrap-flow
-<cssproperty_name> = -webkit-writing-mode
-<cssproperty_name> = align-content
-<cssproperty_name> = align-items
-<cssproperty_name> = align-self
-<cssproperty_name> = alignx
-<cssproperty_name> = animation
-<cssproperty_name> = animation-delay
-<cssproperty_name> = animation-direction
-<cssproperty_name> = animation-duration
-<cssproperty_name> = animation-fill-mode
-<cssproperty_name> = animation-iteration-count
-<cssproperty_name> = animation-name
-<cssproperty_name> = animation-play-state
-<cssproperty_name> = animation-timing-function
-<cssproperty_name> = backdrop-filter
-<cssproperty_name> = backface-visibility
-<cssproperty_name> = background
-<cssproperty_name> = background-attachment
-<cssproperty_name> = background-blend-mode
-<cssproperty_name> = background-clip
-<cssproperty_name> = background-color
-<cssproperty_name> = background-image
-<cssproperty_name> = background-origin
-<cssproperty_name> = background-position
-<cssproperty_name> = background-position-x
-<cssproperty_name> = background-repeat
-<cssproperty_name> = background-repeat-x
-<cssproperty_name> = background-repeat-y
-<cssproperty_name> = background-size
-<cssproperty_name> = baseline-shift
-<cssproperty_name> = border
-<cssproperty_name> = border-bottom
-<cssproperty_name> = border-bottom-color
-<cssproperty_name> = border-bottom-left-radius
-<cssproperty_name> = border-bottom-right-radius
-<cssproperty_name> = border-bottom-style
-<cssproperty_name> = border-bottom-width
-<cssproperty_name> = border-collapse
-<cssproperty_name> = border-color
-<cssproperty_name> = border-image
-<cssproperty_name> = border-image-outset
-<cssproperty_name> = border-image-repeat
-<cssproperty_name> = border-image-slice
-<cssproperty_name> = border-image-source
-<cssproperty_name> = border-image-width
-<cssproperty_name> = border-left
-<cssproperty_name> = border-left-color
-<cssproperty_name> = border-left-style
-<cssproperty_name> = border-left-width
-<cssproperty_name> = border-radius
-<cssproperty_name> = border-right
-<cssproperty_name> = border-right-color
-<cssproperty_name> = border-right-style
-<cssproperty_name> = border-right-width
-<cssproperty_name> = border-size
-<cssproperty_name> = border-spacing
-<cssproperty_name> = border-style
-<cssproperty_name> = border-top
-<cssproperty_name> = border-top-color
-<cssproperty_name> = border-top-left-radius
-<cssproperty_name> = border-top-right-radius
-<cssproperty_name> = border-top-style
-<cssproperty_name> = border-top-width
-<cssproperty_name> = border-width
-<cssproperty_name> = bottom
-<cssproperty_name> = box-align
-<cssproperty_name> = box-decoration-break
-<cssproperty_name> = box-direction
-<cssproperty_name> = box-flex
-<cssproperty_name> = box-flex-group
-<cssproperty_name> = box-ordinal-group
-<cssproperty_name> = box-orient
-<cssproperty_name> = box-pack
-<cssproperty_name> = box-reflect
-<cssproperty_name> = box-shadow
-<cssproperty_name> = box-sizing
-<cssproperty_name> = break-after
-<cssproperty_name> = break-before
-<cssproperty_name> = break-inside
-<cssproperty_name> = caption-side
-<cssproperty_name> = cellpadding
-<cssproperty_name> = cellspacing
-<cssproperty_name> = clear
-<cssproperty_name> = clip
-<cssproperty_name> = clip-path
-<cssproperty_name> = color
-<cssproperty_name> = color-interpolation-filters
-<cssproperty_name> = color-profile
-<cssproperty_name> = column-break-after
-<cssproperty_name> = column-break-before
-<cssproperty_name> = column-count
-<cssproperty_name> = column-fill
-<cssproperty_name> = column-gap
-<cssproperty_name> = column-rule
-<cssproperty_name> = column-rule-style
-<cssproperty_name> = column-span
-<cssproperty_name> = column-width
-<cssproperty_name> = columns
-<cssproperty_name> = contain
-<cssproperty_name> = content
-<cssproperty_name> = counter-increment
-<cssproperty_name> = counter-reset
-<cssproperty_name> = css-float
-<cssproperty_name> = cursor
-<cssproperty_name> = cx
-<cssproperty_name> = cy
-<cssproperty_name> = direction
-<cssproperty_name> = display
-<cssproperty_name> = dominant-baseline
-<cssproperty_name> = empty-cells
-<cssproperty_name> = fill
-<cssproperty_name> = fill-opacity
-<cssproperty_name> = fill-rule
-<cssproperty_name> = filter
-<cssproperty_name> = flex
-<cssproperty_name> = flex-basis
-<cssproperty_name> = flex-direction
-<cssproperty_name> = flex-flow
-<cssproperty_name> = flex-grow
-<cssproperty_name> = flex-shrink
-<cssproperty_name> = flex-wrap
-<cssproperty_name> = float
-<cssproperty_name> = flood-color
-<cssproperty_name> = flood-opacity
-<cssproperty_name> = font
-<cssproperty_name> = font-face
-<cssproperty_name> = font-family
-<cssproperty_name> = font-feature-settings
-<cssproperty_name> = font-kerning
-<cssproperty_name> = font-size
-<cssproperty_name> = font-size-adjust
-<cssproperty_name> = font-stretch
-<cssproperty_name> = font-style
-<cssproperty_name> = font-variant
-<cssproperty_name> = font-variant-caps
-<cssproperty_name> = font-variant-ligatures
-<cssproperty_name> = font-vendor
-<cssproperty_name> = font-weight
-<cssproperty_name> = gap
-<cssproperty_name> = grid
-<cssproperty_name> = grid-area
-<cssproperty_name> = grid-auto-columns
-<cssproperty_name> = grid-auto-flow
-<cssproperty_name> = grid-auto-rows
-<cssproperty_name> = grid-column
-<cssproperty_name> = grid-column-end
-<cssproperty_name> = grid-column-gap
-<cssproperty_name> = grid-column-start
-<cssproperty_name> = grid-gap
-<cssproperty_name> = grid-row
-<cssproperty_name> = grid-row-end
-<cssproperty_name> = grid-row-gap
-<cssproperty_name> = grid-row-start
-<cssproperty_name> = grid-template
-<cssproperty_name> = grid-template-areas
-<cssproperty_name> = grid-template-columns
-<cssproperty_name> = grid-template-rows
-<cssproperty_name> = height
-<cssproperty_name> = hyphens
-<cssproperty_name> = image-orientation
-<cssproperty_name> = image-rendering
-<cssproperty_name> = isolation
-<cssproperty_name> = justify-content
-<cssproperty_name> = justify-items
-<cssproperty_name> = justify-self
-<cssproperty_name> = kerning
-<cssproperty_name> = left
-<cssproperty_name> = letter-spacing
-<cssproperty_name> = lighting-color
-<cssproperty_name> = line-break
-<cssproperty_name> = line-height
-<cssproperty_name> = list-style
-<cssproperty_name> = list-style-image
-<cssproperty_name> = list-style-position
-<cssproperty_name> = list-style-type
-<cssproperty_name> = margin
-<cssproperty_name> = margin-bottom
-<cssproperty_name> = margin-left
-<cssproperty_name> = margin-right
-<cssproperty_name> = margin-top
-<cssproperty_name> = marker
-<cssproperty_name> = marker-mid
-<cssproperty_name> = mask-source-type
-<cssproperty_name> = max-height
-<cssproperty_name> = max-width
-<cssproperty_name> = max-zoom
-<cssproperty_name> = min-height
-<cssproperty_name> = min-width
-<cssproperty_name> = min-zoom
-<cssproperty_name> = mix-blend-mode
-<cssproperty_name> = motion
-<cssproperty_name> = motion-offset
-<cssproperty_name> = motion-path
-<cssproperty_name> = motion-rotation
-<cssproperty_name> = mso-background-source
-<cssproperty_name> = mso-bidi-font-size
-<cssproperty_name> = mso-border-alt
-<cssproperty_name> = mso-border-left-alt
-<cssproperty_name> = mso-border-top-alt
-<cssproperty_name> = mso-data-placement
-<cssproperty_name> = mso-displayed-decimal-separator
-<cssproperty_name> = mso-displayed-thousand-separator
-<cssproperty_name> = mso-fareast-font-family
-<cssproperty_name> = mso-font-charset
-<cssproperty_name> = mso-font-kerning
-<cssproperty_name> = mso-generic-font-family
-<cssproperty_name> = mso-height-source
-<cssproperty_name> = mso-ignore
-<cssproperty_name> = mso-number-format
-<cssproperty_name> = mso-outline-level
-<cssproperty_name> = mso-padding-alt
-<cssproperty_name> = mso-pagination
-<cssproperty_name> = mso-pattern
-<cssproperty_name> = mso-protection
-<cssproperty_name> = mso-rotate
-<cssproperty_name> = mso-style-id
-<cssproperty_name> = mso-style-name
-<cssproperty_name> = mso-style-next
-<cssproperty_name> = mso-style-parent
-<cssproperty_name> = mso-width-alt
-<cssproperty_name> = mso-width-source
-<cssproperty_name> = object-fit
-<cssproperty_name> = object-position
-<cssproperty_name> = offset
-<cssproperty_name> = offset-anchor
-<cssproperty_name> = offset-distance
-<cssproperty_name> = offset-path
-<cssproperty_name> = offset-position
-<cssproperty_name> = offset-rotation
-<cssproperty_name> = opacity
-<cssproperty_name> = order
-<cssproperty_name> = orientation
-<cssproperty_name> = orphans
-<cssproperty_name> = outline
-<cssproperty_name> = outline-bottom
-<cssproperty_name> = outline-color
-<cssproperty_name> = outline-offset
-<cssproperty_name> = outline-style
-<cssproperty_name> = outline-width
-<cssproperty_name> = overflow
-<cssproperty_name> = overflow-anchor
-<cssproperty_name> = overflow-wrap
-<cssproperty_name> = overflow-x
-<cssproperty_name> = overflow-y
-<cssproperty_name> = padding
-<cssproperty_name> = padding-bottom
-<cssproperty_name> = padding-left
-<cssproperty_name> = padding-right
-<cssproperty_name> = padding-top
-<cssproperty_name> = page
-<cssproperty_name> = page-break-after
-<cssproperty_name> = page-break-before
-<cssproperty_name> = page-break-inside
-<cssproperty_name> = perspective
-<cssproperty_name> = perspective-origin
-<cssproperty_name> = pointer-events
-<cssproperty_name> = position
-<cssproperty_name> = prince-hyphens
-<cssproperty_name> = quotes
-<cssproperty_name> = resize
-<cssproperty_name> = right
-<cssproperty_name> = rotate
-<cssproperty_name> = rotation
-<cssproperty_name> = rotation-code
-<cssproperty_name> = rx
-<cssproperty_name> = ry
-<cssproperty_name> = scale
-<cssproperty_name> = scroll-behavior
-<cssproperty_name> = scroll-snap-coordinate
-<cssproperty_name> = scroll-snap-destination
-<cssproperty_name> = scroll-snap-points-x
-<cssproperty_name> = scroll-snap-points-y
-<cssproperty_name> = scroll-snap-type
-<cssproperty_name> = shape-image-threshold
-<cssproperty_name> = shape-inside
-<cssproperty_name> = shape-margin
-<cssproperty_name> = shape-outside
-<cssproperty_name> = snap-height
-<cssproperty_name> = src
-<cssproperty_name> = stop-color
-<cssproperty_name> = stop-opacity
-<cssproperty_name> = stroke
-<cssproperty_name> = stroke-dasharray
-<cssproperty_name> = stroke-dashoffset
-<cssproperty_name> = stroke-linecap
-<cssproperty_name> = stroke-linejoin
-<cssproperty_name> = stroke-miterlimit
-<cssproperty_name> = stroke-opacity
-<cssproperty_name> = stroke-width
-<cssproperty_name> = tab-size
-<cssproperty_name> = table-layout
-<cssproperty_name> = text-align
-<cssproperty_name> = text-align-last
-<cssproperty_name> = text-anchor
-<cssproperty_name> = text-combine-upright
-<cssproperty_name> = text-decoration
-<cssproperty_name> = text-decoration-color
-<cssproperty_name> = text-decoration-line
-<cssproperty_name> = text-decoration-style
-<cssproperty_name> = text-decoration-upright
-<cssproperty_name> = text-indent
-<cssproperty_name> = text-justify
-<cssproperty_name> = text-orientation
-<cssproperty_name> = text-overflow
-<cssproperty_name> = text-rendering
-<cssproperty_name> = text-shadow
-<cssproperty_name> = text-transform
-<cssproperty_name> = text-underline
-<cssproperty_name> = text-underline-position
-<cssproperty_name> = top
-<cssproperty_name> = touch-action
-<cssproperty_name> = transform
-<cssproperty_name> = transform-origin
-<cssproperty_name> = transform-style
-<cssproperty_name> = transition
-<cssproperty_name> = transition-delay
-<cssproperty_name> = transition-duration
-<cssproperty_name> = transition-properties
-<cssproperty_name> = transition-property
-<cssproperty_name> = transition-timing-function
-<cssproperty_name> = translate
-<cssproperty_name> = unicode-bidi
-<cssproperty_name> = user-select
-<cssproperty_name> = user-zoom
-<cssproperty_name> = vector-effect
-<cssproperty_name> = vertical-align
-<cssproperty_name> = visibility
-<cssproperty_name> = weight
-<cssproperty_name> = white
-<cssproperty_name> = white-space
-<cssproperty_name> = whitespace
-<cssproperty_name> = widows
-<cssproperty_name> = width
-<cssproperty_name> = will-change
-<cssproperty_name> = word-break
-<cssproperty_name> = word-space
-<cssproperty_name> = word-spacing
-<cssproperty_name> = word-wrap
-<cssproperty_name> = writing-mode
-<cssproperty_name> = z-index
-<cssproperty_name> = zoom
-
-<cssproperty_value> = <cssproperty_-ms-flex-align>
-<cssproperty_value> = <cssproperty_-ms-font-feature-settings>
-<cssproperty_value> = <cssproperty_-ms-text-combine-horizontal>
-<cssproperty_value> = <cssproperty_-ms-user-select>
-<cssproperty_value> = <cssproperty_-webkit-align-content>
-<cssproperty_value> = <cssproperty_-webkit-align-items>
-<cssproperty_value> = <cssproperty_-webkit-align-self>
-<cssproperty_value> = <cssproperty_-webkit-animation>
-<cssproperty_value> = <cssproperty_-webkit-animation-delay>
-<cssproperty_value> = <cssproperty_-webkit-animation-direction>
-<cssproperty_value> = <cssproperty_-webkit-animation-duration>
-<cssproperty_value> = <cssproperty_-webkit-animation-fill-mode>
-<cssproperty_value> = <cssproperty_-webkit-animation-iteration-count>
-<cssproperty_value> = <cssproperty_-webkit-animation-name>
-<cssproperty_value> = <cssproperty_-webkit-animation-play-state>
-<cssproperty_value> = <cssproperty_-webkit-animation-timing-function>
-<cssproperty_value> = <cssproperty_-webkit-app-region>
-<cssproperty_value> = <cssproperty_-webkit-appearance>
-<cssproperty_value> = <cssproperty_-webkit-backface-visibility>
-<cssproperty_value> = <cssproperty_-webkit-background-clip>
-<cssproperty_value> = <cssproperty_-webkit-background-origin>
-<cssproperty_value> = <cssproperty_-webkit-background-size>
-<cssproperty_value> = <cssproperty_-webkit-border-after>
-<cssproperty_value> = <cssproperty_-webkit-border-after-color>
-<cssproperty_value> = <cssproperty_-webkit-border-after-width>
-<cssproperty_value> = <cssproperty_-webkit-border-before>
-<cssproperty_value> = <cssproperty_-webkit-border-before-color>
-<cssproperty_value> = <cssproperty_-webkit-border-before-style>
-<cssproperty_value> = <cssproperty_-webkit-border-before-width>
-<cssproperty_value> = <cssproperty_-webkit-border-bottom-left-radius>
-<cssproperty_value> = <cssproperty_-webkit-border-bottom-right-radius>
-<cssproperty_value> = <cssproperty_-webkit-border-end>
-<cssproperty_value> = <cssproperty_-webkit-border-end-color>
-<cssproperty_value> = <cssproperty_-webkit-border-end-width>
-<cssproperty_value> = <cssproperty_-webkit-border-image>
-<cssproperty_value> = <cssproperty_-webkit-border-radius>
-<cssproperty_value> = <cssproperty_-webkit-border-start>
-<cssproperty_value> = <cssproperty_-webkit-border-start-color>
-<cssproperty_value> = <cssproperty_-webkit-border-start-width>
-<cssproperty_value> = <cssproperty_-webkit-border-top-left-radius>
-<cssproperty_value> = <cssproperty_-webkit-border-top-right-radius>
-<cssproperty_value> = <cssproperty_-webkit-border-vertical-spacing>
-<cssproperty_value> = <cssproperty_-webkit-box-align>
-<cssproperty_value> = <cssproperty_-webkit-box-decoration-break>
-<cssproperty_value> = <cssproperty_-webkit-box-direction>
-<cssproperty_value> = <cssproperty_-webkit-box-flex>
-<cssproperty_value> = <cssproperty_-webkit-box-flex-group>
-<cssproperty_value> = <cssproperty_-webkit-box-lines>
-<cssproperty_value> = <cssproperty_-webkit-box-ordinal-group>
-<cssproperty_value> = <cssproperty_-webkit-box-orient>
-<cssproperty_value> = <cssproperty_-webkit-box-pack>
-<cssproperty_value> = <cssproperty_-webkit-box-reflect>
-<cssproperty_value> = <cssproperty_-webkit-box-shadow>
-<cssproperty_value> = <cssproperty_-webkit-box-sizing>
-<cssproperty_value> = <cssproperty_-webkit-clip-path>
-<cssproperty_value> = <cssproperty_-webkit-color-correction>
-<cssproperty_value> = <cssproperty_-webkit-column-break-after>
-<cssproperty_value> = <cssproperty_-webkit-column-break-before>
-<cssproperty_value> = <cssproperty_-webkit-column-break-inside>
-<cssproperty_value> = <cssproperty_-webkit-column-count>
-<cssproperty_value> = <cssproperty_-webkit-column-fill>
-<cssproperty_value> = <cssproperty_-webkit-column-gap>
-<cssproperty_value> = <cssproperty_-webkit-column-rule>
-<cssproperty_value> = <cssproperty_-webkit-column-rule-color>
-<cssproperty_value> = <cssproperty_-webkit-column-rule-style>
-<cssproperty_value> = <cssproperty_-webkit-column-rule-width>
-<cssproperty_value> = <cssproperty_-webkit-column-span>
-<cssproperty_value> = <cssproperty_-webkit-column-width>
-<cssproperty_value> = <cssproperty_-webkit-columns>
-<cssproperty_value> = <cssproperty_-webkit-direction>
-<cssproperty_value> = <cssproperty_-webkit-filter>
-<cssproperty_value> = <cssproperty_-webkit-flex>
-<cssproperty_value> = <cssproperty_-webkit-flex-direction>
-<cssproperty_value> = <cssproperty_-webkit-flex-wrap>
-<cssproperty_value> = <cssproperty_-webkit-flow-from>
-<cssproperty_value> = <cssproperty_-webkit-flow-into>
-<cssproperty_value> = <cssproperty_-webkit-font-feature-settings>
-<cssproperty_value> = <cssproperty_-webkit-font-smoothing>
-<cssproperty_value> = <cssproperty_-webkit-highlight>
-<cssproperty_value> = <cssproperty_-webkit-hyphenate-character>
-<cssproperty_value> = <cssproperty_-webkit-hyphens>
-<cssproperty_value> = <cssproperty_-webkit-justify-content>
-<cssproperty_value> = <cssproperty_-webkit-line-break>
-<cssproperty_value> = <cssproperty_-webkit-line-clamp>
-<cssproperty_value> = <cssproperty_-webkit-locale>
-<cssproperty_value> = <cssproperty_-webkit-logical-height>
-<cssproperty_value> = <cssproperty_-webkit-logical-width>
-<cssproperty_value> = <cssproperty_-webkit-margin-after>
-<cssproperty_value> = <cssproperty_-webkit-margin-after-collapse>
-<cssproperty_value> = <cssproperty_-webkit-margin-before>
-<cssproperty_value> = <cssproperty_-webkit-margin-before-collapse>
-<cssproperty_value> = <cssproperty_-webkit-margin-bottom-collapse>
-<cssproperty_value> = <cssproperty_-webkit-margin-collapse>
-<cssproperty_value> = <cssproperty_-webkit-margin-end>
-<cssproperty_value> = <cssproperty_-webkit-margin-start>
-<cssproperty_value> = <cssproperty_-webkit-margin-top-collapse>
-<cssproperty_value> = <cssproperty_-webkit-marquee-speed>
-<cssproperty_value> = <cssproperty_-webkit-mask>
-<cssproperty_value> = <cssproperty_-webkit-mask-box-image>
-<cssproperty_value> = <cssproperty_-webkit-mask-box-image-outset>
-<cssproperty_value> = <cssproperty_-webkit-mask-box-image-repeat>
-<cssproperty_value> = <cssproperty_-webkit-mask-box-image-slice>
-<cssproperty_value> = <cssproperty_-webkit-mask-box-image-source>
-<cssproperty_value> = <cssproperty_-webkit-mask-box-image-width>
-<cssproperty_value> = <cssproperty_-webkit-mask-clip>
-<cssproperty_value> = <cssproperty_-webkit-mask-composite>
-<cssproperty_value> = <cssproperty_-webkit-mask-image>
-<cssproperty_value> = <cssproperty_-webkit-mask-origin>
-<cssproperty_value> = <cssproperty_-webkit-mask-position>
-<cssproperty_value> = <cssproperty_-webkit-mask-repeat>
-<cssproperty_value> = <cssproperty_-webkit-mask-repeat-y>
-<cssproperty_value> = <cssproperty_-webkit-mask-size>
-<cssproperty_value> = <cssproperty_-webkit-min-logical-height>
-<cssproperty_value> = <cssproperty_-webkit-nbsp-mode>
-<cssproperty_value> = <cssproperty_-webkit-opacity>
-<cssproperty_value> = <cssproperty_-webkit-overflow-scrolling>
-<cssproperty_value> = <cssproperty_-webkit-padding-after>
-<cssproperty_value> = <cssproperty_-webkit-padding-before>
-<cssproperty_value> = <cssproperty_-webkit-padding-end>
-<cssproperty_value> = <cssproperty_-webkit-padding-start>
-<cssproperty_value> = <cssproperty_-webkit-perspective>
-<cssproperty_value> = <cssproperty_-webkit-perspective-origin>
-<cssproperty_value> = <cssproperty_-webkit-perspective-origin-x>
-<cssproperty_value> = <cssproperty_-webkit-perspective-origin-y>
-<cssproperty_value> = <cssproperty_-webkit-print-color-adjust>
-<cssproperty_value> = <cssproperty_-webkit-rtl-ordering>
-<cssproperty_value> = <cssproperty_-webkit-ruby-position>
-<cssproperty_value> = <cssproperty_-webkit-shape-margin>
-<cssproperty_value> = <cssproperty_-webkit-shape-outside>
-<cssproperty_value> = <cssproperty_-webkit-tap-highlight-color>
-<cssproperty_value> = <cssproperty_-webkit-text-combine>
-<cssproperty_value> = <cssproperty_-webkit-text-decorations-in-effect>
-<cssproperty_value> = <cssproperty_-webkit-text-emphasis>
-<cssproperty_value> = <cssproperty_-webkit-text-emphasis-color>
-<cssproperty_value> = <cssproperty_-webkit-text-emphasis-position>
-<cssproperty_value> = <cssproperty_-webkit-text-emphasis-style>
-<cssproperty_value> = <cssproperty_-webkit-text-fill-color>
-<cssproperty_value> = <cssproperty_-webkit-text-orientation>
-<cssproperty_value> = <cssproperty_-webkit-text-security>
-<cssproperty_value> = <cssproperty_-webkit-text-stroke>
-<cssproperty_value> = <cssproperty_-webkit-text-stroke-color>
-<cssproperty_value> = <cssproperty_-webkit-text-stroke-width>
-<cssproperty_value> = <cssproperty_-webkit-transform>
-<cssproperty_value> = <cssproperty_-webkit-transform-origin>
-<cssproperty_value> = <cssproperty_-webkit-transform-style>
-<cssproperty_value> = <cssproperty_-webkit-transition>
-<cssproperty_value> = <cssproperty_-webkit-transition-delay>
-<cssproperty_value> = <cssproperty_-webkit-transition-duration>
-<cssproperty_value> = <cssproperty_-webkit-transition-property>
-<cssproperty_value> = <cssproperty_-webkit-transition-timing-function>
-<cssproperty_value> = <cssproperty_-webkit-user-drag>
-<cssproperty_value> = <cssproperty_-webkit-user-modify>
-<cssproperty_value> = <cssproperty_-webkit-user-select>
-<cssproperty_value> = <cssproperty_-webkit-wrap-flow>
-<cssproperty_value> = <cssproperty_-webkit-writing-mode>
-<cssproperty_value> = <cssproperty_align-content>
-<cssproperty_value> = <cssproperty_align-items>
-<cssproperty_value> = <cssproperty_align-self>
-<cssproperty_value> = <cssproperty_alignx>
-<cssproperty_value> = <cssproperty_animation>
-<cssproperty_value> = <cssproperty_animation-delay>
-<cssproperty_value> = <cssproperty_animation-direction>
-<cssproperty_value> = <cssproperty_animation-duration>
-<cssproperty_value> = <cssproperty_animation-fill-mode>
-<cssproperty_value> = <cssproperty_animation-iteration-count>
-<cssproperty_value> = <cssproperty_animation-name>
-<cssproperty_value> = <cssproperty_animation-play-state>
-<cssproperty_value> = <cssproperty_animation-timing-function>
-<cssproperty_value> = <cssproperty_backdrop-filter>
-<cssproperty_value> = <cssproperty_backface-visibility>
-<cssproperty_value> = <cssproperty_background>
-<cssproperty_value> = <cssproperty_background-attachment>
-<cssproperty_value> = <cssproperty_background-blend-mode>
-<cssproperty_value> = <cssproperty_background-clip>
-<cssproperty_value> = <cssproperty_background-color>
-<cssproperty_value> = <cssproperty_background-image>
-<cssproperty_value> = <cssproperty_background-origin>
-<cssproperty_value> = <cssproperty_background-position>
-<cssproperty_value> = <cssproperty_background-position-x>
-<cssproperty_value> = <cssproperty_background-repeat>
-<cssproperty_value> = <cssproperty_background-repeat-x>
-<cssproperty_value> = <cssproperty_background-repeat-y>
-<cssproperty_value> = <cssproperty_background-size>
-<cssproperty_value> = <cssproperty_baseline-shift>
-<cssproperty_value> = <cssproperty_border>
-<cssproperty_value> = <cssproperty_border-bottom>
-<cssproperty_value> = <cssproperty_border-bottom-color>
-<cssproperty_value> = <cssproperty_border-bottom-left-radius>
-<cssproperty_value> = <cssproperty_border-bottom-right-radius>
-<cssproperty_value> = <cssproperty_border-bottom-style>
-<cssproperty_value> = <cssproperty_border-bottom-width>
-<cssproperty_value> = <cssproperty_border-collapse>
-<cssproperty_value> = <cssproperty_border-color>
-<cssproperty_value> = <cssproperty_border-image>
-<cssproperty_value> = <cssproperty_border-image-outset>
-<cssproperty_value> = <cssproperty_border-image-repeat>
-<cssproperty_value> = <cssproperty_border-image-slice>
-<cssproperty_value> = <cssproperty_border-image-source>
-<cssproperty_value> = <cssproperty_border-image-width>
-<cssproperty_value> = <cssproperty_border-left>
-<cssproperty_value> = <cssproperty_border-left-color>
-<cssproperty_value> = <cssproperty_border-left-style>
-<cssproperty_value> = <cssproperty_border-left-width>
-<cssproperty_value> = <cssproperty_border-radius>
-<cssproperty_value> = <cssproperty_border-right>
-<cssproperty_value> = <cssproperty_border-right-color>
-<cssproperty_value> = <cssproperty_border-right-style>
-<cssproperty_value> = <cssproperty_border-right-width>
-<cssproperty_value> = <cssproperty_border-size>
-<cssproperty_value> = <cssproperty_border-spacing>
-<cssproperty_value> = <cssproperty_border-style>
-<cssproperty_value> = <cssproperty_border-top>
-<cssproperty_value> = <cssproperty_border-top-color>
-<cssproperty_value> = <cssproperty_border-top-left-radius>
-<cssproperty_value> = <cssproperty_border-top-right-radius>
-<cssproperty_value> = <cssproperty_border-top-style>
-<cssproperty_value> = <cssproperty_border-top-width>
-<cssproperty_value> = <cssproperty_border-width>
-<cssproperty_value> = <cssproperty_bottom>
-<cssproperty_value> = <cssproperty_box-align>
-<cssproperty_value> = <cssproperty_box-decoration-break>
-<cssproperty_value> = <cssproperty_box-direction>
-<cssproperty_value> = <cssproperty_box-flex>
-<cssproperty_value> = <cssproperty_box-flex-group>
-<cssproperty_value> = <cssproperty_box-ordinal-group>
-<cssproperty_value> = <cssproperty_box-orient>
-<cssproperty_value> = <cssproperty_box-pack>
-<cssproperty_value> = <cssproperty_box-reflect>
-<cssproperty_value> = <cssproperty_box-shadow>
-<cssproperty_value> = <cssproperty_box-sizing>
-<cssproperty_value> = <cssproperty_break-after>
-<cssproperty_value> = <cssproperty_break-before>
-<cssproperty_value> = <cssproperty_break-inside>
-<cssproperty_value> = <cssproperty_caption-side>
-<cssproperty_value> = <cssproperty_cellpadding>
-<cssproperty_value> = <cssproperty_cellspacing>
-<cssproperty_value> = <cssproperty_clear>
-<cssproperty_value> = <cssproperty_clip>
-<cssproperty_value> = <cssproperty_clip-path>
-<cssproperty_value> = <cssproperty_color>
-<cssproperty_value> = <cssproperty_color-interpolation-filters>
-<cssproperty_value> = <cssproperty_color-profile>
-<cssproperty_value> = <cssproperty_column-break-after>
-<cssproperty_value> = <cssproperty_column-break-before>
-<cssproperty_value> = <cssproperty_column-count>
-<cssproperty_value> = <cssproperty_column-fill>
-<cssproperty_value> = <cssproperty_column-gap>
-<cssproperty_value> = <cssproperty_column-rule>
-<cssproperty_value> = <cssproperty_column-rule-style>
-<cssproperty_value> = <cssproperty_column-span>
-<cssproperty_value> = <cssproperty_column-width>
-<cssproperty_value> = <cssproperty_columns>
-<cssproperty_value> = <cssproperty_contain>
-<cssproperty_value> = <cssproperty_content>
-<cssproperty_value> = <cssproperty_counter-increment>
-<cssproperty_value> = <cssproperty_counter-reset>
-<cssproperty_value> = <cssproperty_css-float>
-<cssproperty_value> = <cssproperty_cursor>
-<cssproperty_value> = <cssproperty_cx>
-<cssproperty_value> = <cssproperty_cy>
-<cssproperty_value> = <cssproperty_direction>
-<cssproperty_value> = <cssproperty_display>
-<cssproperty_value> = <cssproperty_dominant-baseline>
-<cssproperty_value> = <cssproperty_empty-cells>
-<cssproperty_value> = <cssproperty_fill>
-<cssproperty_value> = <cssproperty_fill-opacity>
-<cssproperty_value> = <cssproperty_fill-rule>
-<cssproperty_value> = <cssproperty_filter>
-<cssproperty_value> = <cssproperty_flex>
-<cssproperty_value> = <cssproperty_flex-basis>
-<cssproperty_value> = <cssproperty_flex-direction>
-<cssproperty_value> = <cssproperty_flex-flow>
-<cssproperty_value> = <cssproperty_flex-grow>
-<cssproperty_value> = <cssproperty_flex-shrink>
-<cssproperty_value> = <cssproperty_flex-wrap>
-<cssproperty_value> = <cssproperty_float>
-<cssproperty_value> = <cssproperty_flood-color>
-<cssproperty_value> = <cssproperty_flood-opacity>
-<cssproperty_value> = <cssproperty_font>
-<cssproperty_value> = <cssproperty_font-face>
-<cssproperty_value> = <cssproperty_font-family>
-<cssproperty_value> = <cssproperty_font-feature-settings>
-<cssproperty_value> = <cssproperty_font-kerning>
-<cssproperty_value> = <cssproperty_font-size>
-<cssproperty_value> = <cssproperty_font-size-adjust>
-<cssproperty_value> = <cssproperty_font-stretch>
-<cssproperty_value> = <cssproperty_font-style>
-<cssproperty_value> = <cssproperty_font-variant>
-<cssproperty_value> = <cssproperty_font-variant-caps>
-<cssproperty_value> = <cssproperty_font-variant-ligatures>
-<cssproperty_value> = <cssproperty_font-vendor>
-<cssproperty_value> = <cssproperty_font-weight>
-<cssproperty_value> = <cssproperty_gap>
-<cssproperty_value> = <cssproperty_grid>
-<cssproperty_value> = <cssproperty_grid-area>
-<cssproperty_value> = <cssproperty_grid-auto-columns>
-<cssproperty_value> = <cssproperty_grid-auto-flow>
-<cssproperty_value> = <cssproperty_grid-auto-rows>
-<cssproperty_value> = <cssproperty_grid-column>
-<cssproperty_value> = <cssproperty_grid-column-end>
-<cssproperty_value> = <cssproperty_grid-column-gap>
-<cssproperty_value> = <cssproperty_grid-column-start>
-<cssproperty_value> = <cssproperty_grid-gap>
-<cssproperty_value> = <cssproperty_grid-row>
-<cssproperty_value> = <cssproperty_grid-row-end>
-<cssproperty_value> = <cssproperty_grid-row-gap>
-<cssproperty_value> = <cssproperty_grid-row-start>
-<cssproperty_value> = <cssproperty_grid-template>
-<cssproperty_value> = <cssproperty_grid-template-areas>
-<cssproperty_value> = <cssproperty_grid-template-columns>
-<cssproperty_value> = <cssproperty_grid-template-rows>
-<cssproperty_value> = <cssproperty_height>
-<cssproperty_value> = <cssproperty_hyphens>
-<cssproperty_value> = <cssproperty_image>
-<cssproperty_value> = <cssproperty_image-orientation>
-<cssproperty_value> = <cssproperty_image-rendering>
-<cssproperty_value> = <cssproperty_isolation>
-<cssproperty_value> = <cssproperty_justify-content>
-<cssproperty_value> = <cssproperty_justify-items>
-<cssproperty_value> = <cssproperty_justify-self>
-<cssproperty_value> = <cssproperty_kerning>
-<cssproperty_value> = <cssproperty_left>
-<cssproperty_value> = <cssproperty_letter-spacing>
-<cssproperty_value> = <cssproperty_lighting-color>
-<cssproperty_value> = <cssproperty_line-break>
-<cssproperty_value> = <cssproperty_line-height>
-<cssproperty_value> = <cssproperty_list-style>
-<cssproperty_value> = <cssproperty_list-style-image>
-<cssproperty_value> = <cssproperty_list-style-position>
-<cssproperty_value> = <cssproperty_list-style-type>
-<cssproperty_value> = <cssproperty_margin>
-<cssproperty_value> = <cssproperty_margin-bottom>
-<cssproperty_value> = <cssproperty_margin-left>
-<cssproperty_value> = <cssproperty_margin-right>
-<cssproperty_value> = <cssproperty_margin-top>
-<cssproperty_value> = <cssproperty_marker>
-<cssproperty_value> = <cssproperty_marker-mid>
-<cssproperty_value> = <cssproperty_mask-source-type>
-<cssproperty_value> = <cssproperty_max-height>
-<cssproperty_value> = <cssproperty_max-width>
-<cssproperty_value> = <cssproperty_max-zoom>
-<cssproperty_value> = <cssproperty_min-height>
-<cssproperty_value> = <cssproperty_min-width>
-<cssproperty_value> = <cssproperty_min-zoom>
-<cssproperty_value> = <cssproperty_mix-blend-mode>
-<cssproperty_value> = <cssproperty_motion>
-<cssproperty_value> = <cssproperty_motion-offset>
-<cssproperty_value> = <cssproperty_motion-path>
-<cssproperty_value> = <cssproperty_motion-rotation>
-<cssproperty_value> = <cssproperty_mso-background-source>
-<cssproperty_value> = <cssproperty_mso-bidi-font-size>
-<cssproperty_value> = <cssproperty_mso-border-alt>
-<cssproperty_value> = <cssproperty_mso-border-left-alt>
-<cssproperty_value> = <cssproperty_mso-border-top-alt>
-<cssproperty_value> = <cssproperty_mso-data-placement>
-<cssproperty_value> = <cssproperty_mso-displayed-decimal-separator>
-<cssproperty_value> = <cssproperty_mso-displayed-thousand-separator>
-<cssproperty_value> = <cssproperty_mso-fareast-font-family>
-<cssproperty_value> = <cssproperty_mso-font-charset>
-<cssproperty_value> = <cssproperty_mso-font-kerning>
-<cssproperty_value> = <cssproperty_mso-generic-font-family>
-<cssproperty_value> = <cssproperty_mso-height-source>
-<cssproperty_value> = <cssproperty_mso-ignore>
-<cssproperty_value> = <cssproperty_mso-number-format>
-<cssproperty_value> = <cssproperty_mso-outline-level>
-<cssproperty_value> = <cssproperty_mso-padding-alt>
-<cssproperty_value> = <cssproperty_mso-pagination>
-<cssproperty_value> = <cssproperty_mso-pattern>
-<cssproperty_value> = <cssproperty_mso-protection>
-<cssproperty_value> = <cssproperty_mso-rotate>
-<cssproperty_value> = <cssproperty_mso-style-id>
-<cssproperty_value> = <cssproperty_mso-style-name>
-<cssproperty_value> = <cssproperty_mso-style-next>
-<cssproperty_value> = <cssproperty_mso-style-parent>
-<cssproperty_value> = <cssproperty_mso-width-alt>
-<cssproperty_value> = <cssproperty_mso-width-source>
-<cssproperty_value> = <cssproperty_object-fit>
-<cssproperty_value> = <cssproperty_object-position>
-<cssproperty_value> = <cssproperty_offset>
-<cssproperty_value> = <cssproperty_offset-anchor>
-<cssproperty_value> = <cssproperty_offset-distance>
-<cssproperty_value> = <cssproperty_offset-path>
-<cssproperty_value> = <cssproperty_offset-position>
-<cssproperty_value> = <cssproperty_offset-rotation>
-<cssproperty_value> = <cssproperty_opacity>
-<cssproperty_value> = <cssproperty_order>
-<cssproperty_value> = <cssproperty_orientation>
-<cssproperty_value> = <cssproperty_orphans>
-<cssproperty_value> = <cssproperty_outline>
-<cssproperty_value> = <cssproperty_outline-bottom>
-<cssproperty_value> = <cssproperty_outline-color>
-<cssproperty_value> = <cssproperty_outline-offset>
-<cssproperty_value> = <cssproperty_outline-style>
-<cssproperty_value> = <cssproperty_outline-width>
-<cssproperty_value> = <cssproperty_overflow>
-<cssproperty_value> = <cssproperty_overflow-anchor>
-<cssproperty_value> = <cssproperty_overflow-wrap>
-<cssproperty_value> = <cssproperty_overflow-x>
-<cssproperty_value> = <cssproperty_overflow-y>
-<cssproperty_value> = <cssproperty_padding>
-<cssproperty_value> = <cssproperty_padding-bottom>
-<cssproperty_value> = <cssproperty_padding-left>
-<cssproperty_value> = <cssproperty_padding-right>
-<cssproperty_value> = <cssproperty_padding-top>
-<cssproperty_value> = <cssproperty_page>
-<cssproperty_value> = <cssproperty_page-break-after>
-<cssproperty_value> = <cssproperty_page-break-before>
-<cssproperty_value> = <cssproperty_page-break-inside>
-<cssproperty_value> = <cssproperty_perspective>
-<cssproperty_value> = <cssproperty_perspective-origin>
-<cssproperty_value> = <cssproperty_pointer-events>
-<cssproperty_value> = <cssproperty_position>
-<cssproperty_value> = <cssproperty_prince-hyphens>
-<cssproperty_value> = <cssproperty_quotes>
-<cssproperty_value> = <cssproperty_resize>
-<cssproperty_value> = <cssproperty_right>
-<cssproperty_value> = <cssproperty_rotate>
-<cssproperty_value> = <cssproperty_rotation>
-<cssproperty_value> = <cssproperty_rotation-code>
-<cssproperty_value> = <cssproperty_rx>
-<cssproperty_value> = <cssproperty_ry>
-<cssproperty_value> = <cssproperty_scale>
-<cssproperty_value> = <cssproperty_scroll-behavior>
-<cssproperty_value> = <cssproperty_scroll-snap-coordinate>
-<cssproperty_value> = <cssproperty_scroll-snap-destination>
-<cssproperty_value> = <cssproperty_scroll-snap-points-x>
-<cssproperty_value> = <cssproperty_scroll-snap-points-y>
-<cssproperty_value> = <cssproperty_scroll-snap-type>
-<cssproperty_value> = <cssproperty_shape-image-threshold>
-<cssproperty_value> = <cssproperty_shape-inside>
-<cssproperty_value> = <cssproperty_shape-margin>
-<cssproperty_value> = <cssproperty_shape-outside>
-<cssproperty_value> = <cssproperty_snap-height>
-<cssproperty_value> = <cssproperty_src>
-<cssproperty_value> = <cssproperty_stop-color>
-<cssproperty_value> = <cssproperty_stop-opacity>
-<cssproperty_value> = <cssproperty_stroke>
-<cssproperty_value> = <cssproperty_stroke-dasharray>
-<cssproperty_value> = <cssproperty_stroke-dashoffset>
-<cssproperty_value> = <cssproperty_stroke-linecap>
-<cssproperty_value> = <cssproperty_stroke-linejoin>
-<cssproperty_value> = <cssproperty_stroke-miterlimit>
-<cssproperty_value> = <cssproperty_stroke-opacity>
-<cssproperty_value> = <cssproperty_stroke-width>
-<cssproperty_value> = <cssproperty_tab-size>
-<cssproperty_value> = <cssproperty_table-layout>
-<cssproperty_value> = <cssproperty_text-align>
-<cssproperty_value> = <cssproperty_text-align-last>
-<cssproperty_value> = <cssproperty_text-anchor>
-<cssproperty_value> = <cssproperty_text-combine-upright>
-<cssproperty_value> = <cssproperty_text-decoration>
-<cssproperty_value> = <cssproperty_text-decoration-color>
-<cssproperty_value> = <cssproperty_text-decoration-line>
-<cssproperty_value> = <cssproperty_text-decoration-style>
-<cssproperty_value> = <cssproperty_text-decoration-upright>
-<cssproperty_value> = <cssproperty_text-indent>
-<cssproperty_value> = <cssproperty_text-justify>
-<cssproperty_value> = <cssproperty_text-orientation>
-<cssproperty_value> = <cssproperty_text-overflow>
-<cssproperty_value> = <cssproperty_text-rendering>
-<cssproperty_value> = <cssproperty_text-shadow>
-<cssproperty_value> = <cssproperty_text-transform>
-<cssproperty_value> = <cssproperty_text-underline>
-<cssproperty_value> = <cssproperty_text-underline-position>
-<cssproperty_value> = <cssproperty_top>
-<cssproperty_value> = <cssproperty_touch-action>
-<cssproperty_value> = <cssproperty_transform>
-<cssproperty_value> = <cssproperty_transform-origin>
-<cssproperty_value> = <cssproperty_transform-style>
-<cssproperty_value> = <cssproperty_transition>
-<cssproperty_value> = <cssproperty_transition-delay>
-<cssproperty_value> = <cssproperty_transition-duration>
-<cssproperty_value> = <cssproperty_transition-properties>
-<cssproperty_value> = <cssproperty_transition-property>
-<cssproperty_value> = <cssproperty_transition-timing-function>
-<cssproperty_value> = <cssproperty_translate>
-<cssproperty_value> = <cssproperty_unicode-bidi>
-<cssproperty_value> = <cssproperty_user-select>
-<cssproperty_value> = <cssproperty_user-zoom>
-<cssproperty_value> = <cssproperty_vector-effect>
-<cssproperty_value> = <cssproperty_vertical-align>
-<cssproperty_value> = <cssproperty_visibility>
-<cssproperty_value> = <cssproperty_weight>
-<cssproperty_value> = <cssproperty_white>
-<cssproperty_value> = <cssproperty_white-space>
-<cssproperty_value> = <cssproperty_whitespace>
-<cssproperty_value> = <cssproperty_widows>
-<cssproperty_value> = <cssproperty_width>
-<cssproperty_value> = <cssproperty_will-change>
-<cssproperty_value> = <cssproperty_word-break>
-<cssproperty_value> = <cssproperty_word-space>
-<cssproperty_value> = <cssproperty_word-spacing>
-<cssproperty_value> = <cssproperty_word-wrap>
-<cssproperty_value> = <cssproperty_writing-mode>
-<cssproperty_value> = <cssproperty_z-index>
-<cssproperty_value> = <cssproperty_zoom>
-
-<cssproperty> = -ms-flex-align: <cssproperty_-ms-flex-align>
-<cssproperty> = -ms-font-feature-settings: <cssproperty_-ms-font-feature-settings>
-<cssproperty> = -ms-text-combine-horizontal: <cssproperty_-ms-text-combine-horizontal>
-<cssproperty> = -ms-user-select: <cssproperty_-ms-user-select>
-<cssproperty> = -webkit-align-content: <cssproperty_-webkit-align-content>
-<cssproperty> = -webkit-align-items: <cssproperty_-webkit-align-items>
-<cssproperty> = -webkit-align-self: <cssproperty_-webkit-align-self>
-<cssproperty> = -webkit-animation: <cssproperty_-webkit-animation>
-<cssproperty> = -webkit-animation-delay: <cssproperty_-webkit-animation-delay>
-<cssproperty> = -webkit-animation-direction: <cssproperty_-webkit-animation-direction>
-<cssproperty> = -webkit-animation-duration: <cssproperty_-webkit-animation-duration>
-<cssproperty> = -webkit-animation-fill-mode: <cssproperty_-webkit-animation-fill-mode>
-<cssproperty> = -webkit-animation-iteration-count: <cssproperty_-webkit-animation-iteration-count>
-<cssproperty> = -webkit-animation-name: <cssproperty_-webkit-animation-name>
-<cssproperty> = -webkit-animation-play-state: <cssproperty_-webkit-animation-play-state>
-<cssproperty> = -webkit-animation-timing-function: <cssproperty_-webkit-animation-timing-function>
-<cssproperty> = -webkit-app-region: <cssproperty_-webkit-app-region>
-<cssproperty> = -webkit-appearance: <cssproperty_-webkit-appearance>
-<cssproperty> = -webkit-backface-visibility: <cssproperty_-webkit-backface-visibility>
-<cssproperty> = -webkit-background-clip: <cssproperty_-webkit-background-clip>
-<cssproperty> = -webkit-background-origin: <cssproperty_-webkit-background-origin>
-<cssproperty> = -webkit-background-size: <cssproperty_-webkit-background-size>
-<cssproperty> = -webkit-border-after: <cssproperty_-webkit-border-after>
-<cssproperty> = -webkit-border-after-color: <cssproperty_-webkit-border-after-color>
-<cssproperty> = -webkit-border-after-width: <cssproperty_-webkit-border-after-width>
-<cssproperty> = -webkit-border-before: <cssproperty_-webkit-border-before>
-<cssproperty> = -webkit-border-before-color: <cssproperty_-webkit-border-before-color>
-<cssproperty> = -webkit-border-before-style: <cssproperty_-webkit-border-before-style>
-<cssproperty> = -webkit-border-before-width: <cssproperty_-webkit-border-before-width>
-<cssproperty> = -webkit-border-bottom-left-radius: <cssproperty_-webkit-border-bottom-left-radius>
-<cssproperty> = -webkit-border-bottom-right-radius: <cssproperty_-webkit-border-bottom-right-radius>
-<cssproperty> = -webkit-border-end: <cssproperty_-webkit-border-end>
-<cssproperty> = -webkit-border-end-color: <cssproperty_-webkit-border-end-color>
-<cssproperty> = -webkit-border-end-width: <cssproperty_-webkit-border-end-width>
-<cssproperty> = -webkit-border-image: <cssproperty_-webkit-border-image>
-<cssproperty> = -webkit-border-radius: <cssproperty_-webkit-border-radius>
-<cssproperty> = -webkit-border-start: <cssproperty_-webkit-border-start>
-<cssproperty> = -webkit-border-start-color: <cssproperty_-webkit-border-start-color>
-<cssproperty> = -webkit-border-start-width: <cssproperty_-webkit-border-start-width>
-<cssproperty> = -webkit-border-top-left-radius: <cssproperty_-webkit-border-top-left-radius>
-<cssproperty> = -webkit-border-top-right-radius: <cssproperty_-webkit-border-top-right-radius>
-<cssproperty> = -webkit-border-vertical-spacing: <cssproperty_-webkit-border-vertical-spacing>
-<cssproperty> = -webkit-box-align: <cssproperty_-webkit-box-align>
-<cssproperty> = -webkit-box-decoration-break: <cssproperty_-webkit-box-decoration-break>
-<cssproperty> = -webkit-box-direction: <cssproperty_-webkit-box-direction>
-<cssproperty> = -webkit-box-flex: <cssproperty_-webkit-box-flex>
-<cssproperty> = -webkit-box-flex-group: <cssproperty_-webkit-box-flex-group>
-<cssproperty> = -webkit-box-lines: <cssproperty_-webkit-box-lines>
-<cssproperty> = -webkit-box-ordinal-group: <cssproperty_-webkit-box-ordinal-group>
-<cssproperty> = -webkit-box-orient: <cssproperty_-webkit-box-orient>
-<cssproperty> = -webkit-box-pack: <cssproperty_-webkit-box-pack>
-<cssproperty> = -webkit-box-reflect: <cssproperty_-webkit-box-reflect>
-<cssproperty> = -webkit-box-shadow: <cssproperty_-webkit-box-shadow>
-<cssproperty> = -webkit-box-sizing: <cssproperty_-webkit-box-sizing>
-<cssproperty> = -webkit-clip-path: <cssproperty_-webkit-clip-path>
-<cssproperty> = -webkit-color-correction: <cssproperty_-webkit-color-correction>
-<cssproperty> = -webkit-column-break-after: <cssproperty_-webkit-column-break-after>
-<cssproperty> = -webkit-column-break-before: <cssproperty_-webkit-column-break-before>
-<cssproperty> = -webkit-column-break-inside: <cssproperty_-webkit-column-break-inside>
-<cssproperty> = -webkit-column-count: <cssproperty_-webkit-column-count>
-<cssproperty> = -webkit-column-fill: <cssproperty_-webkit-column-fill>
-<cssproperty> = -webkit-column-gap: <cssproperty_-webkit-column-gap>
-<cssproperty> = -webkit-column-rule: <cssproperty_-webkit-column-rule>
-<cssproperty> = -webkit-column-rule-color: <cssproperty_-webkit-column-rule-color>
-<cssproperty> = -webkit-column-rule-style: <cssproperty_-webkit-column-rule-style>
-<cssproperty> = -webkit-column-rule-width: <cssproperty_-webkit-column-rule-width>
-<cssproperty> = -webkit-column-span: <cssproperty_-webkit-column-span>
-<cssproperty> = -webkit-column-width: <cssproperty_-webkit-column-width>
-<cssproperty> = -webkit-columns: <cssproperty_-webkit-columns>
-<cssproperty> = -webkit-direction: <cssproperty_-webkit-direction>
-<cssproperty> = -webkit-filter: <cssproperty_-webkit-filter>
-<cssproperty> = -webkit-flex: <cssproperty_-webkit-flex>
-<cssproperty> = -webkit-flex-direction: <cssproperty_-webkit-flex-direction>
-<cssproperty> = -webkit-flex-wrap: <cssproperty_-webkit-flex-wrap>
-<cssproperty> = -webkit-flow-from: <cssproperty_-webkit-flow-from>
-<cssproperty> = -webkit-flow-into: <cssproperty_-webkit-flow-into>
-<cssproperty> = -webkit-font-feature-settings: <cssproperty_-webkit-font-feature-settings>
-<cssproperty> = -webkit-font-smoothing: <cssproperty_-webkit-font-smoothing>
-<cssproperty> = -webkit-highlight: <cssproperty_-webkit-highlight>
-<cssproperty> = -webkit-hyphenate-character: <cssproperty_-webkit-hyphenate-character>
-<cssproperty> = -webkit-hyphens: <cssproperty_-webkit-hyphens>
-<cssproperty> = -webkit-justify-content: <cssproperty_-webkit-justify-content>
-<cssproperty> = -webkit-line-break: <cssproperty_-webkit-line-break>
-<cssproperty> = -webkit-line-clamp: <cssproperty_-webkit-line-clamp>
-<cssproperty> = -webkit-locale: <cssproperty_-webkit-locale>
-<cssproperty> = -webkit-logical-height: <cssproperty_-webkit-logical-height>
-<cssproperty> = -webkit-logical-width: <cssproperty_-webkit-logical-width>
-<cssproperty> = -webkit-margin-after: <cssproperty_-webkit-margin-after>
-<cssproperty> = -webkit-margin-after-collapse: <cssproperty_-webkit-margin-after-collapse>
-<cssproperty> = -webkit-margin-before: <cssproperty_-webkit-margin-before>
-<cssproperty> = -webkit-margin-before-collapse: <cssproperty_-webkit-margin-before-collapse>
-<cssproperty> = -webkit-margin-bottom-collapse: <cssproperty_-webkit-margin-bottom-collapse>
-<cssproperty> = -webkit-margin-collapse: <cssproperty_-webkit-margin-collapse>
-<cssproperty> = -webkit-margin-end: <cssproperty_-webkit-margin-end>
-<cssproperty> = -webkit-margin-start: <cssproperty_-webkit-margin-start>
-<cssproperty> = -webkit-margin-top-collapse: <cssproperty_-webkit-margin-top-collapse>
-<cssproperty> = -webkit-marquee-speed: <cssproperty_-webkit-marquee-speed>
-<cssproperty> = -webkit-mask: <cssproperty_-webkit-mask>
-<cssproperty> = -webkit-mask-box-image: <cssproperty_-webkit-mask-box-image>
-<cssproperty> = -webkit-mask-box-image-outset: <cssproperty_-webkit-mask-box-image-outset>
-<cssproperty> = -webkit-mask-box-image-repeat: <cssproperty_-webkit-mask-box-image-repeat>
-<cssproperty> = -webkit-mask-box-image-slice: <cssproperty_-webkit-mask-box-image-slice>
-<cssproperty> = -webkit-mask-box-image-source: <cssproperty_-webkit-mask-box-image-source>
-<cssproperty> = -webkit-mask-box-image-width: <cssproperty_-webkit-mask-box-image-width>
-<cssproperty> = -webkit-mask-clip: <cssproperty_-webkit-mask-clip>
-<cssproperty> = -webkit-mask-composite: <cssproperty_-webkit-mask-composite>
-<cssproperty> = -webkit-mask-image: <cssproperty_-webkit-mask-image>
-<cssproperty> = -webkit-mask-origin: <cssproperty_-webkit-mask-origin>
-<cssproperty> = -webkit-mask-position: <cssproperty_-webkit-mask-position>
-<cssproperty> = -webkit-mask-repeat: <cssproperty_-webkit-mask-repeat>
-<cssproperty> = -webkit-mask-repeat-y: <cssproperty_-webkit-mask-repeat-y>
-<cssproperty> = -webkit-mask-size: <cssproperty_-webkit-mask-size>
-<cssproperty> = -webkit-min-logical-height: <cssproperty_-webkit-min-logical-height>
-<cssproperty> = -webkit-nbsp-mode: <cssproperty_-webkit-nbsp-mode>
-<cssproperty> = -webkit-opacity: <cssproperty_-webkit-opacity>
-<cssproperty> = -webkit-overflow-scrolling: <cssproperty_-webkit-overflow-scrolling>
-<cssproperty> = -webkit-padding-after: <cssproperty_-webkit-padding-after>
-<cssproperty> = -webkit-padding-before: <cssproperty_-webkit-padding-before>
-<cssproperty> = -webkit-padding-end: <cssproperty_-webkit-padding-end>
-<cssproperty> = -webkit-padding-start: <cssproperty_-webkit-padding-start>
-<cssproperty> = -webkit-perspective: <cssproperty_-webkit-perspective>
-<cssproperty> = -webkit-perspective-origin: <cssproperty_-webkit-perspective-origin>
-<cssproperty> = -webkit-perspective-origin-x: <cssproperty_-webkit-perspective-origin-x>
-<cssproperty> = -webkit-perspective-origin-y: <cssproperty_-webkit-perspective-origin-y>
-<cssproperty> = -webkit-print-color-adjust: <cssproperty_-webkit-print-color-adjust>
-<cssproperty> = -webkit-rtl-ordering: <cssproperty_-webkit-rtl-ordering>
-<cssproperty> = -webkit-ruby-position: <cssproperty_-webkit-ruby-position>
-<cssproperty> = -webkit-shape-margin: <cssproperty_-webkit-shape-margin>
-<cssproperty> = -webkit-shape-outside: <cssproperty_-webkit-shape-outside>
-<cssproperty> = -webkit-tap-highlight-color: <cssproperty_-webkit-tap-highlight-color>
-<cssproperty> = -webkit-text-combine: <cssproperty_-webkit-text-combine>
-<cssproperty> = -webkit-text-decorations-in-effect: <cssproperty_-webkit-text-decorations-in-effect>
-<cssproperty> = -webkit-text-emphasis: <cssproperty_-webkit-text-emphasis>
-<cssproperty> = -webkit-text-emphasis-color: <cssproperty_-webkit-text-emphasis-color>
-<cssproperty> = -webkit-text-emphasis-position: <cssproperty_-webkit-text-emphasis-position>
-<cssproperty> = -webkit-text-emphasis-style: <cssproperty_-webkit-text-emphasis-style>
-<cssproperty> = -webkit-text-fill-color: <cssproperty_-webkit-text-fill-color>
-<cssproperty> = -webkit-text-orientation: <cssproperty_-webkit-text-orientation>
-<cssproperty> = -webkit-text-security: <cssproperty_-webkit-text-security>
-<cssproperty> = -webkit-text-stroke: <cssproperty_-webkit-text-stroke>
-<cssproperty> = -webkit-text-stroke-color: <cssproperty_-webkit-text-stroke-color>
-<cssproperty> = -webkit-text-stroke-width: <cssproperty_-webkit-text-stroke-width>
-<cssproperty> = -webkit-transform: <cssproperty_-webkit-transform>
-<cssproperty> = -webkit-transform-origin: <cssproperty_-webkit-transform-origin>
-<cssproperty> = -webkit-transform-style: <cssproperty_-webkit-transform-style>
-<cssproperty> = -webkit-transition: <cssproperty_-webkit-transition>
-<cssproperty> = -webkit-transition-delay: <cssproperty_-webkit-transition-delay>
-<cssproperty> = -webkit-transition-duration: <cssproperty_-webkit-transition-duration>
-<cssproperty> = -webkit-transition-property: <cssproperty_-webkit-transition-property>
-<cssproperty> = -webkit-transition-timing-function: <cssproperty_-webkit-transition-timing-function>
-<cssproperty> = -webkit-user-drag: <cssproperty_-webkit-user-drag>
-<cssproperty> = -webkit-user-modify: <cssproperty_-webkit-user-modify>
-<cssproperty> = -webkit-user-select: <cssproperty_-webkit-user-select>
-<cssproperty> = -webkit-wrap-flow: <cssproperty_-webkit-wrap-flow>
-<cssproperty> = -webkit-writing-mode: <cssproperty_-webkit-writing-mode>
-<cssproperty> = align-content: <cssproperty_align-content>
-<cssproperty> = align-items: <cssproperty_align-items>
-<cssproperty> = align-self: <cssproperty_align-self>
-<cssproperty> = alignx: <cssproperty_alignx>
-<cssproperty> = animation: <cssproperty_animation>
-<cssproperty> = animation-delay: <cssproperty_animation-delay>
-<cssproperty> = animation-direction: <cssproperty_animation-direction>
-<cssproperty> = animation-duration: <cssproperty_animation-duration>
-<cssproperty> = animation-fill-mode: <cssproperty_animation-fill-mode>
-<cssproperty> = animation-iteration-count: <cssproperty_animation-iteration-count>
-<cssproperty> = animation-name: <cssproperty_animation-name>
-<cssproperty> = animation-play-state: <cssproperty_animation-play-state>
-<cssproperty> = animation-timing-function: <cssproperty_animation-timing-function>
-<cssproperty> = backdrop-filter: <cssproperty_backdrop-filter>
-<cssproperty> = backface-visibility: <cssproperty_backface-visibility>
-<cssproperty> = background: <cssproperty_background>
-<cssproperty> = background-attachment: <cssproperty_background-attachment>
-<cssproperty> = background-blend-mode: <cssproperty_background-blend-mode>
-<cssproperty> = background-clip: <cssproperty_background-clip>
-<cssproperty> = background-color: <cssproperty_background-color>
-<cssproperty> = background-image: <cssproperty_background-image>
-<cssproperty> = background-origin: <cssproperty_background-origin>
-<cssproperty> = background-position: <cssproperty_background-position>
-<cssproperty> = background-position-x: <cssproperty_background-position-x>
-<cssproperty> = background-repeat: <cssproperty_background-repeat>
-<cssproperty> = background-repeat-x: <cssproperty_background-repeat-x>
-<cssproperty> = background-repeat-y: <cssproperty_background-repeat-y>
-<cssproperty> = background-size: <cssproperty_background-size>
-<cssproperty> = baseline-shift: <cssproperty_baseline-shift>
-<cssproperty> = border: <cssproperty_border>
-<cssproperty> = border-bottom: <cssproperty_border-bottom>
-<cssproperty> = border-bottom-color: <cssproperty_border-bottom-color>
-<cssproperty> = border-bottom-left-radius: <cssproperty_border-bottom-left-radius>
-<cssproperty> = border-bottom-right-radius: <cssproperty_border-bottom-right-radius>
-<cssproperty> = border-bottom-style: <cssproperty_border-bottom-style>
-<cssproperty> = border-bottom-width: <cssproperty_border-bottom-width>
-<cssproperty> = border-collapse: <cssproperty_border-collapse>
-<cssproperty> = border-color: <cssproperty_border-color>
-<cssproperty> = border-image: <cssproperty_border-image>
-<cssproperty> = border-image-outset: <cssproperty_border-image-outset>
-<cssproperty> = border-image-repeat: <cssproperty_border-image-repeat>
-<cssproperty> = border-image-slice: <cssproperty_border-image-slice>
-<cssproperty> = border-image-source: <cssproperty_border-image-source>
-<cssproperty> = border-image-width: <cssproperty_border-image-width>
-<cssproperty> = border-left: <cssproperty_border-left>
-<cssproperty> = border-left-color: <cssproperty_border-left-color>
-<cssproperty> = border-left-style: <cssproperty_border-left-style>
-<cssproperty> = border-left-width: <cssproperty_border-left-width>
-<cssproperty> = border-radius: <cssproperty_border-radius>
-<cssproperty> = border-right: <cssproperty_border-right>
-<cssproperty> = border-right-color: <cssproperty_border-right-color>
-<cssproperty> = border-right-style: <cssproperty_border-right-style>
-<cssproperty> = border-right-width: <cssproperty_border-right-width>
-<cssproperty> = border-size: <cssproperty_border-size>
-<cssproperty> = border-spacing: <cssproperty_border-spacing>
-<cssproperty> = border-style: <cssproperty_border-style>
-<cssproperty> = border-top: <cssproperty_border-top>
-<cssproperty> = border-top-color: <cssproperty_border-top-color>
-<cssproperty> = border-top-left-radius: <cssproperty_border-top-left-radius>
-<cssproperty> = border-top-right-radius: <cssproperty_border-top-right-radius>
-<cssproperty> = border-top-style: <cssproperty_border-top-style>
-<cssproperty> = border-top-width: <cssproperty_border-top-width>
-<cssproperty> = border-width: <cssproperty_border-width>
-<cssproperty> = bottom: <cssproperty_bottom>
-<cssproperty> = box-align: <cssproperty_box-align>
-<cssproperty> = box-decoration-break: <cssproperty_box-decoration-break>
-<cssproperty> = box-direction: <cssproperty_box-direction>
-<cssproperty> = box-flex: <cssproperty_box-flex>
-<cssproperty> = box-flex-group: <cssproperty_box-flex-group>
-<cssproperty> = box-ordinal-group: <cssproperty_box-ordinal-group>
-<cssproperty> = box-orient: <cssproperty_box-orient>
-<cssproperty> = box-pack: <cssproperty_box-pack>
-<cssproperty> = box-reflect: <cssproperty_box-reflect>
-<cssproperty> = box-shadow: <cssproperty_box-shadow>
-<cssproperty> = box-sizing: <cssproperty_box-sizing>
-<cssproperty> = break-after: <cssproperty_break-after>
-<cssproperty> = break-before: <cssproperty_break-before>
-<cssproperty> = break-inside: <cssproperty_break-inside>
-<cssproperty> = caption-side: <cssproperty_caption-side>
-<cssproperty> = cellpadding: <cssproperty_cellpadding>
-<cssproperty> = cellspacing: <cssproperty_cellspacing>
-<cssproperty> = clear: <cssproperty_clear>
-<cssproperty> = clip: <cssproperty_clip>
-<cssproperty> = clip-path: <cssproperty_clip-path>
-<cssproperty> = color: <cssproperty_color>
-<cssproperty> = color-interpolation-filters: <cssproperty_color-interpolation-filters>
-<cssproperty> = color-profile: <cssproperty_color-profile>
-<cssproperty> = column-break-after: <cssproperty_column-break-after>
-<cssproperty> = column-break-before: <cssproperty_column-break-before>
-<cssproperty> = column-count: <cssproperty_column-count>
-<cssproperty> = column-fill: <cssproperty_column-fill>
-<cssproperty> = column-gap: <cssproperty_column-gap>
-<cssproperty> = column-rule: <cssproperty_column-rule>
-<cssproperty> = column-rule-style: <cssproperty_column-rule-style>
-<cssproperty> = column-span: <cssproperty_column-span>
-<cssproperty> = column-width: <cssproperty_column-width>
-<cssproperty> = columns: <cssproperty_columns>
-<cssproperty> = contain: <cssproperty_contain>
-<cssproperty> = content: <cssproperty_content>
-<cssproperty> = counter-increment: <cssproperty_counter-increment>
-<cssproperty> = counter-reset: <cssproperty_counter-reset>
-<cssproperty> = css-float: <cssproperty_css-float>
-<cssproperty> = cursor: <cssproperty_cursor>
-<cssproperty> = cx: <cssproperty_cx>
-<cssproperty> = cy: <cssproperty_cy>
-<cssproperty> = direction: <cssproperty_direction>
-<cssproperty> = display: <cssproperty_display>
-<cssproperty> = dominant-baseline: <cssproperty_dominant-baseline>
-<cssproperty> = empty-cells: <cssproperty_empty-cells>
-<cssproperty> = fill: <cssproperty_fill>
-<cssproperty> = fill-opacity: <cssproperty_fill-opacity>
-<cssproperty> = fill-rule: <cssproperty_fill-rule>
-<cssproperty> = filter: <cssproperty_filter>
-<cssproperty> = flex: <cssproperty_flex>
-<cssproperty> = flex-basis: <cssproperty_flex-basis>
-<cssproperty> = flex-direction: <cssproperty_flex-direction>
-<cssproperty> = flex-flow: <cssproperty_flex-flow>
-<cssproperty> = flex-grow: <cssproperty_flex-grow>
-<cssproperty> = flex-shrink: <cssproperty_flex-shrink>
-<cssproperty> = flex-wrap: <cssproperty_flex-wrap>
-<cssproperty> = float: <cssproperty_float>
-<cssproperty> = flood-color: <cssproperty_flood-color>
-<cssproperty> = flood-opacity: <cssproperty_flood-opacity>
-<cssproperty> = font: <cssproperty_font>
-<cssproperty> = font-face: <cssproperty_font-face>
-<cssproperty> = font-family: <cssproperty_font-family>
-<cssproperty> = font-feature-settings: <cssproperty_font-feature-settings>
-<cssproperty> = font-kerning: <cssproperty_font-kerning>
-<cssproperty> = font-size: <cssproperty_font-size>
-<cssproperty> = font-size-adjust: <cssproperty_font-size-adjust>
-<cssproperty> = font-stretch: <cssproperty_font-stretch>
-<cssproperty> = font-style: <cssproperty_font-style>
-<cssproperty> = font-variant: <cssproperty_font-variant>
-<cssproperty> = font-variant-caps: <cssproperty_font-variant-caps>
-<cssproperty> = font-variant-ligatures: <cssproperty_font-variant-ligatures>
-<cssproperty> = font-vendor: <cssproperty_font-vendor>
-<cssproperty> = font-weight: <cssproperty_font-weight>
-<cssproperty> = gap: <cssproperty_gap>
-<cssproperty> = grid: <cssproperty_grid>
-<cssproperty> = grid-area: <cssproperty_grid-area>
-<cssproperty> = grid-auto-columns: <cssproperty_grid-auto-columns>
-<cssproperty> = grid-auto-flow: <cssproperty_grid-auto-flow>
-<cssproperty> = grid-auto-rows: <cssproperty_grid-auto-rows>
-<cssproperty> = grid-column: <cssproperty_grid-column>
-<cssproperty> = grid-column-end: <cssproperty_grid-column-end>
-<cssproperty> = grid-column-gap: <cssproperty_grid-column-gap>
-<cssproperty> = grid-column-start: <cssproperty_grid-column-start>
-<cssproperty> = grid-gap: <cssproperty_grid-gap>
-<cssproperty> = grid-row: <cssproperty_grid-row>
-<cssproperty> = grid-row-end: <cssproperty_grid-row-end>
-<cssproperty> = grid-row-gap: <cssproperty_grid-row-gap>
-<cssproperty> = grid-row-start: <cssproperty_grid-row-start>
-<cssproperty> = grid-template: <cssproperty_grid-template>
-<cssproperty> = grid-template-areas: <cssproperty_grid-template-areas>
-<cssproperty> = grid-template-columns: <cssproperty_grid-template-columns>
-<cssproperty> = grid-template-rows: <cssproperty_grid-template-rows>
-<cssproperty> = height: <cssproperty_height>
-<cssproperty> = hyphens: <cssproperty_hyphens>
-<cssproperty> = image-orientation: <cssproperty_image-orientation>
-<cssproperty> = image-rendering: <cssproperty_image-rendering>
-<cssproperty> = isolation: <cssproperty_isolation>
-<cssproperty> = justify-content: <cssproperty_justify-content>
-<cssproperty> = justify-items: <cssproperty_justify-items>
-<cssproperty> = justify-self: <cssproperty_justify-self>
-<cssproperty> = kerning: <cssproperty_kerning>
-<cssproperty> = left: <cssproperty_left>
-<cssproperty> = letter-spacing: <cssproperty_letter-spacing>
-<cssproperty> = lighting-color: <cssproperty_lighting-color>
-<cssproperty> = line-break: <cssproperty_line-break>
-<cssproperty> = line-height: <cssproperty_line-height>
-<cssproperty> = list-style: <cssproperty_list-style>
-<cssproperty> = list-style-image: <cssproperty_list-style-image>
-<cssproperty> = list-style-position: <cssproperty_list-style-position>
-<cssproperty> = list-style-type: <cssproperty_list-style-type>
-<cssproperty> = margin: <cssproperty_margin>
-<cssproperty> = margin-bottom: <cssproperty_margin-bottom>
-<cssproperty> = margin-left: <cssproperty_margin-left>
-<cssproperty> = margin-right: <cssproperty_margin-right>
-<cssproperty> = margin-top: <cssproperty_margin-top>
-<cssproperty> = marker: <cssproperty_marker>
-<cssproperty> = marker-mid: <cssproperty_marker-mid>
-<cssproperty> = mask-source-type: <cssproperty_mask-source-type>
-<cssproperty> = max-height: <cssproperty_max-height>
-<cssproperty> = max-width: <cssproperty_max-width>
-<cssproperty> = max-zoom: <cssproperty_max-zoom>
-<cssproperty> = min-height: <cssproperty_min-height>
-<cssproperty> = min-width: <cssproperty_min-width>
-<cssproperty> = min-zoom: <cssproperty_min-zoom>
-<cssproperty> = mix-blend-mode: <cssproperty_mix-blend-mode>
-<cssproperty> = motion: <cssproperty_motion>
-<cssproperty> = motion-offset: <cssproperty_motion-offset>
-<cssproperty> = motion-path: <cssproperty_motion-path>
-<cssproperty> = motion-rotation: <cssproperty_motion-rotation>
-<cssproperty> = mso-background-source: <cssproperty_mso-background-source>
-<cssproperty> = mso-bidi-font-size: <cssproperty_mso-bidi-font-size>
-<cssproperty> = mso-border-alt: <cssproperty_mso-border-alt>
-<cssproperty> = mso-border-left-alt: <cssproperty_mso-border-left-alt>
-<cssproperty> = mso-border-top-alt: <cssproperty_mso-border-top-alt>
-<cssproperty> = mso-data-placement: <cssproperty_mso-data-placement>
-<cssproperty> = mso-displayed-decimal-separator: <cssproperty_mso-displayed-decimal-separator>
-<cssproperty> = mso-displayed-thousand-separator: <cssproperty_mso-displayed-thousand-separator>
-<cssproperty> = mso-fareast-font-family: <cssproperty_mso-fareast-font-family>
-<cssproperty> = mso-font-charset: <cssproperty_mso-font-charset>
-<cssproperty> = mso-font-kerning: <cssproperty_mso-font-kerning>
-<cssproperty> = mso-generic-font-family: <cssproperty_mso-generic-font-family>
-<cssproperty> = mso-height-source: <cssproperty_mso-height-source>
-<cssproperty> = mso-ignore: <cssproperty_mso-ignore>
-<cssproperty> = mso-number-format: <cssproperty_mso-number-format>
-<cssproperty> = mso-outline-level: <cssproperty_mso-outline-level>
-<cssproperty> = mso-padding-alt: <cssproperty_mso-padding-alt>
-<cssproperty> = mso-pagination: <cssproperty_mso-pagination>
-<cssproperty> = mso-pattern: <cssproperty_mso-pattern>
-<cssproperty> = mso-protection: <cssproperty_mso-protection>
-<cssproperty> = mso-rotate: <cssproperty_mso-rotate>
-<cssproperty> = mso-style-id: <cssproperty_mso-style-id>
-<cssproperty> = mso-style-name: <cssproperty_mso-style-name>
-<cssproperty> = mso-style-next: <cssproperty_mso-style-next>
-<cssproperty> = mso-style-parent: <cssproperty_mso-style-parent>
-<cssproperty> = mso-width-alt: <cssproperty_mso-width-alt>
-<cssproperty> = mso-width-source: <cssproperty_mso-width-source>
-<cssproperty> = object-fit: <cssproperty_object-fit>
-<cssproperty> = object-position: <cssproperty_object-position>
-<cssproperty> = offset: <cssproperty_offset>
-<cssproperty> = offset-anchor: <cssproperty_offset-anchor>
-<cssproperty> = offset-distance: <cssproperty_offset-distance>
-<cssproperty> = offset-path: <cssproperty_offset-path>
-<cssproperty> = offset-position: <cssproperty_offset-position>
-<cssproperty> = offset-rotation: <cssproperty_offset-rotation>
-<cssproperty> = opacity: <cssproperty_opacity>
-<cssproperty> = order: <cssproperty_order>
-<cssproperty> = orientation: <cssproperty_orientation>
-<cssproperty> = orphans: <cssproperty_orphans>
-<cssproperty> = outline: <cssproperty_outline>
-<cssproperty> = outline-bottom: <cssproperty_outline-bottom>
-<cssproperty> = outline-color: <cssproperty_outline-color>
-<cssproperty> = outline-offset: <cssproperty_outline-offset>
-<cssproperty> = outline-style: <cssproperty_outline-style>
-<cssproperty> = outline-width: <cssproperty_outline-width>
-<cssproperty> = overflow: <cssproperty_overflow>
-<cssproperty> = overflow-anchor: <cssproperty_overflow-anchor>
-<cssproperty> = overflow-wrap: <cssproperty_overflow-wrap>
-<cssproperty> = overflow-x: <cssproperty_overflow-x>
-<cssproperty> = overflow-y: <cssproperty_overflow-y>
-<cssproperty> = padding: <cssproperty_padding>
-<cssproperty> = padding-bottom: <cssproperty_padding-bottom>
-<cssproperty> = padding-left: <cssproperty_padding-left>
-<cssproperty> = padding-right: <cssproperty_padding-right>
-<cssproperty> = padding-top: <cssproperty_padding-top>
-<cssproperty> = page: <cssproperty_page>
-<cssproperty> = page-break-after: <cssproperty_page-break-after>
-<cssproperty> = page-break-before: <cssproperty_page-break-before>
-<cssproperty> = page-break-inside: <cssproperty_page-break-inside>
-<cssproperty> = perspective: <cssproperty_perspective>
-<cssproperty> = perspective-origin: <cssproperty_perspective-origin>
-<cssproperty> = pointer-events: <cssproperty_pointer-events>
-<cssproperty> = position: <cssproperty_position>
-<cssproperty> = prince-hyphens: <cssproperty_prince-hyphens>
-<cssproperty> = quotes: <cssproperty_quotes>
-<cssproperty> = resize: <cssproperty_resize>
-<cssproperty> = right: <cssproperty_right>
-<cssproperty> = rotate: <cssproperty_rotate>
-<cssproperty> = rotation: <cssproperty_rotation>
-<cssproperty> = rotation-code: <cssproperty_rotation-code>
-<cssproperty> = rx: <cssproperty_rx>
-<cssproperty> = ry: <cssproperty_ry>
-<cssproperty> = scale: <cssproperty_scale>
-<cssproperty> = scroll-behavior: <cssproperty_scroll-behavior>
-<cssproperty> = scroll-snap-coordinate: <cssproperty_scroll-snap-coordinate>
-<cssproperty> = scroll-snap-destination: <cssproperty_scroll-snap-destination>
-<cssproperty> = scroll-snap-points-x: <cssproperty_scroll-snap-points-x>
-<cssproperty> = scroll-snap-points-y: <cssproperty_scroll-snap-points-y>
-<cssproperty> = scroll-snap-type: <cssproperty_scroll-snap-type>
-<cssproperty> = shape-image-threshold: <cssproperty_shape-image-threshold>
-<cssproperty> = shape-inside: <cssproperty_shape-inside>
-<cssproperty> = shape-margin: <cssproperty_shape-margin>
-<cssproperty> = shape-outside: <cssproperty_shape-outside>
-<cssproperty> = snap-height: <cssproperty_snap-height>
-<cssproperty> = src: <cssproperty_src>
-<cssproperty> = stop-color: <cssproperty_stop-color>
-<cssproperty> = stop-opacity: <cssproperty_stop-opacity>
-<cssproperty> = stroke: <cssproperty_stroke>
-<cssproperty> = stroke-dasharray: <cssproperty_stroke-dasharray>
-<cssproperty> = stroke-dashoffset: <cssproperty_stroke-dashoffset>
-<cssproperty> = stroke-linecap: <cssproperty_stroke-linecap>
-<cssproperty> = stroke-linejoin: <cssproperty_stroke-linejoin>
-<cssproperty> = stroke-miterlimit: <cssproperty_stroke-miterlimit>
-<cssproperty> = stroke-opacity: <cssproperty_stroke-opacity>
-<cssproperty> = stroke-width: <cssproperty_stroke-width>
-<cssproperty> = tab-size: <cssproperty_tab-size>
-<cssproperty> = table-layout: <cssproperty_table-layout>
-<cssproperty> = text-align: <cssproperty_text-align>
-<cssproperty> = text-align-last: <cssproperty_text-align-last>
-<cssproperty> = text-anchor: <cssproperty_text-anchor>
-<cssproperty> = text-combine-upright: <cssproperty_text-combine-upright>
-<cssproperty> = text-decoration: <cssproperty_text-decoration>
-<cssproperty> = text-decoration-color: <cssproperty_text-decoration-color>
-<cssproperty> = text-decoration-line: <cssproperty_text-decoration-line>
-<cssproperty> = text-decoration-style: <cssproperty_text-decoration-style>
-<cssproperty> = text-decoration-upright: <cssproperty_text-decoration-upright>
-<cssproperty> = text-indent: <cssproperty_text-indent>
-<cssproperty> = text-justify: <cssproperty_text-justify>
-<cssproperty> = text-orientation: <cssproperty_text-orientation>
-<cssproperty> = text-overflow: <cssproperty_text-overflow>
-<cssproperty> = text-rendering: <cssproperty_text-rendering>
-<cssproperty> = text-shadow: <cssproperty_text-shadow>
-<cssproperty> = text-transform: <cssproperty_text-transform>
-<cssproperty> = text-underline: <cssproperty_text-underline>
-<cssproperty> = text-underline-position: <cssproperty_text-underline-position>
-<cssproperty> = top: <cssproperty_top>
-<cssproperty> = touch-action: <cssproperty_touch-action>
-<cssproperty> = transform: <cssproperty_transform>
-<cssproperty> = transform-origin: <cssproperty_transform-origin>
-<cssproperty> = transform-style: <cssproperty_transform-style>
-<cssproperty> = transition: <cssproperty_transition>
-<cssproperty> = transition-delay: <cssproperty_transition-delay>
-<cssproperty> = transition-duration: <cssproperty_transition-duration>
-<cssproperty> = transition-properties: <cssproperty_transition-properties>
-<cssproperty> = transition-property: <cssproperty_transition-property>
-<cssproperty> = transition-timing-function: <cssproperty_transition-timing-function>
-<cssproperty> = translate: <cssproperty_translate>
-<cssproperty> = unicode-bidi: <cssproperty_unicode-bidi>
-<cssproperty> = user-select: <cssproperty_user-select>
-<cssproperty> = user-zoom: <cssproperty_user-zoom>
-<cssproperty> = vector-effect: <cssproperty_vector-effect>
-<cssproperty> = vertical-align: <cssproperty_vertical-align>
-<cssproperty> = visibility: <cssproperty_visibility>
-<cssproperty> = weight: <cssproperty_weight>
-<cssproperty> = white: <cssproperty_white>
-<cssproperty> = white-space: <cssproperty_white-space>
-<cssproperty> = whitespace: <cssproperty_whitespace>
-<cssproperty> = widows: <cssproperty_widows>
-<cssproperty> = width: <cssproperty_width>
-<cssproperty> = will-change: <cssproperty_will-change>
-<cssproperty> = word-break: <cssproperty_word-break>
-<cssproperty> = word-space: <cssproperty_word-space>
-<cssproperty> = word-spacing: <cssproperty_word-spacing>
-<cssproperty> = word-wrap: <cssproperty_word-wrap>
-<cssproperty> = writing-mode: <cssproperty_writing-mode>
-<cssproperty> = z-index: <cssproperty_z-index>
-<cssproperty> = zoom: <cssproperty_zoom>
-
-# Container Queries
-<cssproperty> = container: <cssproperty_container>
-<cssproperty> = container-name: <cssproperty_container-name>
-<cssproperty> = container-type: <cssproperty_container-type>
-<cssproperty> = container-inline-size: <cssproperty_container-inline-size>
-<cssproperty> = container-inline-size: <cssproperty_container-inline-size>
-
-# Cascade Layers
-<cssproperty> = layer-name: <cssproperty_layer-name>
-
-# Color Level 4+
-<cssproperty> = color-mix: <cssproperty_color-mix>
-<cssproperty> = color-scheme: <cssproperty_color-scheme>
-<cssproperty> = color-adjust: <cssproperty_color-adjust>
-<cssproperty> = scroll-timeline: <cssproperty_scroll-timeline>
-<cssproperty> = scroll-timeline-axis: <cssproperty_scroll-timeline-axis>
-<cssproperty> = scroll-timeline-name: <cssproperty_scroll-timeline-name>
-<cssproperty> = timeline-scope: <cssproperty_timeline-scope>
-<cssproperty> = animation-timeline: <cssproperty_animation-timeline>
-<cssproperty> = view-timeline: <cssproperty_view-timeline>
-<cssproperty> = view-timeline-axis: <cssproperty_view-timeline-axis>
-<cssproperty> = view-timeline-inset: <cssproperty_view-timeline-inset>
-<cssproperty> = view-timeline-name: <cssproperty_view-timeline-name>
-
-# View Transitions
-<cssproperty> = view-transition-name: <cssproperty_view-transition-name>
-
-# Scroll Drive
-<cssproperty> = scroll-driven-animation: <cssproperty_scroll-driven-animation>
-
-# Subgrid
-<cssproperty> = grid-template-columns: subgrid <cssproperty_grid-template-columns>
-<cssproperty> = grid-template-rows: subgrid <cssproperty_grid-template-rows>
-
-# New Logical Properties
-<cssproperty> = block-size: <cssproperty_block-size>
-<cssproperty> = inline-size: <cssproperty_inline-size>
-<cssproperty> = min-block-size: <cssproperty_min-block-size>
-<cssproperty> = max-block-size: <cssproperty_max-block-size>
-<cssproperty> = min-inline-size: <cssproperty_min-inline-size>
-<cssproperty> = max-inline-size: <cssproperty_max-inline-size>
-<cssproperty> = margin-block: <cssproperty_margin-block>
-<cssproperty> = margin-inline: <cssproperty_margin-inline>
-<cssproperty> = margin-block-start: <cssproperty_margin-block-start>
-<cssproperty> = margin-block-end: <cssproperty_margin-block-end>
-<cssproperty> = margin-inline-start: <cssproperty_margin-inline-start>
-<cssproperty> = margin-inline-end: <cssproperty_margin-inline-end>
-<cssproperty> = padding-block: <cssproperty_padding-block>
-<cssproperty> = padding-inline: <cssproperty_padding-inline>
-<cssproperty> = padding-block-start: <cssproperty_padding-block-start>
-<cssproperty> = padding-block-end: <cssproperty_padding-block-end>
-<cssproperty> = padding-inline-start: <cssproperty_padding-inline-start>
-<cssproperty> = padding-inline-end: <cssproperty_padding-inline-end>
-<cssproperty> = inset: <cssproperty_inset>
-<cssproperty> = inset-block: <cssproperty_inset-block>
-<cssproperty> = inset-inline: <cssproperty_inset-inline>
-<cssproperty> = inset-block-start: <cssproperty_inset-block-start>
-<cssproperty> = inset-block-end: <cssproperty_inset-block-end>
-<cssproperty> = inset-inline-start: <cssproperty_inset-inline-start>
-<cssproperty> = inset-inline-end: <cssproperty_inset-inline-end>
-
-# New Pseudo-class Selectors
-<selector2> = <element>:has(<selector>)
-<selector2> = <element>:is(<selector>)
-<selector2> = <element>:where(<selector>)
-<selector2> = <element>:not(<selector>)
-<selector2> = <element>:focus-within
-<selector2> = <element>:focus-visible
-<selector2> = <element>:hover
-<selector2> = <element>:active
-<selector2> = <element>:target
-<selector2> = <element>:target-within
-<selector2> = <element>:current
-<selector2> = <element>:past
-<selector2> = <element>:future
-<selector2> = <element>:playing
-<selector2> = <element>:paused
-<selector2> = <element>:picture-in-picture
-<selector2> = <element>:modal
-<selector2> = <element>:any-link
-<selector2> = <element>:local-link
-<selector2> = <element>:scope
-<selector2> = <element>:host(<selector>)
-<selector2> = <element>:host-context(<selector>)
-<selector2> = <element>:nth-child(odd)
-<selector2> = <element>:nth-child(even)
-<selector2> = <element>:nth-child(2n+1)
-<selector2> = <element>:nth-last-child(2n)
-<selector2> = <element>:nth-of-type(odd)
-<selector2> = <element>:nth-last-of-type(even)
-<selector2> = <element>:first
-<selector2> = <element>:last
-<selector2> = <element>:only
-<selector2> = <element>:blank
-<selector2> = <element>:defined
-<selector2> = <element>:indeterminate
-<selector2> = <element>:default
-<selector2> = <element>:valid
-<selector2> = <element>:invalid
-<selector2> = <element>:user-invalid
-<selector2> = <element>:in-range
-<selector2> = <element>:out-of-range
-<selector2> = <element>:placeholder-shown
-<selector2> = <element>:autofill
-<selector2> = <element>:read-only
-<selector2> = <element>:read-write
-<selector2> = <element>:enabled
-<selector2> = <element>:disabled
-<selector2> = <element>:checked
-<selector2> = <element>:unchecked
-<selector2> = <element>:checked
-<selector2> = <element>:default
-<selector2> = <element>:valid
-<selector2> = <element>:invalid
-<selector2> = <element>:required
-<selector2> = <element>:optional
-<selector2> = <element>:user-valid
-<selector2> = <element>:user-invalid
-<selector2> = <element>:lang(en)
-<selector2> = <element>:dir(ltr)
-<selector2> = <element>:dir(rtl)
-<selector2> = <element>:starting-style
-
-# New Pseudo-element Selectors
-<selector2> = <element>::backdrop
-<selector2> = <element>::cue
-<selector2> = <element>::cue-region
-<selector2> = <element>::grammar-error
-<selector2> = <element>::marker
-<selector2> = <element>::part(<DOMString>)
-<selector2> = <element>::slotted(<selector>)
-<selector2> = <element>::spelling-error
-<selector2> = <element>::placeholder
-<selector2> = <element>::selection
-<selector2> = <element>::target-text
-<selector2> = <element>::highlight(<DOMString>)
-
-# At-rules
-<atrule> = @container <selector> { <rule> }
-<atrule> = @container (min-width: <fuzzint>px) { <rule> }
-<atrule> = @container (min-height: <fuzzint>px) { <rule> }
-<atrule> = @container (width > <fuzzint>px) { <rule> }
-<atrule> = @container (height > <fuzzint>px) { <rule> }
-<atrule> = @container (aspect-ratio > 1/1) { <rule> }
-<atrule> = @container (orientation: landscape) { <rule> }
-<atrule> = @container (orientation: portrait) { <rule> }
-<atrule> = @container (block-size > <fuzzint>px) { <rule> }
-<atrule> = @container (inline-size > <fuzzint>px) { <rule> }
-<atrule> = @container <DOMString> / (min-width: <fuzzint>px) { <rule> }
-<atrule> = @layer <DOMString> { <rule> }
-<atrule> = @layer { <rule> }
-<atrule> = @layer <DOMString>, <DOMString>, <DOMString>
-<atrule> = @scope (<selector> to <selector>) { <rule> }
-<atrule> = @property --<DOMString> { syntax: "<cssproperty_syntax>"; inherits: <boolean>; initial-value: <cssproperty_value>; }
-<atrule> = @view-transition { <rule> }
-<atrule> = @starting-style { <rule> }
-
-# New CSS Functions
-<cssproperty> = background: paint(<DOMString>)
-<cssproperty> = background-image: paint(<DOMString>)
-<cssproperty> = mask-image: paint(<DOMString>)
-<cssproperty> = content: open-quote
-<cssproperty> = content: close-quote
-<cssproperty> = content: no-open-quote
-<cssproperty> = content: no-close-quote
-<cssproperty> = content: attr(<DOMString>)
-<cssproperty> = content: counter(<DOMString>)
-<cssproperty> = content: counters(<DOMString>, "<DOMString>")
-<cssproperty> = counter-reset: <DOMString> <fuzzint>
-<cssproperty> = counter-increment: <DOMString> <fuzzint>
-
-# New CSS Values
-<cssproperty> = background: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: oklab(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: lch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: lab(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: color(display-p3 <fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: color(rec2020 <fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: color(xyz-d50 <fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = color: color-mix(in srgb, red, blue <fuzzfloat>%)
-<cssproperty> = color: color-mix(in oklch, red, blue)
-<cssproperty> = color: color-mix(in lab, <cssproperty_color>, <cssproperty_color>)
-<cssproperty> = fill: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = stroke: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = outline-color: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = border-color: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = box-shadow: 0 0 <fuzzint>px oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-<cssproperty> = text-shadow: 0 0 <fuzzint>px oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-
-# New CSS Grid Features
-<cssproperty> = grid-template-areas: "<DOMString> <DOMString> <DOMString>" "<DOMString> <DOMString> <DOMString>"
-<cssproperty> = grid-auto-flow: row dense
-<cssproperty> = grid-auto-flow: column dense
-<cssproperty> = grid-auto-rows: min-content
-<cssproperty> = grid-auto-columns: max-content
-<cssproperty> = grid-row: span <fuzzint>
-<cssproperty> = grid-column: span <fuzzint>
-<cssproperty> = grid-area: <DOMString>
-
-# New CSS Flexbox Features
-<cssproperty> = flex-wrap: wrap-reverse
-<cssproperty> = flex-flow: row wrap
-<cssproperty> = align-content: stretch
-<cssproperty> = align-content: center
-<cssproperty> = align-content: flex-start
-<cssproperty> = align-content: flex-end
-<cssproperty> = align-content: space-between
-<cssproperty> = align-content: space-around
-<cssproperty> = align-content: space-evenly
-<cssproperty> = justify-content: normal
-<cssproperty> = justify-content: center
-<cssproperty> = justify-content: flex-start
-<cssproperty> = justify-content: flex-end
-<cssproperty> = justify-content: space-between
-<cssproperty> = justify-content: space-around
-<cssproperty> = justify-content: space-evenly
-<cssproperty> = align-items: normal
-<cssproperty> = align-items: stretch
-<cssproperty> = align-items: center
-<cssproperty> = align-items: flex-start
-<cssproperty> = align-items: flex-end
-<cssproperty> = align-items: baseline
-<cssproperty> = align-items: first baseline
-<cssproperty> = align-items: last baseline
-<cssproperty> = place-items: center
-<cssproperty> = place-items: stretch
-<cssproperty> = place-content: center
-<cssproperty> = place-content: stretch
-<cssproperty> = place-self: center
-<cssproperty> = place-self: stretch
-
-# New CSS Animation Features
-<cssproperty> = animation-composition: replace
-<cssproperty> = animation-composition: add
-<cssproperty> = animation-composition: accumulate
-<cssproperty> = animation-range: <fuzzint>px
-<cssproperty> = animation-range: cover
-<cssproperty> = animation-range: contain
-<cssproperty> = animation-range: entry <fuzzint>px
-<cssproperty> = animation-range: exit <fuzzint>px
-<cssproperty> = animation-range: entry-crossing <fuzzint>px
-<cssproperty> = animation-range: exit-crossing <fuzzint>px
-<cssproperty> = animation-direction: alternate-reverse
-<cssproperty> = animation-fill-mode: both
-<cssproperty> = animation-play-state: paused
-<cssproperty> = animation-play-state: running
-
-# New CSS Transform Features
-<cssproperty> = transform: perspective(<fuzzint>px) rotateX(<fuzzfloat>deg) rotateY(<fuzzfloat>deg) rotateZ(<fuzzfloat>deg)
-<cssproperty> = transform: translate3d(<fuzzint>px, <fuzzint>px, <fuzzint>px)
-<cssproperty> = transform: scale3d(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>)
-<cssproperty> = transform: rotate3d(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>deg)
-<cssproperty> = transform: matrix3d(<fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>, <fuzzfloat>)
-<cssproperty> = transform-style: preserve-3d
-<cssproperty> = transform-style: flat
-<cssproperty> = backface-visibility: hidden
-<cssproperty> = backface-visibility: visible
-
-# New CSS Filter Features
-<cssproperty> = filter: blur(<fuzzint>px)
-<cssproperty> = filter: brightness(<fuzzfloat>)
-<cssproperty> = filter: contrast(<fuzzfloat>)
-<cssproperty> = filter: drop-shadow(<fuzzint>px <fuzzint>px <fuzzint>px <cssproperty_color>)
-<cssproperty> = filter: grayscale(<fuzzfloat>)
-<cssproperty> = filter: hue-rotate(<fuzzfloat>deg)
-<cssproperty> = filter: invert(<fuzzfloat>)
-<cssproperty> = filter: opacity(<fuzzfloat>)
-<cssproperty> = filter: saturate(<fuzzfloat>)
-<cssproperty> = filter: sepia(<fuzzfloat>)
-<cssproperty> = filter: url(<hash><DOMString>)
-<cssproperty> = filter: blur(<fuzzint>px) brightness(<fuzzfloat>) contrast(<fuzzfloat>)
-<cssproperty> = backdrop-filter: blur(<fuzzint>px)
-<cssproperty> = backdrop-filter: brightness(<fuzzfloat>)
-<cssproperty> = backdrop-filter: contrast(<fuzzfloat>)
-<cssproperty> = backdrop-filter: grayscale(<fuzzfloat>)
-<cssproperty> = backdrop-filter: hue-rotate(<fuzzfloat>deg)
-<cssproperty> = backdrop-filter: invert(<fuzzfloat>)
-<cssproperty> = backdrop-filter: opacity(<fuzzfloat>)
-<cssproperty> = backdrop-filter: saturate(<fuzzfloat>)
-<cssproperty> = backdrop-filter: sepia(<fuzzfloat>)
-
-# New CSS Mask Features
-<cssproperty> = mask-type: alpha
-<cssproperty> = mask-type: luminance
-<cssproperty> = mask-mode: alpha
-<cssproperty> = mask-mode: luminance
-<cssproperty> = mask-mode: match-source
-<cssproperty> = mask-clip: no-clip
-<cssproperty> = mask-clip: border-box
-<cssproperty> = mask-clip: padding-box
-<cssproperty> = mask-clip: content-box
-<cssproperty> = mask-clip: fill-box
-<cssproperty> = mask-clip: stroke-box
-<cssproperty> = mask-clip: view-box
-<cssproperty> = mask-origin: border-box
-<cssproperty> = mask-origin: padding-box
-<cssproperty> = mask-origin: content-box
-<cssproperty> = mask-origin: fill-box
-<cssproperty> = mask-origin: stroke-box
-<cssproperty> = mask-origin: view-box
-<cssproperty> = mask-repeat: repeat
-<cssproperty> = mask-repeat: no-repeat
-<cssproperty> = mask-repeat: repeat-x
-<cssproperty> = mask-repeat: repeat-y
-<cssproperty> = mask-repeat: space
-<cssproperty> = mask-repeat: round
-<cssproperty> = mask-position: center
-<cssproperty> = mask-position: top left
-<cssproperty> = mask-position: <fuzzint>px <fuzzint>px
-<cssproperty> = mask-size: contain
-<cssproperty> = mask-size: cover
-<cssproperty> = mask-size: <fuzzint>px <fuzzint>px
-
-# New CSS Clip Path Features
-<cssproperty> = clip-path: inset(<fuzzint>px <fuzzint>px <fuzzint>px <fuzzint>px)
-<cssproperty> = clip-path: circle(<fuzzint>px at <fuzzint>px <fuzzint>px)
-<cssproperty> = clip-path: ellipse(<fuzzint>px <fuzzint>px at <fuzzint>px <fuzzint>px)
-<cssproperty> = clip-path: polygon(<fuzzint>px <fuzzint>px, <fuzzint>px <fuzzint>px, <fuzzint>px <fuzzint>px)
-<cssproperty> = clip-path: url(<hash><DOMString>)
-<cssproperty> = clip-path: path("M <fuzzint> <fuzzint> L <fuzzint> <fuzzint> L <fuzzint> <fuzzint> Z")
-<cssproperty> = clip-rule: nonzero
-<cssproperty> = clip-rule: evenodd
-
-# New CSS Scroll Features
-<cssproperty> = scroll-snap-align: none
-<cssproperty> = scroll-snap-align: start
-<cssproperty> = scroll-snap-align: end
-<cssproperty> = scroll-snap-align: center
-<cssproperty> = scroll-snap-align: none
-<cssproperty> = scroll-snap-stop: normal
-<cssproperty> = scroll-snap-stop: always
-<cssproperty> = scroll-padding: <fuzzint>px
-<cssproperty> = scroll-padding-top: <fuzzint>px
-<cssproperty> = scroll-padding-right: <fuzzint>px
-<cssproperty> = scroll-padding-bottom: <fuzzint>px
-<cssproperty> = scroll-padding-left: <fuzzint>px
-<cssproperty> = scroll-padding-block: <fuzzint>px
-<cssproperty> = scroll-padding-inline: <fuzzint>px
-<cssproperty> = scroll-margin: <fuzzint>px
-<cssproperty> = scroll-margin-top: <fuzzint>px
-<cssproperty> = scroll-margin-right: <fuzzint>px
-<cssproperty> = scroll-margin-bottom: <fuzzint>px
-<cssproperty> = scroll-margin-left: <fuzzint>px
-<cssproperty> = scroll-margin-block: <fuzzint>px
-<cssproperty> = scroll-margin-inline: <fuzzint>px
-<cssproperty> = scroll-padding: <fuzzint>px
-<cssproperty> = overscroll-behavior: auto
-<cssproperty> = overscroll-behavior: contain
-<cssproperty> = overscroll-behavior: none
-<cssproperty> = overscroll-behavior-x: auto
-<cssproperty> = overscroll-behavior-y: contain
-<cssproperty> = overscroll-behavior: contain
-
-# New CSS Text Features
-<cssproperty> = text-wrap: wrap
-<cssproperty> = text-wrap: nowrap
-<cssproperty> = text-wrap: balance
-<cssproperty> = text-wrap: pretty
-<cssproperty> = text-decoration-thickness: <fuzzint>px
-<cssproperty> = text-decoration-thickness: from-font
-<cssproperty> = text-decoration-thickness: auto
-<cssproperty> = text-decoration-skip-ink: auto
-<cssproperty> = text-decoration-skip-ink: none
-<cssproperty> = text-decoration-skip-ink: all
-<cssproperty> = text-orientation: mixed
-<cssproperty> = text-orientation: upright
-<cssproperty> = text-orientation: sideways
-<cssproperty> = text-orientation: sideways-right
-<cssproperty> = text-orientation: sideways-left
-<cssproperty> = text-spacing: auto
-<cssproperty> = text-spacing: trim-start
-<cssproperty> = text-spacing: trim-end
-<cssproperty> = text-spacing: trim-both
-<cssproperty> = text-spacing: full
-<cssproperty> = text-size-adjust: none
-<cssproperty> = text-size-adjust: auto
-<cssproperty> = text-underline-offset: auto
-<cssproperty> = text-underline-offset: <fuzzint>px
-<cssproperty> = text-underline-offset: from-font
-<cssproperty> = text-decoration-skip-ink: auto
-<cssproperty> = text-decoration-skip-ink: none
-<cssproperty> = hanging-punctuation: first
-<cssproperty> = hanging-punctuation: last
-<cssproperty> = hanging-punctuation: first last
-<cssproperty> = hanging-punctuation: none
-<cssproperty> = line-clamp: <fuzzint>
-<cssproperty> = line-break: auto
-<cssproperty> = line-break: loose
-<cssproperty> = line-break: normal
-<cssproperty> = line-break: strict
-<cssproperty> = line-break: anywhere
-<cssproperty> = overflow-wrap: normal
-<cssproperty> = overflow-wrap: break-word
-<cssproperty> = overflow-wrap: anywhere
-<cssproperty> = word-break: normal
-<cssproperty> = word-break: break-all
-<cssproperty> = word-break: keep-all
-<cssproperty> = word-break: break-word
-<cssproperty> = hyphens: none
-<cssproperty> = hyphens: manual
-<cssproperty> = hyphens: auto
-
-# New CSS Font Features
-<cssproperty> = font-palette: light
-<cssproperty> = font-palette: dark
-<cssproperty> = font-palette: <DOMString>
-<cssproperty> = font-optical-sizing: auto
-<cssproperty> = font-optical-sizing: none
-<cssproperty> = font-size-adjust: auto
-<cssproperty> = font-size-adjust: <fuzzfloat>
-<cssproperty> = font-variation-settings: "<DOMString>" <fuzzint>
-<cssproperty> = font-feature-settings: normal
-<cssproperty> = font-feature-settings: "<DOMString>" <fuzzint>
-<cssproperty> = font-kerning: auto
-<cssproperty> = font-kerning: normal
-<cssproperty> = font-kerning: none
-<cssproperty> = font-language-override: normal
-<cssproperty> = font-language-override: "<DOMString>"
-<cssproperty> = font-variant-alternates: normal
-<cssproperty> = font-variant-caps: normal
-<cssproperty> = font-variant-caps: small-caps
-<cssproperty> = font-variant-caps: all-small-caps
-<cssproperty> = font-variant-caps: petite-caps
-<cssproperty> = font-variant-caps: all-petite-caps
-<cssproperty> = font-variant-caps: unicase
-<cssproperty> = font-variant-caps: titling-caps
-<cssproperty> = font-variant-east-asian: normal
-<cssproperty> = font-variant-ligatures: normal
-<cssproperty> = font-variant-ligatures: none
-<cssproperty> = font-variant-ligatures: common-ligatures
-<cssproperty> = font-variant-ligatures: no-common-ligatures
-<cssproperty> = font-variant-ligatures: discretionary-ligatures
-<cssproperty> = font-variant-ligatures: no-discretionary-ligatures
-<cssproperty> = font-variant-ligatures: historical-ligatures
-<cssproperty> = font-variant-ligatures: no-historical-ligatures
-<cssproperty> = font-variant-ligatures: contextual
-<cssproperty> = font-variant-ligatures: no-contextual
-<cssproperty> = font-variant-numeric: normal
-<cssproperty> = font-variant-numeric: lining-nums
-<cssproperty> = font-variant-numeric: oldstyle-nums
-<cssproperty> = font-variant-numeric: proportional-nums
-<cssproperty> = font-variant-numeric: tabular-nums
-<cssproperty> = font-variant-numeric: diagonal-fractions
-<cssproperty> = font-variant-numeric: stacked-fractions
-<cssproperty> = font-variant-numeric: ordinal
-<cssproperty> = font-variant-numeric: slashed-zero
-<cssproperty> = font-variant-position: normal
-<cssproperty> = font-variant-position: sub
-<cssproperty> = font-variant-position: super
-
-# New CSS Overflow Features
-<cssproperty> = overflow-x: visible
-<cssproperty> = overflow-x: hidden
-<cssproperty> = overflow-x: clip
-<cssproperty> = overflow-x: scroll
-<cssproperty> = overflow-x: auto
-<cssproperty> = overflow-y: visible
-<cssproperty> = overflow-y: hidden
-<cssproperty> = overflow-y: clip
-<cssproperty> = overflow-y: scroll
-<cssproperty> = overflow-y: auto
-<cssproperty> = overflow-x: overlay
-<cssproperty> = overflow-y: overlay
-<cssproperty> = overflow-clip-margin: <fuzzint>px
-<cssproperty> = scrollbar-color: <cssproperty_color> <cssproperty_color>
-<cssproperty> = scrollbar-gutter: auto
-<cssproperty> = scrollbar-gutter: stable
-<cssproperty> = scrollbar-gutter: stable both-edges
-<cssproperty> = scrollbar-width: auto
-<cssproperty> = scrollbar-width: thin
-<cssproperty> = scrollbar-width: none
-
-# New CSS Position Features
-<cssproperty> = position: absolute
-<cssproperty> = position: fixed
-<cssproperty> = position: relative
-<cssproperty> = position: static
-<cssproperty> = position: sticky
-<cssproperty> = position: running(<DOMString>)
-<cssproperty> = position-try: <fuzzint>
-<cssproperty> = position-try-fallbacks: <DOMString>
-<cssproperty> = position-try-order: size-only
-<cssproperty> = position-try-order: source-order
-<cssproperty> = contain-intrinsic-size: <fuzzint>px <fuzzint>px
-<cssproperty> = contain-intrinsic-width: <fuzzint>px
-<cssproperty> = contain-intrinsic-height: <fuzzint>px
-
-# New CSS Containment Features
-<cssproperty> = contain: none
-<cssproperty> = contain: strict
-<cssproperty> = contain: content
-<cssproperty> = contain: size
-<cssproperty> = contain: layout
-<cssproperty> = contain: paint
-<cssproperty> = contain: style
-<cssproperty> = contain: inline-size
-<cssproperty> = contain-intrinsic-size: auto
-<cssproperty> = contain-intrinsic-width: auto
-<cssproperty> = contain-intrinsic-height: auto
-
-# New CSS Appearance Features
-<cssproperty> = appearance: none
-<cssproperty> = appearance: auto
-<cssproperty> = appearance: textfield
-<cssproperty> = appearance: searchfield
-<cssproperty> = appearance: textarea
-<cssproperty> = appearance: button
-<cssproperty> = appearance: menu
-<cssproperty> = appearance: listbox
-<cssproperty> = appearance: checkbox
-<cssproperty> = appearance: radio
-<cssproperty> = appearance: slider-horizontal
-<cssproperty> = appearance: slider-vertical
-<cssproperty> = appearance: menulist
-<cssproperty> = appearance: meter
-<cssproperty> = appearance: progressbar
-<cssproperty> = appearance: bullet
-<cssproperty> = appearance: disc
-<cssproperty> = appearance: circle
-<cssproperty> = appearance: square
-<cssproperty> = appearance: none
-<cssproperty> = -webkit-appearance: none
-<cssproperty> = -moz-appearance: none
-
-# New CSS Box Features
-<cssproperty> = box-decoration-break: slice
-<cssproperty> = box-decoration-break: clone
-<cssproperty> = box-shadow: inset <fuzzint>px <fuzzint>px <fuzzint>px <cssproperty_color>
-<cssproperty> = box-shadow: <fuzzint>px <fuzzint>px <fuzzint>px <fuzzint>px <cssproperty_color>
-<cssproperty> = box-sizing: border-box
-<cssproperty> = box-sizing: content-box
-<cssproperty> = break-after: auto
-<cssproperty> = break-after: avoid
-<cssproperty> = break-after: always
-<cssproperty> = break-after: all
-<cssproperty> = break-after: avoid-page
-<cssproperty> = break-after: page
-<cssproperty> = break-after: left
-<cssproperty> = break-after: right
-<cssproperty> = break-after: column
-<cssproperty> = break-after: avoid-column
-<cssproperty> = break-after: region
-<cssproperty> = break-after: avoid-region
-<cssproperty> = break-before: auto
-<cssproperty> = break-before: avoid
-<cssproperty> = break-before: always
-<cssproperty> = break-before: all
-<cssproperty> = break-before: avoid-page
-<cssproperty> = break-before: page
-<cssproperty> = break-before: left
-<cssproperty> = break-before: right
-<cssproperty> = break-before: column
-<cssproperty> = break-before: avoid-column
-<cssproperty> = break-before: region
-<cssproperty> = break-before: avoid-region
-<cssproperty> = break-inside: auto
-<cssproperty> = break-inside: avoid
-<cssproperty> = break-inside: avoid-page
-<cssproperty> = break-inside: avoid-column
-<cssproperty> = break-inside: avoid-region
-<cssproperty> = caption-side: top
-<cssproperty> = caption-side: bottom
-<cssproperty> = empty-cells: show
-<cssproperty> = empty-cells: hide
-<cssproperty> = max-lines: <fuzzint>
-
-# New CSS Image Features
-<cssproperty> = image-rendering: auto
-<cssproperty> = image-rendering: crisp-edges
-<cssproperty> = image-rendering: pixelated
-<cssproperty> = image-rendering: optimizeSpeed
-<cssproperty> = image-rendering: optimizeQuality
-<cssproperty> = image-orientation: auto
-<cssproperty> = image-orientation: from-image
-<cssproperty> = image-orientation: <fuzzfloat>deg
-<cssproperty> = object-fit: fill
-<cssproperty> = object-fit: contain
-<cssproperty> = object-fit: cover
-<cssproperty> = object-fit: none
-<cssproperty> = object-fit: scale-down
-<cssproperty> = object-position: center
-<cssproperty> = object-position: <fuzzint>px <fuzzint>px
-<cssproperty> = object-position: <fuzzfloat>% <fuzzfloat>%
-
-# New CSS List Features
-<cssproperty> = list-style: none
-<cssproperty> = list-style: disc
-<cssproperty> = list-style: circle
-<cssproperty> = list-style: square
-<cssproperty> = list-style: decimal
-<cssproperty> = list-style: decimal-leading-zero
-<cssproperty> = list-style: lower-roman
-<cssproperty> = list-style: upper-roman
-<cssproperty> = list-style: lower-greek
-<cssproperty> = list-style: lower-latin
-<cssproperty> = list-style: upper-latin
-<cssproperty> = list-style: armenian
-<cssproperty> = list-style: georgian
-<cssproperty> = list-style: cjk-ideographic
-<cssproperty> = list-style: hiragana
-<cssproperty> = list-style: katakana
-<cssproperty> = list-style: hiragana-iroha
-<cssproperty> = list-style: katakana-iroha
-<cssproperty> = list-style-position: inside
-<cssproperty> = list-style-position: outside
-<cssproperty> = list-style-image: url("<DOMString>")
-
-# New CSS Table Features
-<cssproperty> = border-collapse: collapse
-<cssproperty> = border-collapse: separate
-<cssproperty> = border-spacing: <fuzzint>px
-<cssproperty> = border-spacing: <fuzzint>px <fuzzint>px
-<cssproperty> = empty-cells: show
-<cssproperty> = empty-cells: hide
-<cssproperty> = table-layout: auto
-<cssproperty> = table-layout: fixed
-<cssproperty> = border-color: <cssproperty_color>
-<cssproperty> = border-style: none
-<cssproperty> = border-style: hidden
-<cssproperty> = border-style: dotted
-<cssproperty> = border-style: dashed
-<cssproperty> = border-style: solid
-<cssproperty> = border-style: double
-<cssproperty> = border-style: groove
-<cssproperty> = border-style: ridge
-<cssproperty> = border-style: inset
-<cssproperty> = border-style: outset
-<cssproperty> = border-width: <fuzzint>px
-<cssproperty> = border-radius: <fuzzint>px
-<cssproperty> = border-radius: <fuzzint>px / <fuzzint>px
-<cssproperty> = border-top-left-radius: <fuzzint>px
-<cssproperty> = border-top-right-radius: <fuzzint>px
-<cssproperty> = border-bottom-right-radius: <fuzzint>px
-<cssproperty> = border-bottom-left-radius: <fuzzint>px
-<cssproperty> = border-image: url("<DOMString>") <fuzzint> fill
-<cssproperty> = border-image-source: url("<DOMString>")
-<cssproperty> = border-image-slice: <fuzzint> fill
-<cssproperty> = border-image-width: <fuzzint>
-<cssproperty> = border-image-outset: <fuzzint>
-<cssproperty> = border-image-repeat: stretch
-<cssproperty> = border-image-repeat: repeat
-<cssproperty> = border-image-repeat: round
-<cssproperty> = border-image-repeat: space
-
-# New CSS Cursor Features
-<cssproperty> = cursor: auto
-<cssproperty> = cursor: default
-<cssproperty> = cursor: none
-<cssproperty> = cursor: context-menu
-<cssproperty> = cursor: help
-<cssproperty> = cursor: pointer
-<cssproperty> = cursor: progress
-<cssproperty> = cursor: wait
-<cssproperty> = cursor: cell
-<cssproperty> = cursor: crosshair
-<cssproperty> = cursor: text
-<cssproperty> = cursor: vertical-text
-<cssproperty> = cursor: alias
-<cssproperty> = cursor: copy
-<cssproperty> = cursor: move
-<cssproperty> = cursor: no-drop
-<cssproperty> = cursor: not-allowed
-<cssproperty> = cursor: grab
-<cssproperty> = cursor: grabbing
-<cssproperty> = cursor: zoom-in
-<cssproperty> = cursor: zoom-out
-<cssproperty> = cursor: e-resize
-<cssproperty> = cursor: n-resize
-<cssproperty> = cursor: ne-resize
-<cssproperty> = cursor: nw-resize
-<cssproperty> = cursor: s-resize
-<cssproperty> = cursor: se-resize
-<cssproperty> = cursor: sw-resize
-<cssproperty> = cursor: w-resize
-<cssproperty> = cursor: ew-resize
-<cssproperty> = cursor: ns-resize
-<cssproperty> = cursor: nesw-resize
-<cssproperty> = cursor: nwse-resize
-<cssproperty> = cursor: col-resize
-<cssproperty> = cursor: row-resize
-<cssproperty> = cursor: all-scroll
-<cssproperty> = cursor: url("<DOMString>"), auto
-
-# New CSS Print Features
-<cssproperty> = page-break-after: auto
-<cssproperty> = page-break-after: always
-<cssproperty> = page-break-after: avoid
-<cssproperty> = page-break-after: left
-<cssproperty> = page-break-after: right
-<cssproperty> = page-break-before: auto
-<cssproperty> = page-break-before: always
-<cssproperty> = page-break-before: avoid
-<cssproperty> = page-break-before: left
-<cssproperty> = page-break-before: right
-<cssproperty> = page-break-inside: auto
-<cssproperty> = page-break-inside: avoid
-<cssproperty> = orphans: <fuzzint>
-<cssproperty> = widows: <fuzzint>
-
-# New CSS Speech Features
-<cssproperty> = speak: auto
-<cssproperty> = speak: normal
-<cssproperty> = speak: none
-<cssproperty> = speak: mix
-<cssproperty> = speak-as: normal
-<cssproperty> = speak-as: spell
-<cssproperty> = speak-as: digits
-<cssproperty> = speak-as: literal-punctuation
-<cssproperty> = speak-as: no-punctuation
-<cssproperty> = voice-balance: center
-<cssproperty> = voice-balance: left
-<cssproperty> = voice-balance: right
-<cssproperty> = voice-balance: <fuzzfloat>
-<cssproperty> = voice-duration: auto
-<cssproperty> = voice-duration: <fuzzint>ms
-<cssproperty> = voice-family: <DOMString>
-<cssproperty> = voice-pitch: <fuzzfloat>Hz
-<cssproperty> = voice-pitch: <fuzzfloat>
-<cssproperty> = voice-range: <fuzzfloat>
-<cssproperty> = voice-rate: normal
-<cssproperty> = voice-rate: <fuzzfloat>
-<cssproperty> = voice-stress: none
-<cssproperty> = voice-stress: normal
-<cssproperty> = voice-stress: strong
-<cssproperty> = voice-stress: moderate
-<cssproperty> = voice-stress: sparse
-<cssproperty> = voice-volume: silent
-<cssproperty> = voice-volume: x-soft
-<cssproperty> = voice-volume: soft
-<cssproperty> = voice-volume: medium
-<cssproperty> = voice-volume: loud
-<cssproperty> = voice-volume: x-loud
-<cssproperty> = voice-volume: <fuzzint>%
-
-# New CSS SVG Features
-<cssproperty> = alignment-baseline: auto
-<cssproperty> = alignment-baseline: baseline
-<cssproperty> = alignment-baseline: before-edge
-<cssproperty> = alignment-baseline: text-before-edge
-<cssproperty> = alignment-baseline: middle
-<cssproperty> = alignment-baseline: central
-<cssproperty> = alignment-baseline: after-edge
-<cssproperty> = alignment-baseline: text-after-edge
-<cssproperty> = alignment-baseline: ideographic
-<cssproperty> = alignment-baseline: alphabetic
-<cssproperty> = alignment-baseline: hanging
-<cssproperty> = alignment-baseline: mathematical
-<cssproperty> = baseline-shift: baseline
-<cssproperty> = baseline-shift: sub
-<cssproperty> = baseline-shift: super
-<cssproperty> = baseline-shift: <fuzzint>px
-<cssproperty> = dominant-baseline: auto
-<cssproperty> = dominant-baseline: use-script
-<cssproperty> = dominant-baseline: no-change
-<cssproperty> = dominant-baseline: reset-size
-<cssproperty> = dominant-baseline: ideographic
-<cssproperty> = dominant-baseline: alphabetic
-<cssproperty> = dominant-baseline: hanging
-<cssproperty> = dominant-baseline: mathematical
-<cssproperty> = color-interpolation: auto
-<cssproperty> = color-interpolation: sRGB
-<cssproperty> = color-interpolation: linearRGB
-<cssproperty> = color-interpolation-filters: auto
-<cssproperty> = color-interpolation-filters: sRGB
-<cssproperty> = color-interpolation-filters: linearRGB
-<cssproperty> = color-rendering: auto
-<cssproperty> = color-rendering: optimizeSpeed
-<cssproperty> = color-rendering: optimizeQuality
-<cssproperty> = flood-color: <cssproperty_color>
-<cssproperty> = flood-opacity: <fuzzfloat>
-<cssproperty> = lighting-color: <cssproperty_color>
-<cssproperty> = marker: none
-<cssproperty> = marker-end: none
-<cssproperty> = marker-mid: none
-<cssproperty> = marker-start: none
-<cssproperty> = solid-opacity: <fuzzfloat>
-<cssproperty> = solid-color: <cssproperty_color>
-<cssproperty> = stop-color: <cssproperty_color>
-<cssproperty> = stop-opacity: <fuzzfloat>
-<cssproperty> = textLength: <fuzzint>px
-<cssproperty> = textLength: <fuzzfloat>%
-<cssproperty> = textLength: auto
-
-# New CSS Will-Change Features
-<cssproperty> = will-change: auto
-<cssproperty> = will-change: scroll-position
-<cssproperty> = will-change: contents
-<cssproperty> = will-change: transform
-<cssproperty> = will-change: opacity
-<cssproperty> = will-change: compositing
-<cssproperty> = will-change: paint
-<cssproperty> = will-change: custom-ident
-<cssproperty> = will-change: transform, opacity
-<cssproperty> = will-change: transform, contents
-
-# New CSS Accent Color
-<cssproperty> = accent-color: auto
-<cssproperty> = accent-color: <cssproperty_color>
-<cssproperty> = accent-color: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-
-# New CSS Caret Color
-<cssproperty> = caret-color: auto
-<cssproperty> = caret-color: <cssproperty_color>
-<cssproperty> = caret-color: oklch(<fuzzfloat> <fuzzfloat> <fuzzfloat>)
-
-# New CSS Color Scheme
-<cssproperty> = color-scheme: normal
-<cssproperty> = color-scheme: light
-<cssproperty> = color-scheme: dark
-<cssproperty> = color-scheme: light dark
-<cssproperty> = color-scheme: only light
-<cssproperty> = color-scheme: only dark
-
-# New CSS Forced Color Adjust
-<cssproperty> = forced-color-adjust: auto
-<cssproperty> = forced-color-adjust: none
-<cssproperty> = forced-color-adjust: preserve
-
-# New CSS Print Color Adjust
-<cssproperty> = print-color-adjust: economy
-<cssproperty> = print-color-adjust: exact
-<cssproperty> = color-adjust: economy
-<cssproperty> = color-adjust: exact
-<cssproperty> = color-adjust: save-data
-
-# New CSS Aspect Ratio
-<cssproperty> = aspect-ratio: auto
-<cssproperty> = aspect-ratio: 16 / 9
-<cssproperty> = aspect-ratio: 1 / 1
-<cssproperty> = aspect-ratio: <fuzzint> / <fuzzint>
-<cssproperty> = aspect-ratio: <fuzzfloat>
-
-# New CSS Field Sizing
-<cssproperty> = field-sizing: content
-<cssproperty> = field-sizing: fixed
-
-# New CSS Overflow Overlay
-<cssproperty> = overflow: overlay
-<cssproperty> = overflow-x: overlay
-<cssproperty> = overflow-y: overlay
-
-# New CSS Interpolate Size
-<cssproperty> = interpolate-size: allowed
-<cssproperty> = interpolate-size: size-only
-
-# New CSS Overflow Edge Distance
-<cssproperty> = overflow-edge-distance: <fuzzint>px
-<cssproperty> = overflow-edge-distance: <fuzzfloat>%
-
-# New CSS Text Wrap
-<cssproperty> = text-wrap-style: auto
-<cssproperty> = text-wrap-style: wrap
-<cssproperty> = text-wrap-style: nowrap
-<cssproperty> = text-wrap-style: balance
-<cssproperty> = text-wrap-style: pretty
-
-# New CSS Rounded Border
-<cssproperty> = border-radius: <fuzzint>px
-<cssproperty> = border-radius: <fuzzint>px <fuzzint>px
-<cssproperty> = border-radius: <fuzzint>px / <fuzzint>px
-<cssproperty> = border-radius: <fuzzint>%
-<cssproperty> = border-radius: 50%
-<cssproperty> = border-radius: 0
-<cssproperty> = border-top-left-radius: <fuzzint>px
-<cssproperty> = border-top-right-radius: <fuzzint>px
-<cssproperty> = border-bottom-right-radius: <fuzzint>px
-<cssproperty> = border-bottom-left-radius: <fuzzint>px
-
-# New CSS Nesting
-<cssproperty> = @nest <selector> { <rule> }
-
-# New CSS Color Gamut
-<cssproperty> = color-gamut: srgb
-<cssproperty> = color-gamut: p3
-<cssproperty> = color-gamut: rec2020
-
-# New CSS Dynamic Range
-<cssproperty> = dynamic-range: standard
-<cssproperty> = dynamic-range: high
-
-# New CSS HDR Metadata
-<cssproperty> = hdr-metadata: none
-<cssproperty> = hdr-metadata: all
-
-# New CSS Preference
-<cssproperty> = prefers-reduced-motion: no-preference
-<cssproperty> = prefers-reduced-motion: reduce
-<cssproperty> = prefers-reduced-transparency: no-preference
-<cssproperty> = prefers-reduced-transparency: reduce
-<cssproperty> = prefers-reduced-motion: no-preference
-<cssproperty> = prefers-reduced-motion: reduce
-<cssproperty> = prefers-contrast: no-preference
-<cssproperty> = prefers-contrast: more
-<cssproperty> = prefers-contrast: less
-<cssproperty> = prefers-contrast: custom
-<cssproperty> = prefers-color-scheme: light
-<cssproperty> = prefers-color-scheme: dark
-<cssproperty> = prefers-color-scheme: no-preference
-<cssproperty> = prefers-color-scheme: light
-<cssproperty> = prefers-color-scheme: dark
-<cssproperty> = prefers-color-scheme: no-preference
-<cssproperty> = prefers-reduced-data: no-preference
-<cssproperty> = prefers-reduced-data: reduce
-<cssproperty> = prefers-reduced-transparency: no-preference
-<cssproperty> = prefers-reduced-transparency: reduce
-
-# New CSS Environment
-<cssproperty> = env(safe-area-inset-top)
-<cssproperty> = env(safe-area-inset-right)
-<cssproperty> = env(safe-area-inset-bottom)
-<cssproperty> = env(safe-area-inset-left)
-<cssproperty> = env(safe-area-inset-top, <fuzzint>px)
-<cssproperty> = env(safe-area-inset-bottom, <fuzzint>px)
-
-# New CSS System Colors
-<cssproperty> = color: Canvas
-<cssproperty> = color: CanvasText
-<cssproperty> = color: LinkText
-<cssproperty> = color: VisitedText
-<cssproperty> = color: ActiveText
-<cssproperty> = color: ButtonFace
-<cssproperty> = color: ButtonText
-<cssproperty> = color: ButtonBorder
-<cssproperty> = color: Field
-<cssproperty> = color: FieldText
-<cssproperty> = color: Highlight
-<cssproperty> = color: HighlightText
-<cssproperty> = color: SelectedItem
-<cssproperty> = color: SelectedItemText
-<cssproperty> = color: GrayText
-<cssproperty> = color: Mark
-<cssproperty> = color: MarkText
-<cssproperty> = color: AccentColor
-<cssproperty> = color: AccentColorText
-
-# New CSS OKLCH Colors
-<cssproperty> = background: oklch(0.7 0.2 200)
-<cssproperty> = background: oklch(0.5 0.3 100 / 0.5)
-<cssproperty> = color: oklch(0.8 0.1 250)
-<cssproperty> = fill: oklch(0.6 0.15 180)
-<cssproperty> = stroke: oklch(0.9 0.05 300)
-<cssproperty> = outline-color: oklch(0.4 0.2 120)
-<cssproperty> = border-color: oklch(0.75 0.1 270)
-<cssproperty> = box-shadow: 0 0 <fuzzint>px oklch(0.5 0.2 200 / 0.3)
-<cssproperty> = text-shadow: 0 0 <fuzzint>px oklch(0.6 0.15 150 / 0.5)
-
-# New CSS OKLAB Colors
-<cssproperty> = background: oklab(0.7 0.1 0.2)
-<cssproperty> = color: oklab(0.8 -0.1 0.1)
-<cssproperty> = fill: oklab(0.6 0.05 -0.1)
-<cssproperty> = stroke: oklab(0.9 0.02 0.05)
-
-# New CSS LCH Colors
-<cssproperty> = background: lch(70% 0.2 200)
-<cssproperty> = color: lch(80% 0.1 250)
-<cssproperty> = fill: lch(60% 0.15 180)
-<cssproperty> = stroke: lch(90% 0.05 300)
-
-# New CSS LAB Colors
-<cssproperty> = background: lab(70% 0.1 0.2)
-<cssproperty> = color: lab(80% -0.1 0.1)
-<cssproperty> = fill: lab(60% 0.05 -0.1)
-<cssproperty> = stroke: lab(90% 0.02 0.05)
-
-# New CSS Color Space Functions
-<cssproperty> = background: color(display-p3 0.5 0.6 0.7)
-<cssproperty> = color: color(rec2020 0.3 0.4 0.5)
-<cssproperty> = fill: color(xyz-d50 0.2 0.3 0.4)
-<cssproperty> = stroke: color(a98-rgb 0.6 0.7 0.8)
-<cssproperty> = outline-color: color(prophoto-rgb 0.4 0.5 0.6)
-
-# New CSS Color Mix
-<cssproperty> = background: color-mix(in srgb, red, blue)
-<cssproperty> = background: color-mix(in oklch, red, blue 50%)
-<cssproperty> = color: color-mix(in lab, <cssproperty_color>, <cssproperty_color>)
-<cssproperty> = fill: color-mix(in srgb, oklch(0.7 0.2 200), oklch(0.5 0.3 100))
-<cssproperty> = stroke: color-mix(in srgb, red 30%, blue 70%)
-
-# New CSS Relative Color Syntax
-<cssproperty> = background: oklch(from red 0.7 L C / 0.5)
-<cssproperty> = color: oklch(from blue L 0.2 200)
-<cssproperty> = fill: oklab(from <cssproperty_color> L a b)
-
-# New CSS Scroll Timeline
-<cssproperty> = scroll-timeline: --<DOMString>
-<cssproperty> = scroll-timeline: --<DOMString> y
-<cssproperty> = scroll-timeline-axis: block
-<cssproperty> = scroll-timeline-axis: inline
-<cssproperty> = scroll-timeline-axis: x
-<cssproperty> = scroll-timeline-axis: y
-<cssproperty> = scroll-timeline-name: --<DOMString>
-<cssproperty> = timeline-scope: --<DOMString>
-<cssproperty> = animation-timeline: auto
-<cssproperty> = animation-timeline: --<DOMString>
-<cssproperty> = animation-timeline: scroll()
-<cssproperty> = animation-timeline: view()
-<cssproperty> = view-timeline: --<DOMString>
-<cssproperty> = view-timeline-axis: block
-<cssproperty> = view-timeline-axis: inline
-<cssproperty> = view-timeline-inset: <fuzzint>px
-<cssproperty> = view-timeline-name: --<DOMString>
-
-# New CSS Animation Range
-<cssproperty> = animation-range: normal
-<cssproperty> = animation-range: <fuzzint>px
-<cssproperty> = animation-range: <fuzzfloat>%
-<cssproperty> = animation-range: cover
-<cssproperty> = animation-range: contain
-<cssproperty> = animation-range: entry
-<cssproperty> = animation-range: exit
-<cssproperty> = animation-range: entry-crossing
-<cssproperty> = animation-range: exit-crossing
-<cssproperty> = animation-range-start: <fuzzint>px
-<cssproperty> = animation-range-end: <fuzzint>px
-
-# New CSS Animation Composition
-<cssproperty> = animation-composition: replace
-<cssproperty> = animation-composition: add
-<cssproperty> = animation-composition: accumulate
-
-# New CSS View Transitions
-<cssproperty> = view-transition-name: none
-<cssproperty> = view-transition-name: <DOMString>
-
-# New CSS Starting Style
-<cssproperty> = starting-style: <rule>
-
-# New CSS Scope
-<cssproperty> = @scope (<selector>) { <rule> }
-<cssproperty> = @scope (<selector> to <selector>) { <rule> }
-
-# New CSS Property Rule
-<cssproperty> = @property --<DOMString> { syntax: "<cssproperty_syntax>"; inherits: <boolean>; initial-value: <cssproperty_value>; }
-
-# New CSS Container Name
-<cssproperty> = container-name: none
-<cssproperty> = container-name: <DOMString>
-<cssproperty> = container-name: <DOMString> <DOMString>
-
-# New CSS Container Type
-<cssproperty> = container-type: normal
-<cssproperty> = container-type: size
-<cssproperty> = container-type: inline-size
-<cssproperty> = container-type: inline-size(--)
-
-# New CSS Container Inline Size
-<cssproperty> = container-inline-size: <fuzzint>px
-<cssproperty> = container-inline-size: <fuzzfloat>%
-<cssproperty> = container-inline-size: auto
-<cssproperty> = container-inline-size: min-content
-<cssproperty> = container-inline-size: max-content
-<cssproperty> = container-inline-size: fit-content
-
-# New CSS Layer
-<cssproperty> = @layer <DOMString>
-<cssproperty> = @layer <DOMString>, <DOMString>
-<cssproperty> = @layer { <rule> }
-
-# New CSS Nesting
-<cssproperty> = @nest <selector> { <rule> }
-
-# New CSS Field Sizing
-<cssproperty> = field-sizing: content
-<cssproperty> = field-sizing: fixed
-
-# New CSS Interpolate Size
-<cssproperty> = interpolate-size: allowed
-<cssproperty> = interpolate-size: size-only
-
-# New CSS Overflow Edge Distance
-<cssproperty> = overflow-edge-distance: <fuzzint>px
-<cssproperty> = overflow-edge-distance: <fuzzfloat>%
-
-# New CSS Text Wrap Style
-<cssproperty> = text-wrap-style: auto
-<cssproperty> = text-wrap-style: wrap
-<cssproperty> = text-wrap-style: nowrap
-<cssproperty> = text-wrap-style: balance
-<cssproperty> = text-wrap-style: pretty
-
-# New CSS Color Gamut
-<cssproperty> = color-gamut: srgb
-<cssproperty> = color-gamut: p3
-<cssproperty> = color-gamut: rec2020
-
-# New CSS Dynamic Range
-<cssproperty> = dynamic-range: standard
-<cssproperty> = dynamic-range: high
-
-# New CSS HDR Metadata
-<cssproperty> = hdr-metadata: none
-<cssproperty> = hdr-metadata: all
-
-# New CSS Preference
-<cssproperty> = prefers-reduced-motion: no-preference
-<cssproperty> = prefers-reduced-motion: reduce
-<cssproperty> = prefers-reduced-transparency: no-preference
-<cssproperty> = prefers-reduced-transparency: reduce
-<cssproperty> = prefers-contrast: no-preference
-<cssproperty> = prefers-contrast: more
-<cssproperty> = prefers-contrast: less
-<cssproperty> = prefers-contrast: custom
-<cssproperty> = prefers-color-scheme: light
-<cssproperty> = prefers-color-scheme: dark
-<cssproperty> = prefers-color-scheme: no-preference
-<cssproperty> = prefers-reduced-data: no-preference
-<cssproperty> = prefers-reduced-data: reduce
-
-# New CSS Environment
-<cssproperty> = env(safe-area-inset-top)
-<cssproperty> = env(safe-area-inset-right)
-<cssproperty> = env(safe-area-inset-bottom)
-<cssproperty> = env(safe-area-inset-left)
-<cssproperty> = env(safe-area-inset-top, <fuzzint>px)
-<cssproperty> = env(safe-area-inset-bottom, <fuzzint>px)
-
-# New CSS System Colors
-<cssproperty> = color: Canvas
-<cssproperty> = color: CanvasText
-<cssproperty> = color: LinkText
-<cssproperty> = color: VisitedText
-<cssproperty> = color: ActiveText
-<cssproperty> = color: ButtonFace
-<cssproperty> = color: ButtonText
-<cssproperty> = color: ButtonBorder
-<cssproperty> = color: Field
-<cssproperty> = color: FieldText
-<cssproperty> = color: Highlight
-<cssproperty> = color: HighlightText
-<cssproperty> = color: SelectedItem
-<cssproperty> = color: SelectedItemText
-<cssproperty> = color: GrayText
-<cssproperty> = color: Mark
-<cssproperty> = color: MarkText
-<cssproperty> = color: AccentColor
-<cssproperty> = color: AccentColorText
-
-# New CSS OKLCH Colors
-<cssproperty> = background: oklch(0.7 0.2 200)
-<cssproperty> = background: oklch(0.5 0.3 100 / 0.5)
-<cssproperty> = color: oklch(0.8 0.1 250)
-<cssproperty> = fill: oklch(0.6 0.15 180)
-<cssproperty> = stroke: oklch(0.9 0.05 300)
-<cssproperty> = outline-color: oklch(0.4 0.2 120)
-<cssproperty> = border-color: oklch(0.75 0.1 270)
-<cssproperty> = box-shadow: 0 0 <fuzzint>px oklch(0.5 0.2 200 / 0.3)
-<cssproperty> = text-shadow: 0 0 <fuzzint>px oklch(0.6 0.15 150 / 0.5)
-
-# New CSS OKLAB Colors
-<cssproperty> = background: oklab(0.7 0.1 0.2)
-<cssproperty> = color: oklab(0.8 -0.1 0.1)
-<cssproperty> = fill: oklab(0.6 0.05 -0.1)
-<cssproperty> = stroke: oklab(0.9 0.02 0.05)
-
-# New CSS LCH Colors
-<cssproperty> = background: lch(70% 0.2 200)
-<cssproperty> = color: lch(80% 0.1 250)
-<cssproperty> = fill: lch(60% 0.15 180)
-<cssproperty> = stroke: lch(90% 0.05 300)
-
-# New CSS LAB Colors
-<cssproperty> = background: lab(70% 0.1 0.2)
-<cssproperty> = color: lab(80% -0.1 0.1)
-<cssproperty> = fill: lab(60% 0.05 -0.1)
-<cssproperty> = stroke: lab(90% 0.02 0.05)
-
-# New CSS Color Space Functions
-<cssproperty> = background: color(display-p3 0.5 0.6 0.7)
-<cssproperty> = color: color(rec2020 0.3 0.4 0.5)
-<cssproperty> = fill: color(xyz-d50 0.2 0.3 0.4)
-<cssproperty> = stroke: color(a98-rgb 0.6 0.7 0.8)
-<cssproperty> = outline-color: color(prophoto-rgb 0.4 0.5 0.6)
-
-# New CSS Color Mix
-<cssproperty> = background: color-mix(in srgb, red, blue)
-<cssproperty> = background: color-mix(in oklch, red, blue 50%)
-<cssproperty> = color: color-mix(in lab, <cssproperty_color>, <cssproperty_color>)
-<cssproperty> = fill: color-mix(in srgb, oklch(0.7 0.2 200), oklch(0.5 0.3 100))
-<cssproperty> = stroke: color-mix(in srgb, red 30%, blue 70%)
-
-# New CSS Relative Color Syntax
-<cssproperty> = background: oklch(from red 0.7 L C / 0.5)
-<cssproperty> = color: oklch(from blue L 0.2 200)
-<cssproperty> = fill: oklab(from <cssproperty_color> L a b)
-
-# New CSS Scroll Timeline
-<cssproperty> = scroll-timeline: --<DOMString>
-<cssproperty> = scroll-timeline: --<DOMString> y
-<cssproperty> = scroll-timeline-axis: block
-<cssproperty> = scroll-timeline-axis: inline
-<cssproperty> = scroll-timeline-axis: x
-<cssproperty> = scroll-timeline-axis: y
-<cssproperty> = scroll-timeline-name: --<DOMString>
-<cssproperty> = timeline-scope: --<DOMString>
-<cssproperty> = animation-timeline: auto
-<cssproperty> = animation-timeline: --<DOMString>
-<cssproperty> = animation-timeline: scroll()
-<cssproperty> = animation-timeline: view()
-<cssproperty> = view-timeline: --<DOMString>
-<cssproperty> = view-timeline-axis: block
-<cssproperty> = view-timeline-axis: inline
-<cssproperty> = view-timeline-inset: <fuzzint>px
-<cssproperty> = view-timeline-name: --<DOMString>
-
-# New CSS Animation Range
-<cssproperty> = animation-range: normal
-<cssproperty> = animation-range: <fuzzint>px
-<cssproperty> = animation-range: <fuzzfloat>%
-<cssproperty> = animation-range: cover
-<cssproperty> = animation-range: contain
-<cssproperty> = animation-range: entry
-<cssproperty> = animation-range: exit
-<cssproperty> = animation-range: entry-crossing
-<cssproperty> = animation-range: exit-crossing
-<cssproperty> = animation-range-start: <fuzzint>px
-<cssproperty> = animation-range-end: <fuzzint>px
-
-# New CSS Animation Composition
-<cssproperty> = animation-composition: replace
-<cssproperty> = animation-composition: add
-<cssproperty> = animation-composition: accumulate
-
-# New CSS View Transitions
-<cssproperty> = view-transition-name: none
-<cssproperty> = view-transition-name: <DOMString>
-
-# New CSS Starting Style
-<cssproperty> = starting-style: <rule>
-
-# New CSS Scope
-<cssproperty> = @scope (<selector>) { <rule> }
-<cssproperty> = @scope (<selector> to <selector>) { <rule> }
-
-# New CSS Property Rule
-<cssproperty> = @property --<DOMString> { syntax: "<cssproperty_syntax>"; inherits: <boolean>; initial-value: <cssproperty_value>; }
-
-# New CSS Container Name
-<cssproperty> = container-name: none
-<cssproperty> = container-name: <DOMString>
-<cssproperty> = container-name: <DOMString> <DOMString>
-
-# New CSS Container Type
-<cssproperty> = container-type: normal
-<cssproperty> = container-type: size
-<cssproperty> = container-type: inline-size
-<cssproperty> = container-type: inline-size(--)
-
-# New CSS Container Inline Size
-<cssproperty> = container-inline-size: <fuzzint>px
-<cssproperty> = container-inline-size: <fuzzfloat>%
-<cssproperty> = container-inline-size: auto
-<cssproperty> = container-inline-size: min-content
-<cssproperty> = container-inline-size: max-content
-<cssproperty> = container-inline-size: fit-content
-
-# New CSS Layer
-<cssproperty> = @layer <DOMString>
-<cssproperty> = @layer <DOMString>, <DOMString>
-<cssproperty> = @layer { <rule> }
-
-# New CSS Nesting
-<cssproperty> = @nest <selector> { <rule> }
-
-# New CSS Field Sizing
-<cssproperty> = field-sizing: content
-<cssproperty> = field-sizing: fixed
-
-# New CSS Interpolate Size
-<cssproperty> = interpolate-size: allowed
-<cssproperty> = interpolate-size: size-only
-
-# New CSS Overflow Edge Distance
-<cssproperty> = overflow-edge-distance: <fuzzint>px
-<cssproperty> = overflow-edge-distance: <fuzzfloat>%
-
-# New CSS Text Wrap Style
-<cssproperty> = text-wrap-style: auto
-<cssproperty> = text-wrap-style: wrap
-<cssproperty> = text-wrap-style: nowrap
-<cssproperty> = text-wrap-style: balance
-<cssproperty> = text-wrap-style: pretty
-
-# New CSS Color Gamut
-<cssproperty> = color-gamut: srgb
-<cssproperty> = color-gamut: p3
-<cssproperty> = color-gamut: rec2020
-
-# New CSS Dynamic Range
-<cssproperty> = dynamic-range: standard
-<cssproperty> = dynamic-range: high
-
-# New CSS HDR Metadata
-<cssproperty> = hdr-metadata: none
-<cssproperty> = hdr-metadata: all
-
-# New CSS Preference
-<cssproperty> = prefers-reduced-motion: no-preference
-<cssproperty> = prefers-reduced-motion: reduce
-<cssproperty> = prefers-reduced-transparency: no-preference
-<cssproperty> = prefers-reduced-transparency: reduce
-<cssproperty> = prefers-contrast: no-preference
-<cssproperty> = prefers-contrast: more
-<cssproperty> = prefers-contrast: less
-<cssproperty> = prefers-contrast: custom
-<cssproperty> = prefers-color-scheme: light
-<cssproperty> = prefers-color-scheme: dark
-<cssproperty> = prefers-color-scheme: no-preference
-<cssproperty> = prefers-reduced-data: no-preference
-<cssproperty> = prefers-reduced-data: reduce
-
-# New CSS Environment
-<cssproperty> = env(safe-area-inset-top)
-<cssproperty> = env(safe-area-inset-right)
-<cssproperty> = env(safe-area-inset-bottom)
-<cssproperty> = env(safe-area-inset-left)
-<cssproperty> = env(safe-area-inset-top, <fuzzint>px)
-<cssproperty> = env(safe-area-inset-bottom, <fuzzint>px)
-
-# New CSS System Colors
-<cssproperty> = color: Canvas
-<cssproperty> = color: CanvasText
-<cssproperty> = color: LinkText
-<cssproperty> = color: VisitedText
-<cssproperty> = color: ActiveText
-<cssproperty> = color: ButtonFace
-<cssproperty> = color: ButtonText
-<cssproperty> = color: ButtonBorder
-<cssproperty> = color: Field
-<cssproperty> = color: FieldText
-<cssproperty> = color: Highlight
-<cssproperty> = color: HighlightText
-<cssproperty> = color: SelectedItem
-<cssproperty> = color: SelectedItemText
-<cssproperty> = color: GrayText
-<cssproperty> = color: Mark
-<cssproperty> = color: MarkText
-<cssproperty> = color: AccentColor
-<cssproperty> = color: AccentColorText
-
-# New CSS OKLCH Colors
-<cssproperty> = background: oklch(0.7 0.2 200)
-<cssproperty> = background: oklch(0.5 0.3 100 / 0.5)
-<cssproperty> = color: oklch(0.8 0.1 250)
-<cssproperty> = fill: oklch(0.6 0.15 180)
-<cssproperty> = stroke: oklch(0.9 0.05 300)
-<cssproperty> = outline-color: oklch(0.4 0.2 120)
-<cssproperty> = border-color: oklch(0.75 0.1 270)
-<cssproperty> = box-shadow: 0 0 <fuzzint>px oklch(0.5 0.2 200 / 0.3)
-<cssproperty> = text-shadow: 0 0 <fuzzint>px oklch(0.6 0.15 150 / 0.5)
-
-# New CSS OKLAB Colors
-<cssproperty> = background: oklab(0.7 0.1 0.2)
-<cssproperty> = color: oklab(0.8 -0.1 0.1)
-<cssproperty> = fill: oklab(0.6 0.05 -0.1)
-<cssproperty> = stroke: oklab(0.9 0.02 0.05)
-
-# New CSS LCH Colors
-<cssproperty> = background: lch(70% 0.2 200)
-<cssproperty> = color: lch(80% 0.1 250)
-<cssproperty> = fill: lch(60% 0.15 180)
-<cssproperty> = stroke: lch(90% 0.05 300)
-
-# New CSS LAB Colors
-<cssproperty> = background: lab(70% 0.1 0.2)
-<cssproperty> = color: lab(80% -0.1 0.1)
-<cssproperty> = fill: lab(60% 0.05 -0.1)
-<cssproperty> = stroke: lab(90% 0.02 0.05)
-
-# New CSS Color Space Functions
-<cssproperty> = background: color(display-p3 0.5 0.6 0.7)
-<cssproperty> = color: color(rec2020 0.3 0.4 0.5)
-<cssproperty> = fill: color(xyz-d50 0.2 0.3 0.4)
-<cssproperty> = stroke: color(a98-rgb 0.6 0.7 0.8)
-<cssproperty> = outline-color: color(prophoto-rgb 0.4 0.5 0.6)
-
-# New CSS Color Mix
-<cssproperty> = background: color-mix(in srgb, red, blue)
-<cssproperty> = background: color-mix(in oklch, red, blue 50%)
-<cssproperty> = color: color-mix(in lab, <cssproperty_color>, <cssproperty_color>)
-<cssproperty> = fill: color-mix(in srgb, oklch(0.7 0.2 200), oklch(0.5 0.3 100))
-<cssproperty> = stroke: color-mix(in srgb, red 30%, blue 70%)
-
-# New CSS Relative Color Syntax
-<cssproperty> = background: oklch(from red 0.7 L C / 0.5)
-<cssproperty> = color: oklch(from blue L 0.2 200)
-<cssproperty> = fill: oklab(from <cssproperty_color> L a b)
-
-# Modern CSS Layout and Box Model
-<cssproperty> = aspect-ratio: <fuzzint min=1 max=16> / <fuzzint min=1 max=16>
-<cssproperty> = aspect-ratio: auto <fuzzint min=1 max=16> / <fuzzint min=1 max=16>
-<cssproperty> = aspect-ratio: <float min=0.1 max=5>
-<cssproperty> = accent-color: <color>
-<cssproperty> = accent-color: auto
-<cssproperty> = caret-color: <color>
-<cssproperty> = caret-color: transparent
-<cssproperty> = backdrop-filter: blur(<fuzzint min=1 max=50>px)
-<cssproperty> = backdrop-filter: brightness(<percentage>%)
-<cssproperty> = backdrop-filter: contrast(<percentage>%)
-<cssproperty> = backdrop-filter: blur(<fuzzint min=1 max=20>px) brightness(<percentage>%)
-<cssproperty> = backdrop-filter: none
-<cssproperty> = container-type: inline-size
-<cssproperty> = container-type: size
-<cssproperty> = container-type: normal
-<cssproperty> = container-name: <DOMString>
-<cssproperty> = container: <DOMString> / inline-size
-<cssproperty> = container: <DOMString> / size
-<cssproperty> = overscroll-behavior: contain
-<cssproperty> = overscroll-behavior: none
-<cssproperty> = overscroll-behavior: auto
-<cssproperty> = overscroll-behavior-x: contain
-<cssproperty> = overscroll-behavior-y: none
-<cssproperty> = scrollbar-gutter: stable
-<cssproperty> = scrollbar-gutter: stable both-edges
-<cssproperty> = scrollbar-width: thin
-<cssproperty> = scrollbar-width: none
-<cssproperty> = scrollbar-color: <color> <color>
-<cssproperty> = scroll-behavior: smooth
-<cssproperty> = scroll-snap-type: x mandatory
-<cssproperty> = scroll-snap-type: y mandatory
-<cssproperty> = scroll-snap-type: both mandatory
-<cssproperty> = scroll-snap-type: block proximity
-<cssproperty> = scroll-snap-align: start
-<cssproperty> = scroll-snap-align: center
-<cssproperty> = scroll-snap-align: end
-<cssproperty> = scroll-snap-stop: always
-<cssproperty> = touch-action: pan-x pan-y
-<cssproperty> = touch-action: manipulation
-<cssproperty> = touch-action: none
-<cssproperty> = user-select: none
-<cssproperty> = user-select: text
-<cssproperty> = user-select: all
-<cssproperty> = user-select: contain
-<cssproperty> = will-change: transform, opacity
-<cssproperty> = will-change: scroll-position
-<cssproperty> = will-change: contents
-<cssproperty> = mix-blend-mode: multiply
-<cssproperty> = mix-blend-mode: screen
-<cssproperty> = mix-blend-mode: overlay
-<cssproperty> = mix-blend-mode: difference
-<cssproperty> = mix-blend-mode: exclusion
-<cssproperty> = mix-blend-mode: plus-lighter
-<cssproperty> = isolation: isolate
-<cssproperty> = image-rendering: pixelated
-<cssproperty> = image-rendering: crisp-edges
-<cssproperty> = font-palette: dark
-<cssproperty> = font-palette: light
-<cssproperty> = forced-color-adjust: none
-
-!include cssproperties.txt
+<root root=true> = <rules>
+
+<rules> = <rule>
+<rules> = <rule><newline><rule>
+<rules> = <rule><newline><rule><newline><rule>
+<rules> = <rule><newline><rule><newline><rule><newline><rule>
+
+<rule> = <selector> { <declarations> }
+<rule> = <selector> { <declarations> }
+<rule> = <atrule> { <declarations> }
+<rule> = <selector> { <declarations> }<newline><rule>
+
+<selector> = <simple>
+<selector> = <simple>, <simple>
+<selector> = <simple> <simple>
+<selector> = <simple> <gt> <simple>
+<selector> = <simple> + <simple>
+<selector> = <simple> ~ <simple>
+<selector> = <simple>:first-child
+<selector> = <simple>::first-letter
+<selector> = <simple>::before
+<selector> = <simple>::after
+<selector> = <simple>:hover
+<selector> = <simple>:focus
+<selector> = <simple>:nth-child(2n+1)
+<selector> = <simple>[<attrname>]
+<selector> = <simple>[<attrname>="<attrsafe>"]
+<selector> = <simple>[<attrname><cssop><cssnumber>]
+
+<simple> = *
+<simple> = <csstagname>
+<simple> = .<cssident>
+<simple> = <hash><cssident>
+
+<atrule> = @media screen
+<atrule> = @media (min-width: 1px)
+<atrule> = @supports (display: grid)
+<atrule> = @supports (color: red)
+<atrule> = @layer fuzz
+<atrule> = @container (min-width: 1px)
+
+<csstagname> = div
+<csstagname> = span
+<csstagname> = a
+<csstagname> = body
+<csstagname> = html
+<csstagname> = p
+<csstagname> = input
+<csstagname> = canvas
+<csstagname> = svg
+<csstagname> = math
+<csstagname> = table
+<csstagname> = ul
+<csstagname> = li
+
+<cssident> = fuzz
+<cssident> = a
+<cssident> = x
+<cssident> = fuzz-fuzz
+<cssident> = fuzz_fuzz
+<cssident> = Fuzz
+
+<attrname> = class
+<attrname> = id
+<attrname> = href
+<attrname> = type
+<attrname> = data-fuzz
+<attrname> = aria-label
+
+<cssop> = =
+<cssop> = ~=
+<cssop> = ^=
+<cssop> = *=
+
+<declarations> = <declaration>;
+<declarations> = <declaration>; <declaration>;
+<declarations> = <declaration>; <declaration>; <declaration>
+<declarations> = <declaration>; <declaration>; <declaration>; <declaration>
+
+<declaration> = color: <color>
+<declaration> = background: <color>
+<declaration> = background-color: <color>
+<declaration> = background-image: <image>
+<declaration> = border: <borderwidth> <borderstyle> <color>
+<declaration> = border-color: <color>
+<declaration> = border-radius: <length>
+<declaration> = outline: <borderwidth> <borderstyle> <color>
+<declaration> = width: <length>
+<declaration> = height: <length>
+<declaration> = min-width: <length>
+<declaration> = max-width: <length>
+<declaration> = min-height: <length>
+<declaration> = max-height: <length>
+<declaration> = margin: <length>
+<declaration> = padding: <length>
+<declaration> = top: <length>
+<declaration> = left: <length>
+<declaration> = right: <length>
+<declaration> = bottom: <length>
+<declaration> = inset: <length>
+<declaration> = display: <display>
+<declaration> = position: <position>
+<declaration> = float: <floatvalue>
+<declaration> = overflow: <overflow>
+<declaration> = overflow-x: <overflow>
+<declaration> = overflow-y: <overflow>
+<declaration> = visibility: hidden
+<declaration> = opacity: <opacity>
+<declaration> = z-index: <fuzzint>
+<declaration> = transform: <transform>
+<declaration> = transform-origin: <length> <length>
+<declaration> = transition: all 1s ease
+<declaration> = animation: fuzz 1s infinite
+<declaration> = filter: <filter>
+<declaration> = backdrop-filter: <filter>
+<declaration> = clip-path: <basic_shape>
+<declaration> = mask-image: <image>
+<declaration> = font: <fontsize> serif
+<declaration> = font-size: <fontsize>
+<declaration> = font-family: <fontfamily>
+<declaration> = font-weight: <fontweight>
+<declaration> = font-style: italic
+<declaration> = line-height: <length>
+<declaration> = letter-spacing: <length>
+<declaration> = word-spacing: <length>
+<declaration> = text-align: <textalign>
+<declaration> = text-decoration: underline
+<declaration> = text-overflow: ellipsis
+<declaration> = white-space: <whitespace>
+<declaration> = overflow-wrap: anywhere
+<declaration> = vertical-align: middle
+<declaration> = direction: <direction>
+<declaration> = unicode-bidi: isolate
+<declaration> = writing-mode: horizontal-tb
+<declaration> = box-sizing: border-box
+<declaration> = box-shadow: 1px 1px 1px <color>
+<declaration> = text-shadow: 1px 1px 1px <color>
+<declaration> = cursor: pointer
+<declaration> = pointer-events: <pointerevents>
+<declaration> = user-select: none
+<declaration> = touch-action: none
+<declaration> = resize: both
+<declaration> = content: "<attrsafe>"
+<declaration> = counter-reset: fuzz
+<declaration> = counter-increment: fuzz <fuzzint>
+<declaration> = list-style: none
+<declaration> = table-layout: fixed
+<declaration> = border-collapse: collapse
+<declaration> = object-fit: cover
+<declaration> = aspect-ratio: 1 / 1
+<declaration> = columns: 2
+<declaration> = column-gap: <length>
+<declaration> = gap: <length>
+<declaration> = flex: 1
+<declaration> = flex-direction: <flexdir>
+<declaration> = flex-wrap: wrap
+<declaration> = justify-content: <justify>
+<declaration> = align-items: <align>
+<declaration> = align-self: <align>
+<declaration> = order: <fuzzint>
+<declaration> = grid-template-columns: repeat(2, 1fr)
+<declaration> = grid-template-rows: repeat(2, 1fr)
+<declaration> = grid-column: 1 / 2
+<declaration> = grid-row: 1 / 2
+<declaration> = grid-area: fuzz
+<declaration> = contain: layout paint
+<declaration> = will-change: transform
+<declaration> = accent-color: <color>
+<declaration> = color-scheme: light dark
+<declaration> = scroll-behavior: smooth
+<declaration> = scroll-snap-type: x mandatory
+<declaration> = scrollbar-width: thin
+<declaration> = -webkit-transform: <transform>
+<declaration> = --fuzz: <length>
+<declaration> = --fuzz: <color>
+<declaration> = <cssproperty>: <cssglobal>
+
+<cssproperty> = color
+<cssproperty> = width
+<cssproperty> = margin
+<cssproperty> = padding
+<cssproperty> = display
+<cssproperty> = background
+
+<cssglobal> = inherit
+<cssglobal> = initial
+<cssglobal> = unset
+<cssglobal> = revert
+<cssglobal> = var(--fuzz)
+
+<color> = red
+<color> = blue
+<color> = green
+<color> = black
+<color> = white
+<color> = transparent
+<color> = currentColor
+<color> = <hash><hex><hex><hex>
+<color> = <hash><hex><hex><hex><hex><hex><hex>
+<color> = rgb(1, 2, 3)
+<color> = rgb(1 2 3 / 0.5)
+<color> = rgba(1, 2, 3, 0.5)
+<color> = hsl(1, 2%, 3%)
+<color> = color(display-p3 1 0 0)
+<color> = color-mix(in srgb, red, blue)
+
+<length> = 0
+<length> = 1px
+<length> = -1px
+<length> = 1em
+<length> = 1rem
+<length> = 1%
+<length> = 100%
+<length> = 1vw
+<length> = 1vh
+<length> = <fuzzint>px
+<length> = calc(1px + 1em)
+<length> = min(1px, 1em)
+<length> = max(1px, 1em)
+<length> = clamp(1px, 2px, 3px)
+
+<opacity> = 0
+<opacity> = 0.5
+<opacity> = 1
+<opacity> = <float min=0 max=1>
+
+<borderwidth> = 0
+<borderwidth> = 1px
+<borderwidth> = thin
+<borderwidth> = thick
+
+<borderstyle> = none
+<borderstyle> = solid
+<borderstyle> = dashed
+<borderstyle> = dotted
+<borderstyle> = double
+
+<display> = none
+<display> = block
+<display> = inline
+<display> = inline-block
+<display> = flex
+<display> = inline-flex
+<display> = grid
+<display> = inline-grid
+<display> = table
+<display> = contents
+<display> = flow-root
+
+<position> = static
+<position> = relative
+<position> = absolute
+<position> = fixed
+<position> = sticky
+
+<floatvalue> = none
+<floatvalue> = left
+<floatvalue> = right
+<floatvalue> = inline-start
+
+<overflow> = visible
+<overflow> = hidden
+<overflow> = scroll
+<overflow> = auto
+<overflow> = clip
+
+<transform> = none
+<transform> = translate(1px, 1px)
+<transform> = translateX(1px)
+<transform> = scale(2)
+<transform> = scale3d(1, 2, 3)
+<transform> = rotate(45deg)
+<transform> = rotate3d(1, 2, 3, 45deg)
+<transform> = skew(1deg, 1deg)
+<transform> = matrix(1, 2, 3, 4, 5, 6)
+<transform> = matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+<transform> = perspective(1px)
+<transform> = translate(1px) rotate(1deg) scale(2)
+
+<filter> = none
+<filter> = blur(1px)
+<filter> = brightness(0.5)
+<filter> = contrast(2)
+<filter> = grayscale(1)
+<filter> = hue-rotate(1deg)
+<filter> = invert(1)
+<filter> = opacity(0.5)
+<filter> = saturate(2)
+<filter> = sepia(1)
+<filter> = drop-shadow(1px 1px 1px red)
+
+<image> = none
+<image> = url("fuzz")
+<image> = linear-gradient(red, blue)
+<image> = radial-gradient(red, blue)
+<image> = conic-gradient(red, blue)
+<image> = repeating-linear-gradient(red, blue)
+<image> = image-set("fuzz" 1x)
+
+<basic_shape> = none
+<basic_shape> = circle(50%)
+<basic_shape> = ellipse(50% 50%)
+<basic_shape> = inset(1px)
+<basic_shape> = polygon(0 0, 1px 1px, 2px 2px)
+<basic_shape> = path("M 0 0 L 1 1")
+<basic_shape> = xywh(0 0 1px 1px)
+<basic_shape> = rect(0 0 1px 1px)
+
+<fontsize> = 1px
+<fontsize> = 1em
+<fontsize> = 100%
+<fontsize> = larger
+<fontsize> = <fuzzint>px
+
+<fontfamily> = serif
+<fontfamily> = sans-serif
+<fontfamily> = monospace
+<fontfamily> = "fuzz"
+<fontfamily> = fuzz, serif
+
+<fontweight> = normal
+<fontweight> = bold
+<fontweight> = <int min=1 max=1000>
+
+<textalign> = left
+<textalign> = right
+<textalign> = center
+<textalign> = justify
+<textalign> = start
+
+<whitespace> = normal
+<whitespace> = nowrap
+<whitespace> = pre
+<whitespace> = pre-wrap
+<whitespace> = break-spaces
+
+<direction> = ltr
+<direction> = rtl
+
+<pointerevents> = none
+<pointerevents> = auto
+<pointerevents> = all
+<pointerevents> = painted
+
+<flexdir> = row
+<flexdir> = column
+<flexdir> = row-reverse
+<flexdir> = column-reverse
+
+<justify> = flex-start
+<justify> = flex-end
+<justify> = center
+<justify> = space-between
+<justify> = space-around
+<justify> = space-evenly
+
+<align> = flex-start
+<align> = flex-end
+<align> = center
+<align> = baseline
+<align> = stretch
+
+<cssnumber> = 0
+<cssnumber> = 1
+<cssnumber> = -1
+<cssnumber> = 100

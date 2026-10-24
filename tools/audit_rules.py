@@ -32,23 +32,23 @@ ENTRY_POINTS = {
     "html": ("rules/html.txt", ("line", "bodyelements")),
     "css": ("rules/css.txt", ("line", "rules")),
     "js": ("rules/js.txt", ("line",)),
-    "canvas": ("canvas/canvas.txt", ("line",)),
-    "webgl": ("webgl/webgl.txt", ("line",)),
+    "canvas": ("rules/canvas.txt", ("line",)),
+    "webgl": ("rules/webgl.txt", ("line",)),
 }
 # IDL kind/name patterns that decide which rules file should own an interface.
 # Graphics APIs each have their own grammar and template, so they must not be
 # routed into the DOM rules just because they are Web APIs.
 API_ROUTING = (
-    (re.compile(r"^GPU"), "webgpu/webgpu.txt"),
+    (re.compile(r"^GPU"), "rules/webgpu.txt"),
     # WebGL extension namespaces (EXT_*, OES_*, WEBGL_*) are object bags reached
     # through gl.getExtension(), so their members belong to the webgl grammar.
-    (re.compile(r"^(WebGL|EXT_|OES_|WEBGL_|ANGLE_|MOZ_WEBGL|WEBKIT_WEBGL)"), "webgl/webgl.txt"),
+    (re.compile(r"^(WebGL|EXT_|OES_|WEBGL_|ANGLE_|MOZ_WEBGL|WEBKIT_WEBGL)"), "rules/webgl.txt"),
     (
         re.compile(
             r"^(CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D|CanvasGradient|CanvasPattern"
             r"|Path2D|ImageData|ImageBitmap|TextMetrics|ImageTrack|ImageFrame|CanvasDrawContext)$"
         ),
-        "canvas/canvas.txt",
+        "rules/canvas.txt",
     ),
 )
 ROUTING = (
@@ -80,68 +80,46 @@ NOTES = {
         "the object is handed to a permission-prompt handler; content has no receiver to read "
         "getAudioOutputOptions() from"
     ),
+    "Element": (
+        "setPointerCapture and releasePointerCapture are the only missing members: both require "
+        "an active pointer with the same id as the argument (Element::SetPointerCapture checks "
+        "the active-pointer list), and a synthetic PointerEvent never creates one - every "
+        "generated id throws NotFoundError (evaluated), so the rules were removed rather than "
+        "left as guaranteed throws"
+    ),
     "Navigator": (
-        "mozGetUserMedia is present on the prototype, but a call asks the user for camera and "
-        "microphone - a permission prompt the harness cannot answer, so AGENTS.md's 'Never add' "
-        "refuses it the same way it refuses a blocking dialog"
+        "probed in the page: testTrialGatedAttribute, canShare, share, mozAddonManager and "
+        "mozTCPSocket are undefined; mediaDevices, serviceWorker, requestMIDIAccess and "
+        "mozGetUserMedia exist, but requestMIDIAccess and mozGetUserMedia ask the user for device "
+        "permission, serviceWorker needs a registered worker script, and registerProtocolHandler "
+        "asks the user to allow the handler - no silent receiver"
     ),
     "OVR_multiview2": (
         "getExtension('OVR_multiview2') returns null on both the webgl and webgl2 contexts of "
         "this build (probe_apis.py), so the extension object does not exist here - not a gap"
     ),
     "Window": (
-        "confirm is present:instance and is a blocking dialog that AGENTS.md refuses; alert/print "
-        "are parsed-but-unreachable dead text; the 12 [Func]-gated members were probed and are "
-        "not-exposed in this build"
+        "alert/confirm/find/print/prompt are blocking dialogs or chrome UI that AGENTS.md refuses "
+        "(confirm is present:instance); reportError is emitted by stateful.txt. All 26 [Func]-gated "
+        "members - Glean, GleanPings, browserDOMWindow, getAttention, getAttentionWithCycleCount, "
+        "getGroupMessageManager, getWebExposedLocales, getWorkspaceID, intlUtils, isChromeWindow, "
+        "isCloaked, isFullyOccluded, maximize, messageManager, minimize, moveToWorkspace, "
+        "notifyDefaultButtonLoaded, ondragexit, ontouchcancel, ontouchend, ontouchmove, "
+        "ontouchstart, printPreview, promiseDocumentFlushed, setCursor, windowState - evaluate "
+        "typeof undefined on this content window"
     ),
     "GamepadPose": (
         "the only content receiver is navigator.getGamepads(), which is an empty list in the "
         "harness - no device is attached and the XRInputSource path needs an XR device too, so a "
         "pose read would dereference undefined on every iteration"
     ),
-    "FileSystemEntry": (
-        "legacy FileSystem API: window.requestFileSystem and navigator.webkitRequestFileSystem "
-        "are both undefined on this build (evaluated in the page), so no FileSystemEntry can be "
-        "obtained - the interface exists only as a prototype"
-    ),
-    "MediaKeys": (
-        "EME: navigator.requestMediaKeySystemAccess is the only producer and it rejects without a "
-        "CDM in this debug build"
-    ),
-    "MediaKeySystemAccess": (
-        "handed back by a rejected requestMediaKeySystemAccess promise on this build - no receiver"
-    ),
-    "MediaKeySession": (
-        "produced only by MediaKeys.createSession(), and there is no MediaKeys without a CDM; "
-        "MediaKeySession itself has no content constructor"
-    ),
     "MediaKeyError": (
-        "legacy EME class, illegal constructor on this build"
+        "legacy EME class: MediaKeySession.error stays null even after a rejected generateRequest "
+        "(evaluated), and the constructor is illegal - no receiver"
     ),
     "PopupBlockedEvent": (
         "illegal constructor, and its receiver only exists when window.open() is blocked - "
         "AGENTS.md refuses opening windows because the harness cannot close them"
-    ),
-    "RTCIceTransport": (
-        "reachable only through a negotiated connection: transceiver.transport and pc.sctp are "
-        "both null right after addTransceiver() on this build (evaluated), so there is no "
-        "RTCDtlsTransport to ask for the iceTransport"
-    ),
-    "RTCSctpTransport": (
-        "pc.sctp is null until the DTLS/SCTP association exists, which needs setRemoteDescription "
-        "and therefore signaling"
-    ),
-    "RTCDTMFSender": (
-        "sender.dtmf is null for the same reason, and RTCPeerConnection has no addSender() on this "
-        "build (TypeError), so no sender can be made on its own"
-    ),
-    "RTCIceCandidatePair": (
-        "the class exists but no content path hands out a pair: local/remote live on events the "
-        "ICE agent dispatches, and the constructor takes no dictionary"
-    ),
-    "RTCCertificate": (
-        "RTCCertificate.generateCertificate is undefined on this build, so a certificate cannot be "
-        "made and its expires read has no receiver"
     ),
     "CSPViolationReportBody": (
         "a ReportBody only arrives inside a ReportingObserver callback for a real violation, and "
@@ -155,42 +133,11 @@ NOTES = {
     "FetchObserver": (
         "created internally per fetch; there is no content constructor to make one"
     ),
-    "CryptoKey": (
-        "subtle.importKey/generateKey are Promise-based and js.txt statements are synchronous, so "
-        "a key can only be read inside a .then callback"
-    ),
     "WebTransport": (
         "needs a live HTTP/3 connection to a host outside server_map, which AGENTS.md refuses"
     ),
     "WebTransportDatagramDuplexStream": (
         "the datagram stream only exists on a connected WebTransport"
-    ),
-    "IDBTransaction": (
-        "the grammar's <new IDBDatabase> creator is indexedDB.open(), which returns an "
-        "IDBOpenDBRequest (verified: constructor is IDBOpenDBRequest), so every transaction line "
-        "dereferences a request. Fixing the creator to read the database inside the onsuccess "
-        "callback is the work; this is not a missing binding"
-    ),
-    "IDBIndex": (
-        "same broken IDBDatabase receiver as IDBTransaction"
-    ),
-    "SourceBuffer": (
-        "MediaSource.addSourceBuffer() throws InvalidStateError until sourceopen fires, and "
-        "sourceopen only happens once the MediaSource is attached through a blob URL (the "
-        "srcObject setter rejects a MediaSource)"
-    ),
-    "CSSImportRule": (
-        "insertRule('@import ...') on a constructed CSSStyleSheet is refused ('An invalid or "
-        "illegal string was specified') and the harness page has no stylesheets, so no import "
-        "rule object is reachable"
-    ),
-    "MediaStreamAudioSourceNode": (
-        "createMediaStreamSource(new MediaStream()) throws InvalidStateError - an empty stream has "
-        "no audio track, and a real track needs getUserMedia, which asks the user"
-    ),
-    "AudioWorkletNode": (
-        "constructing one before a module is loaded raises InvalidStateError, and addModule() is "
-        "async; ac.createWorkletNode is undefined on this build"
     ),
     "PictureInPictureEvent": (
         "the constructor requires a PictureInPictureWindow, which only exists once a video is in "
@@ -228,6 +175,172 @@ NOTES = {
         "(accessibility.AOM.enabled) is in neither StaticPrefList.yaml defaults nor Grizzly's "
         "browser-fuzzing.yml - the property is absent on a content Node (evaluated: undefined); "
         "containingShadowRoot is [Func=IsChromeOrUAWidget], chrome/XUL only"
+    ),
+    "Gamepad": (
+        "navigator.getGamepads() returns an empty list on this build (evaluated) - no gamepad is "
+        "attached and there is no content constructor, so no receiver"
+    ),
+    "GamepadButton": (
+        "only reachable as gamepad.buttons[i]; with no gamepad attached the array does not exist "
+        "and the interface has no constructor"
+    ),
+    "GamepadHapticActuator": (
+        "handed out as gamepad.hapticActuators[i]; no gamepad, no actuator"
+    ),
+    "Geolocation": (
+        "navigator.geolocation is undefined on this build (evaluated): dom.geo.enabled is off in "
+        "StaticPrefList.yaml and not set by Grizzly's prefs, so the Navigator.geolocation pref-off "
+        "exclusion applies to the whole interface"
+    ),
+    "GeolocationCoordinates": (
+        "only handed out through a GeolocationPosition from navigator.geolocation, which is "
+        "undefined here (evaluated)"
+    ),
+    "GeolocationPosition": (
+        "same missing receiver: navigator.geolocation is undefined, and the Position exists only "
+        "as the success callback argument"
+    ),
+    "AuthenticatorResponse": (
+        "WebAuthn: the only producer is navigator.credentials.create/get, which asks the user for "
+        "a security key; getClientExtensionResults/rawId cannot be read without one"
+    ),
+    "AuthenticatorAttestationResponse": (
+        "handed back by credentials.create() after the WebAuthn prompt - no prompt-free receiver"
+    ),
+    "AuthenticatorAssertionResponse": (
+        "handed back by credentials.get() after the WebAuthn prompt - no prompt-free receiver"
+    ),
+    "PublicKeyCredential": (
+        "navigator.credentials.create/get is the only producer and both ask the user for a "
+        "security key (evaluated: no receiver without the prompt)"
+    ),
+    "Serial": (
+        "navigator.serial exists and its getPorts/mock-device/autoselect members are emitted by "
+        "stateful.txt; requestPort requires transient user activation and rejects SecurityError "
+        "without it"
+    ),
+    "SerialPort": (
+        "getPorts() returns only ports the user has already granted, and requestPort needs "
+        "transient activation; the testing API's mock connect events notify only already-granted "
+        "ports (evaluated: simulateDeviceConnection resolves, getPorts stays empty, no onconnect)"
+    ),
+    "SpeechRecognitionEvent": (
+        "new SpeechRecognitionEvent(...) throws TypeError because the required results member is a "
+        "SpeechRecognitionResultList with no constructor, and a real event only comes from a "
+        "microphone-gated recognition session"
+    ),
+    "SpeechRecognitionResult": (
+        "only exists inside SpeechRecognitionEvent.results; that event has no prompt-free producer"
+    ),
+    "SpeechRecognitionAlternative": (
+        "only exists as results[i][j] of a SpeechRecognitionEvent - no receiver"
+    ),
+    "SpeechSynthesisVoice": (
+        "speechSynthesis.getVoices() returns [] on this build (evaluated, also after a delay): "
+        "there is no speech backend, so no voice object exists"
+    ),
+    "CookieStoreManager": (
+        "only reachable as ServiceWorkerRegistration.cookies; the harness has no registered "
+        "service worker and cannot register one from the generated document"
+    ),
+    "History": (
+        "back/forward/go navigate away from the generated document, which AGENTS.md refuses; "
+        "pushState/replaceState/state/length/scrollRestoration are emitted"
+    ),
+    "Location": (
+        "href/protocol/host/hostname/port/pathname/search setters and assign/replace/reload "
+        "navigate the harness document away, so the case's report never arrives (evaluated: "
+        "setting search to a random string reloaded case04.html in scan_cases.py). hash, the "
+        "readonly getters and ancestorOrigins are emitted"
+    ),
+    "SpeechRecognition": (
+        "start() captures the default microphone and, with install-on-start enabled, starts a "
+        "speech-model download whose pending MozPromise crashed the content process at shutdown "
+        "(MOZ_CRASH in MozPromise::ThenValueBase::AssertIsDead from "
+        "SpeechRecognitionBackend::EnsureModelsInstalled, evaluated on this build); install() "
+        "starts that download directly. start/install are refused, the constructor, abort/stop "
+        "and the event/attribute members are emitted"
+    ),
+    "MIDIAccess": (
+        "navigator.requestMIDIAccess() asks the user for MIDI device permission - a prompt the "
+        "harness cannot answer"
+    ),
+    "MIDIPort": (
+        "only handed out by MIDIAccess.inputs/outputs, which needs the MIDI permission prompt"
+    ),
+    "MIDIInput": (
+        "subclass of MIDIPort - same missing permission-gated receiver"
+    ),
+    "Clipboard": (
+        "readText needs transient user activation and Firefox can show a paste prompt the harness "
+        "cannot answer; writeText is emitted by stateful.txt and rejects NotAllowedError without "
+        "activation (evaluated)"
+    ),
+    "RTCIdentityProviderRegistrar": (
+        "only exposed to a registered IdP in chrome context; content has no registrar object"
+    ),
+    "WebTransportDatagramsWritable": (
+        "only exists on a connected WebTransport, which needs an HTTP/3 host outside server_map"
+    ),
+    "WebTransportSendStream": (
+        "only handed out by a connected WebTransport's createSendGroup/createSendStream"
+    ),
+    "WebTransportError": (
+        "only delivered as a WebTransport stream/read rejection, which needs a connection"
+    ),
+    "DeprecationReportBody": (
+        "report bodies are browser-created; `new Report(...)` is undefined in content (evaluated) "
+        "and no deprecation is reported in the harness"
+    ),
+    "Directory": (
+        "legacy FileSystem API: the only content producer is a directory picker or the "
+        "[ChromeOnly] constructor, and the API's entry point (window.requestFileSystem / "
+        "navigator.webkitRequestFileSystem) is undefined on this build (evaluated)"
+    ),
+    "FileSystemDirectoryEntry": (
+        "legacy FileSystem API: DataTransferItem.webkitGetAsEntry() on a synthetic File yields a "
+        "FileSystemFileEntry, and its getParent() returns that same file entry on this build "
+        "(evaluated) - no directory entry exists, so no reader can be obtained from one"
+    ),
+    "FileSystemDirectoryReader": (
+        "legacy FileSystem API: DataTransferItem.webkitGetAsEntry() on a synthetic File yields a "
+        "FileSystemFileEntry, and its getParent() returns that same file entry on this build "
+        "(evaluated) - no directory entry exists, so no reader can be obtained from one"
+    ),
+    "CSSNumericValue": (
+        "min() and max() are stubs that throw NS_ERROR_NOT_IMPLEMENTED for every argument "
+        "(layout/style/typedom/CSSNumericValue.cpp:308-320; evaluated: min(1, 2) throws "
+        "NS_ERROR_NOT_IMPLEMENTED on a CSSMathNegate receiver) - not a grammar gap"
+    ),
+    "HTMLInputElement": (
+        "showPicker() opens a native file/date/colour picker window that the harness cannot close"
+    ),
+    "HTMLSelectElement": (
+        "showPicker() opens a native select popup the harness cannot close"
+    ),
+    "IDBKeyRange": (
+        "the IDL spells the page-visible method `includes` as `_includes`; the content object has "
+        "`includes` (evaluated) and no `_includes`, so the IDL spelling cannot be emitted"
+    ),
+    "MouseScrollEvent": (
+        "document.createEvent('MouseScrollEvent') throws NotSupportedError and `new` is an Illegal "
+        "constructor (both evaluated) - no receiver"
+    ),
+    "ScrollAreaEvent": (
+        "document.createEvent('ScrollAreaEvent') throws NotSupportedError and `new` is an Illegal "
+        "constructor (both evaluated) - no receiver"
+    ),
+    "TimeEvent": (
+        "document.createEvent('TimeEvent') throws NotSupportedError and `new` is an Illegal "
+        "constructor (both evaluated) - no receiver"
+    ),
+    "WEBGL_explicit_present": (
+        "getExtension('WEBGL_explicit_present') returns null on both webgl and webgl2 contexts of "
+        "this build (evaluated) - the extension object does not exist here"
+    ),
+    "WEBGL_provoking_vertex": (
+        "getExtension('WEBGL_provoking_vertex') returns null on both webgl and webgl2 contexts of "
+        "this build (evaluated) - the extension object does not exist here"
     ),
 }
 
@@ -284,12 +397,20 @@ def load_prefs(source_root: Path) -> dict[str, bool]:
     Missing is fatal, not empty: pref_enabled reads an unknown pref as off, so a
     silent empty table would report every [Pref]-gated member of the IDL as
     unreachable and take real work out of the queue without saying so.
+
+    Some defaults are written as @IS_NIGHTLY_BUILD@ and friends: the build
+    substitutes them from mozilla-config.h at compile time. Reading those as
+    false hides whole interfaces on a Nightly checkout (evaluated: `new
+    QuotaExceededError().quota` is null, not a TypeError, when the pref is on).
+    The objdir next to the source is the only place the substitution is
+    recorded, so use it when it exists.
     """
     path = source_root / "modules" / "libpref" / "init" / "StaticPrefList.yaml"
     if not path.exists():
         raise SystemExit(
             f"no StaticPrefList.yaml under {source_root} - pass --source <firefox checkout>"
         )
+    build = build_substitutions(source_root)
     prefs: dict[str, bool] = {}
     name = None
     value = None
@@ -302,10 +423,51 @@ def load_prefs(source_root: Path) -> dict[str, bool]:
             continue
         found = re.match(r"^\s+value: (\S+)", line)
         if found and name is not None and value is None:
-            value = found.group(1).lower() in ("true", "1")
+            token = found.group(1)
+            if token.startswith("@") and token.endswith("@"):
+                value = build.get(token[1:-1])
+            else:
+                value = token.lower() in ("true", "1")
     if name is not None:
         prefs[name] = bool(value)
     return prefs
+
+
+def build_substitutions(source_root: Path) -> dict[str, bool]:
+    """@IS_...@ tokens from the objdir's mozilla-config.h.
+
+    Returns {} when there is no objdir, which keeps every substituted pref at
+    its conservative false - the same answer as before this existed.
+    """
+    configs = sorted(source_root.glob("obj-*/mozilla-config.h"))
+    if not configs:
+        return {}
+    text = configs[0].read_text(encoding="utf-8", errors="replace")
+    defined = set(re.findall(r"^#define ([A-Za-z_][A-Za-z0-9_]*)", text, re.MULTILINE))
+    nightly = "NIGHTLY_BUILD" in defined
+    early_beta = "EARLY_BETA_OR_EARLIER" in defined
+    official = "MOZILLA_OFFICIAL" in defined
+    release_or_beta = "RELEASE_OR_BETA" in defined
+    android = "ANDROID" in defined
+    ios = "IOS" in defined
+    win = "XP_WIN" in defined
+    macos = "XP_MACOSX" in defined
+    return {
+        "IS_NIGHTLY_BUILD": nightly,
+        "IS_EARLY_BETA_OR_EARLIER": early_beta,
+        "IS_NIGHTLY_OR_DEV_EDITION": nightly or early_beta,
+        "IS_NOT_NIGHTLY_BUILD": not nightly,
+        "IS_NOT_RELEASE_OR_BETA": not release_or_beta,
+        "IS_NOT_MOZILLA_OFFICIAL": not official,
+        "IS_ANDROID": android,
+        "IS_IOS": ios,
+        "IS_NOT_ANDROID": not android,
+        "IS_NOT_MOBILE": not (android or ios),
+        "IS_XP_WIN": win,
+        "IS_NOT_XP_WIN": not win,
+        "IS_XP_MACOSX": macos,
+        "IS_NOT_XP_MACOSX": not macos,
+    }
 
 
 def load_fuzzing_prefs() -> dict[str, bool]:
@@ -509,7 +671,12 @@ def main() -> int:
         default="results/audit/probe.json",
         help="probe_apis.py output to join with the queue for the per-file work orders",
     )
-    parser.add_argument("--top", type=int, default=40, help="interfaces to list in the queue")
+    parser.add_argument(
+        "--top",
+        type=int,
+        default=100,
+        help="interfaces to list in the queue (the header still counts them all)",
+    )
     parser.add_argument("--target", default=None, help="only queue entries routed to this rules file")
     parser.add_argument("--name", default=None, help="only queue entries whose interface name contains this")
     parser.add_argument(
@@ -529,7 +696,7 @@ def main() -> int:
         mentioned[label] = all_text(grammar)
     # the WebGPU grammar needs shader-derived symbols, so it is scanned via the
     # adapter's own builder rather than parsed standalone
-    adapter_grammar = _parse_grammar(gen, DOMATO_DIR / "webgpu" / "webgpu.txt", "")
+    adapter_grammar = _parse_grammar(gen, DOMATO_DIR / "rules" / "webgpu.txt", "")
     reachable["webgpu"] = reachable_text(adapter_grammar, ("line",))
     mentioned["webgpu"] = all_text(adapter_grammar)
     # one pass per grammar beats a word-boundary regex per member over ~10MB of
@@ -583,17 +750,20 @@ def main() -> int:
         covered_by, probe, missing_by_target = {}, [], {}
         base = suggest_target(name, entry)
         for member in standard + gated:
-            if member in reachable_ids:
+            # WebIDL strips one leading underscore from the exposed identifier:
+            # `_any` is the page-visible `any`, and that is what a rule says
+            exposed = member[1:] if member.startswith("_") else member
+            if exposed in reachable_ids:
                 reachable_members.append(member)
                 covered_by[member] = sorted(
-                    label for label, ids in reachable_at.items() if member in ids
+                    label for label, ids in reachable_at.items() if exposed in ids
                 )
-            elif member in mentioned_ids:
+            elif exposed in mentioned_ids:
                 mentioned_only.append(member)
             elif member in gated:
                 # [Func] needs the browser to answer, presence in text proves nothing
                 probe.append(member)
-            elif member in reachable_words:
+            elif exposed in reachable_words:
                 # the word is in live rules, but never as a property of anything:
                 # a CSS keyword, an ARIA role, an attribute name. Not this API.
                 name_only.append(member)
