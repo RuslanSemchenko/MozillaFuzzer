@@ -3,7 +3,10 @@
 #
 #   ./fuzz.sh [firefox-binary] [runtime-seconds] [fuzzing-flags...]
 #
-# Built-in stress flags:
+# Built-in flags:
+#   headless, --headless  Run Firefox with -headless (no window, same browser)
+#   headful, --headful    Force a visible browser window (default)
+#   xvfb, --xvfb          Run Firefox under Xvfb
 #   --chaos[=HEX]     Enable Firefox MOZ_CHAOSMODE (default: 0xfb)
 #   --zeal[=MODE]     Enable SpiderMonkey JS_GC_ZEAL (default: 2,100)
 #   --stress          Enable both Chaos Mode and GC Zeal
@@ -14,6 +17,7 @@
 #
 # Examples:
 #   ./fuzz.sh                                     # default browser, 360000s
+#   ./fuzz.sh headless                            # no window, crashes still hunted
 #   ./fuzz.sh --stress                            # run with Chaos Mode + GC Zeal
 #   ./fuzz.sh --chaos --smoke-test                # quick sanity run under chaos mode
 #   ./fuzz.sh "" 7200 --relaunch 200 --rr         # 2h run with rr recording
@@ -25,9 +29,19 @@ RUNTIME_DEFAULT=360000
 pos=()
 extra=()
 seen_flag=0
+display_mode=""
 
 for arg in "$@"; do
     case "$arg" in
+        headless|--headless)
+            display_mode="headless"
+            ;;
+        headful|--headful)
+            display_mode="default"
+            ;;
+        xvfb|--xvfb)
+            display_mode="xvfb"
+            ;;
         --chaos)
             export MOZ_CHAOSMODE="${MOZ_CHAOSMODE:-0xfb}"
             ;;
@@ -64,6 +78,7 @@ done
 BROWSER="${pos[0]:-}"
 [[ -n $BROWSER ]] || BROWSER="${FIREFOX_BIN:-$DEFAULT_BROWSER}"
 RUNTIME="${pos[1]:-$RUNTIME_DEFAULT}"
+[[ -z $display_mode ]] || extra+=(--display "$display_mode")
 
 OUT="$(dirname "$(readlink -f "$0")")/results"
 PYTHON="${PYTHON_BIN:-python3}"
@@ -75,6 +90,7 @@ echo "=================================================="
 echo "Python:     $PYTHON"
 echo "Browser:    $BROWSER"
 echo "Runtime:    ${RUNTIME}s (stop via Ctrl+C)"
+echo "Display:    ${display_mode:-default}"
 echo "Output:     $OUT"
 echo "Chaos Mode: ${MOZ_CHAOSMODE:-disabled}"
 echo "GC Zeal:    ${JS_GC_ZEAL:-disabled}"
