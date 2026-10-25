@@ -52,20 +52,17 @@ API_ROUTING = (
     ),
 )
 ROUTING = (
-    (re.compile(r"^SVG"), "svg.txt"),
-    (re.compile(r"^MML"), "mathml.txt"),
     (re.compile(r"^(CSS|.*CSS.*|Style.*|.*Style)$"), "css.txt"),
-    (re.compile(r".*Element$|^(HTMLElement|HTML.*Element)$"), "tagattributes.txt"),
 )
 DEFAULT_TARGET = "webapis.txt"
 SKIP_KINDS = ("typedef", "callback")
 # Queue entries whose gap is real but whose fix is a decision, not a rule to write.
 NOTES = {
     "FuzzingFunctions": (
-        "the whole namespace is compiled out unless the build is configured --enable-fuzzing, "
-        "and this checkout's mozconfig is an ASan debug build without it - libxul.so has no "
-        "FuzzingFunctions binding, so probe_apis.py finds no global and every generated call "
-        "would be a ReferenceError. Re-check on a fuzzing build before writing rules for it."
+        "enabled via --enable-fuzzing; crash(), killGPUProcess() and signalIPCReady() end "
+        "the session, memoryPressure() shrinks GC/CC on demand, and synthesizeKeyboardEvents() "
+        "IPC_FAILs the content process outside automation mode (IsInAutomation needs a pref "
+        "Grizzly does not set), so all five are refused."
     ),
     "PermissionsPolicy": (
         "LegacyNoInterfaceObject whose only content receiver is document.featurePolicy, and that "
@@ -559,19 +556,11 @@ def suggest_target(name: str, entry: dict) -> str:
     for pattern, target in ROUTING:
         if pattern.match(name):
             return target
-    if entry["parent"] and entry["parent"].endswith("Element"):
-        return "tagattributes.txt"
     return DEFAULT_TARGET
 
 
 def member_target(base: str, kinds: list[str]) -> str:
-    """Which file a member of an interface routed to `base` belongs to.
-
-    Only `*Element` splits: its attributes can be set as HTML attributes, which is
-    what tagattributes.txt is for, while its methods (moveBefore, setCapture,
-    getAttributeNames) are ordinary DOM calls and belong to the JS rules."""
-    if base == "tagattributes.txt" and "attribute" not in kinds:
-        return DEFAULT_TARGET
+    """Which file a member of an interface routed to `base` belongs to."""
     return base
 
 

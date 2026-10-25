@@ -13,6 +13,22 @@ function freememory() {
   try { FuzzingFunctions.garbageCollect(); } catch(err) { }
   try { FuzzingFunctions.cycleCollect(); } catch(err) { }
   try { window.gc(); } catch(err) { }
+  try { if (window.SpecialPowers) SpecialPowers.exactGC(); } catch(err) { }
+  // Synthetic nursery/major GC pressure when fuzzing functions are compiled out
+  try {
+    var _alloc = [];
+    for (var _i = 0; _i < 16; _i++) { _alloc.push(new Uint8Array(1024 * 1024)); }
+    _alloc = null;
+  } catch(err) { }
+  // Cycle Collector pressure via cyclic DOM <-> JS bindings
+  try {
+    var _c1 = document.createElement('div');
+    var _c2 = document.createElement('div');
+    _c1.expando = _c2;
+    _c2.expando = _c1;
+    _c1 = null;
+    _c2 = null;
+  } catch(err) { }
 }
 
 var runcount = {'jsfuzzer':0, 'eventhandler1':0, 'eventhandler2':0, 'eventhandler3':0, 'eventhandler4':0, 'eventhandler5':0}
@@ -26,6 +42,8 @@ function jsfuzzer() {
 runcount["jsfuzzer"]++; if(runcount["jsfuzzer"] > 2) { return; }
 
 <jsfuzzer>
+
+freememory();
 
 }
 

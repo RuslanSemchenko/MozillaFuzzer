@@ -70,7 +70,6 @@ DENY_INTERFACES = {
     "Serial": "requestPort() opens the serial-port chooser",
     "SerialPort": "only produced by the serial-port chooser",
     "DocumentPictureInPicture": "requestWindow() opens a separate always-on-top window",
-    "FuzzingFunctions": "compiled out of this build; crash()/killGPUProcess() also end the session",
     # network the harness does not control
     "WebSocket": "the constructor contacts a host named by a generated string",
     "WebSocketStream": "the constructor contacts a host named by a generated string",
@@ -118,6 +117,17 @@ DENY_MEMBERS = {
     ("Window", "queryLocalFonts"): "opens the font-access prompt",
     ("Window", "getVRDisplays"): "opens the VR permission prompt",
     ("Window", "requestMIDIAccess"): "opens the MIDI permission prompt",
+    # FuzzingFunctions: process abort / destructive methods excluded
+    ("FuzzingFunctions", "crash"): "immediately aborts the process",
+    ("FuzzingFunctions", "killGPUProcess"): "kills the GPU process",
+    ("FuzzingFunctions", "signalIPCReady"): "premature IPC signaling disrupts Grizzly",
+    ("FuzzingFunctions", "memoryPressure"): "shrinking GC + CC on demand is not worth a fuzz line",
+    # BrowserParent::RecvRequestNativeKeyBindings starts with
+    # NS_ENSURE_TRUE(xpc::IsInAutomation(), IPC_FAIL(...)) and IsInAutomation()
+    # needs the security.turn_off_all_security pref plus
+    # MOZ_DISABLE_NONLOCAL_CONNECTIONS; Grizzly sets neither, so a Tab key press
+    # ends the content process with "Exiting due to channel error"
+    ("FuzzingFunctions", "synthesizeKeyboardEvents"): "IPC_FAILs the content process outside automation mode",
     # Location and History are otherwise safe receivers: the navigation
     # methods are the only members that leave the harness document.
     ("Location", "assign"): "navigates the test page",
@@ -730,6 +740,9 @@ MEMBER_ARG_OVERRIDES = {
     ("Window", "requestAnimationFrame"): "function() { }",
     ("Window", "requestIdleCallback"): "function() { }",
     ("Window", "queueMicrotask"): "function() { }",
+    # unsigned long, so a generated <fuzzuint> could spin the event loop for
+    # ~49 days and the case would die by timeout instead of fuzzing anything
+    ("FuzzingFunctions", "spinEventLoopFor"): "1",
     ("FontFaceSet", "forEach"): "function() { }",
     # a dirty rectangle with a non-positive or out-of-image size throws; the
     # three-argument form applies the whole image
@@ -1639,6 +1652,13 @@ CONSTRUCTOR_ARG_OVERRIDES = {
     "MutationObserver": "function() { }",
     # the generated <EventHandler> is a null on* read; the constructor rejects it
     "PerformanceObserver": "function() { }",
+    # StaticRange validates its init: both containers must share a root and the
+    # offsets must be valid boundary points, so a random <Node> pair throws
+    # InvalidNodeTypeError and the variable is never created
+    "StaticRange": (
+        '{ startContainer: (document.body || document.documentElement), startOffset: 0,'
+        ' endContainer: (document.body || document.documentElement), endOffset: 0 }'
+    ),
     # <EventHandler> is a null on* read, which the required callback rejects
     "ReportingObserver": "function() { }",
     "MediaElementAudioSourceNode": '<AudioContext>, { mediaElement: document.createElement("audio") }',

@@ -1,0 +1,145 @@
+#   Firefox WebAssembly (Wasm) Grammar Rules.
+#
+#   Covers the WebAssembly JavaScript API, binary decoding, memory/table manipulation,
+#   SIMD, atomics, exceptions, globals and module round-tripping.
+#
+#   All lines are guarded by the DOM/JS lineguard.
+
+# ============================================================================
+# Wasm bytecode sources (valid modules, edge cases, malformed payloads)
+# ============================================================================
+
+# --- Minimal valid module (magic + version 1) ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00])
+
+# --- Simple function: export "f" () -> 42 ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x05,0x01,0x60,0x00,0x01,0x7f,0x03,0x02,0x01,0x00,0x07,0x05,0x01,0x01,0x66,0x00,0x00,0x0a,0x06,0x01,0x04,0x00,0x41,0x2a,0x0b])
+
+# --- Binary add: export "add" (i32, i32) -> i32 ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x07,0x01,0x60,0x02,0x7f,0x7f,0x01,0x7f,0x03,0x02,0x01,0x00,0x07,0x07,0x01,0x03,0x61,0x64,0x64,0x00,0x00,0x0a,0x09,0x01,0x07,0x00,0x20,0x00,0x20,0x01,0x6a,0x0b])
+
+# --- Memory module: export "m" (1 page min, 2 max) ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x05,0x04,0x01,0x01,0x01,0x02,0x07,0x05,0x01,0x01,0x6d,0x02,0x00])
+
+# --- Table module: export "t" (1 funcref min, 5 max) ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x04,0x05,0x01,0x70,0x01,0x01,0x05,0x07,0x05,0x01,0x01,0x74,0x01,0x00])
+
+# --- Global module: export "g" (mut i32 = 7) ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x06,0x06,0x01,0x7f,0x01,0x41,0x07,0x0b,0x07,0x05,0x01,0x01,0x67,0x03,0x00])
+
+# --- Control flow: loop and select ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x06,0x01,0x60,0x01,0x7f,0x01,0x7f,0x03,0x02,0x01,0x00,0x07,0x08,0x01,0x04,0x6c,0x6f,0x6f,0x70,0x00,0x00,0x0a,0x09,0x01,0x07,0x00,0x03,0x7f,0x20,0x00,0x0b,0x0b])
+
+# --- Atomics / Shared memory module: export "mem" 1 1 shared ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x05,0x04,0x01,0x03,0x01,0x01,0x07,0x07,0x01,0x03,0x6d,0x65,0x6d,0x02,0x00])
+
+# --- SIMD v128 module ---
+<wasmbytes> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x05,0x01,0x60,0x00,0x01,0x7b,0x03,0x02,0x01,0x00,0x07,0x08,0x01,0x04,0x73,0x69,0x6d,0x64,0x00,0x00,0x0a,0x16,0x01,0x14,0x00,0xfd,0x0c,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0b])
+
+# --- Malformed / Boundary bytecodes for parser & validation fuzzing ---
+# These must never back a `<new WebAssemblyModule>` creator: the constructor
+# throws CompileError, the variable is never registered and every later line
+# reading it is dead text. They are fed to the parser by wrapped statements.
+<wasmbytesbad> = new Uint8Array([0x00,0x61,0x73,0x6d,0x02,0x00,0x00,0x00])
+<wasmbytesbad> = new Uint8Array([0x00,0x61,0x73,0x00])
+<wasmbytesbad> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0xff])
+<wasmbytesbad> = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x80,0x80,0x80,0x80,0x00])
+<wasmbytesbad> = new Uint8Array(0)
+
+# ============================================================================
+# Helper definitions
+# ============================================================================
+
+<wasmexportname> = "f"
+<wasmexportname> = "add"
+<wasmexportname> = "m"
+<wasmexportname> = "t"
+<wasmexportname> = "g"
+<wasmexportname> = "mem"
+<wasmexportname> = "loop"
+<wasmexportname> = "simd"
+<wasmexportname> = "main"
+
+<wasmsectionname> = "name"
+<wasmsectionname> = "producers"
+<wasmsectionname> = "custom"
+<wasmsectionname> = ""
+
+<wasmimportobject> = {}
+<wasmimportobject> = { js: { mem: <WebAssemblyMemory> } }
+<wasmimportobject> = { env: { table: <WebAssemblyTable> } }
+<wasmimportobject> = { m: { g: <WebAssemblyGlobal> } }
+
+# ============================================================================
+# WebAssembly creators
+# ============================================================================
+
+!begin lines
+
+<new WebAssemblyModule> = new WebAssembly.Module(<wasmbytes>);
+<new WebAssemblyInstance> = new WebAssembly.Instance(<WebAssemblyModule>);
+<new WebAssemblyInstance> = new WebAssembly.Instance(<WebAssemblyModule>, <wasmimportobject>);
+<new WebAssemblyMemory> = new WebAssembly.Memory({ initial: 1, maximum: 2 });
+<new WebAssemblyMemory> = new WebAssembly.Memory({ initial: 1, maximum: 5, shared: true });
+<new WebAssemblyTable> = new WebAssembly.Table({ element: "anyfunc", initial: 1, maximum: 5 });
+<new WebAssemblyTable> = new WebAssembly.Table({ element: "externref", initial: 1, maximum: 5 });
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "i32", mutable: true }, <fuzzint>);
+<new WebAssemblyGlobal> = new WebAssembly.Global({ value: "f64", mutable: true }, <fuzzfloat>);
+<new WebAssemblyTag> = new WebAssembly.Tag({ parameters: ["i32"] });
+<new WebAssemblyException> = new WebAssembly.Exception(<WebAssemblyTag>, [<fuzzint>]);
+
+# ============================================================================
+# WebAssembly statements
+# ============================================================================
+
+# --- Validation and compilation ---
+WebAssembly.validate(<wasmbytes>);
+WebAssembly.validate(<wasmbytesbad>);
+WebAssembly.compile(<wasmbytes>).then(function(m) { WebAssembly.Module.exports(m); }).catch(function(e) {});
+WebAssembly.compile(<wasmbytesbad>).then(function(m) { WebAssembly.Module.exports(m); }).catch(function(e) {});
+WebAssembly.instantiate(<wasmbytes>).then(function(res) { try { res.instance.exports.f(); } catch(x) {} }).catch(function(e) {});
+WebAssembly.instantiate(<wasmbytesbad>).then(function(res) { try { res.instance.exports.f(); } catch(x) {} }).catch(function(e) {});
+try { new WebAssembly.Module(<wasmbytesbad>); } catch (e) { }
+WebAssembly.instantiate(<WebAssemblyModule>, <wasmimportobject>).then(function(inst) { try { inst.exports.f(); } catch(x) {} }).catch(function(e) {});
+
+# --- WebAssembly.Module introspection ---
+WebAssembly.Module.exports(<WebAssemblyModule>);
+WebAssembly.Module.imports(<WebAssemblyModule>);
+WebAssembly.Module.customSections(<WebAssemblyModule>, <wasmsectionname>);
+
+# --- WebAssembly.Instance execution ---
+try { <WebAssemblyInstance>.exports[<wasmexportname>](); } catch (e) { }
+try { <WebAssemblyInstance>.exports[<wasmexportname>](<fuzzint>, <fuzzint>); } catch (e) { }
+
+# --- WebAssembly.Memory manipulation ---
+try { <WebAssemblyMemory>.grow(<int min=0 max=1>); } catch (e) { }
+<WebAssemblyMemory>.buffer.byteLength;
+new Uint8Array(<WebAssemblyMemory>.buffer).fill(<int min=0 max=255>);
+new Int32Array(<WebAssemblyMemory>.buffer)[0] = <fuzzint>;
+Atomics.load(new Int32Array(<WebAssemblyMemory>.buffer), 0);
+Atomics.store(new Int32Array(<WebAssemblyMemory>.buffer), 0, <fuzzint>);
+Atomics.add(new Int32Array(<WebAssemblyMemory>.buffer), 0, <fuzzint>);
+try { <WebAssemblyMemory>.buffer.slice(0, 8); } catch(e) {}
+
+# --- WebAssembly.Table manipulation ---
+<WebAssemblyTable>.length;
+try { <WebAssemblyTable>.get(0); } catch(e) {}
+try { <WebAssemblyTable>.set(0, null); } catch(e) {}
+try { <WebAssemblyTable>.grow(<int min=0 max=1>); } catch(e) {}
+
+# --- WebAssembly.Global manipulation ---
+<WebAssemblyGlobal>.value = <fuzzint>;
+<WebAssemblyGlobal>.value = <fuzzfloat>;
+<WebAssemblyGlobal>.valueOf();
+
+# --- WebAssembly.Tag & Exception ---
+<WebAssemblyException>.is(<WebAssemblyTag>);
+try { <WebAssemblyException>.getArg(<WebAssemblyTag>, 0); } catch(e) {}
+
+# --- Structured Clone & Interop ---
+structuredClone(<WebAssemblyModule>);
+try { structuredClone(<WebAssemblyMemory>); } catch(e) {}
+# Table and Global are not serializable: structuredClone throws DataCloneError
+# on every draw, which is a deterministic refusal and not something to fuzz
+
+!end lines

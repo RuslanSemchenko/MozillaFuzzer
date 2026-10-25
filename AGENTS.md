@@ -12,13 +12,14 @@ before opening a rules file.
 
 | file | owns | note |
 |---|---|---|
-| `domato/rules/html.txt` | element/tag structure | includes `common`, `attributevalues`, `tagattributes`, `svg*`, `mathml*` |
-| `domato/rules/js.txt` | DOM/JS statements (`!begin lines`) | includes `common`, `jshelpers`, `wasm`, `webapis`; sets the `!lineguard` |
-| `domato/rules/webapis.txt` | Web API method calls, constructors, event handlers | the default destination for a new interface |
+| `domato/rules/html.txt` | element/tag structure | includes `common`; safe markup tags and attributes |
+| `domato/rules/js.txt` | DOM/JS statements (`!begin lines`) | includes `common`, `jshelpers`, `webidl_values`, `webapis`, `stateful`, `wasm`; sets `!lineguard` |
+| `domato/rules/webapis.txt` | Web API calls, constructors, events | generated from Firefox dom/webidl via `gen_webidl_rules.py` |
+| `domato/rules/webidl_values.txt` | WebIDL value types and dictionary generators | generated from dom/webidl |
+| `domato/rules/stateful.txt` | stateful multi-step scenarios | IDB, Streams, WebCrypto, OPFS, Workers, Detached frames |
+| `domato/rules/wasm.txt` | WebAssembly API & bytecodes | Wasm modules, SIMD, atomics, memory, tables, globals, exceptions |
 | `domato/rules/jshelpers.txt` | value-producing helpers | ends in `!begin helperlines` |
-| `domato/rules/tagattributes.txt` | per-element attribute values | `*Element` interfaces route here |
-| `domato/rules/css.txt` + `cssproperties.txt` | CSS grammar | `rules` is a live entry point |
-| `domato/rules/svg.txt`, `mathml.txt` (+ `*attrvalues.txt`) | SVG / MathML | included by `html.txt` |
+| `domato/rules/css.txt` | CSS grammar and properties | `rules` is a live entry point |
 | `domato/rules/canvas.txt` (+ `canvashelpers.txt`) | Canvas 2D statements | own grammar, own `!lineguard`, `!varformat fuzzvar%05d` |
 | `domato/rules/webgl.txt` (+ `webglhelpers.txt`) | WebGL 1/2 statements | same, separate grammar |
 | `domato/rules/webgpu.txt` + `webgpuhelpers.txt` | WebGPU statements | needs `<computeEntryPoint>`/`<vertexEntryPoint>`/`<fragmentEntryPoint>`/`<BindInt>` derived from the WGSL corpus |
@@ -32,7 +33,11 @@ sibling file name, never `../rules/...`.
 `grz_domato/template.html` is the harness the generated code is dropped into. It
 declares `freememory`, `GetVariable`, `SetVariable`, `fuzzervars`, and one guarded
 `<script>` block per API. A rule that needs a variable the template does not create
-is a template change, not a rules change.
+is a template change, not a rules change. `fuzzall()` calls `freememory()` after the
+generated lines, so every case ends with `FuzzingFunctions.garbageCollect()`,
+`cycleCollect()`, extra allocation pressure and a DOM/JS cycle - the GC/CC that can
+surface teardown bugs happens while the report is still attributable to this case.
+(`freememory()` used to be defined and never called, so those calls were dead code.)
 
 ## The loop
 
@@ -74,6 +79,14 @@ ResizeObserverSize(...)`, `MediaStreamError`, and a `MediaSource` behind `srcObj
 refused after the probe had called them present. Write one self-contained expression per
 member, in the shape the rule will actually emit, before writing the rule.
 
+`probe_apis.py --only NAME` writes the *whole* `results/audit/probe.json`, not just the
+batch: a targeted run replaces the 969-record file with a handful of answers, and the
+generator then silently drops every `[Func]` member and every interface only reachable
+through one (Window.caches, Navigator.gpu/mediaDevices/serviceWorker, Window.navigation,
+Document.createComment, Node.appendChild, ... - dozens of generated lines vanished this
+way before anyone noticed the file had shrunk). After any targeted probe, re-run the full
+`python3 tools/probe_apis.py` before running `gen_webidl_rules.py`.
+
 ## Reading the queue, honestly
 
 The audit matches the Firefox IDL against rule text. A member counts as emitted
@@ -107,21 +120,22 @@ confirms) are what produce a claim.
 
 ## Current state (last verified run)
 
-Every figure below is from the command written next to it, run on 2026-10-24 with the
+Every figure below is from the command written next to it, run on 2026-10-25 with the
 rules files in this tree. Re-run everything - they go stale the moment a rules file changes.
 
 `python3 tools/extract_idl.py --source /home/ruslan/firefox` -> 847 files, 2362 types
 (1101 interfaces), 10932 members.
 
-`python3 tools/audit_rules.py` on that inventory: 937 types considered, 790 not gated off at
-interface level (147 gated), 56 interfaces with at least one missing member. Across those 790:
-5597 members reachable, 143 missing (141 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
-five work orders are empty), 9 word-only, 0 parsed-but-unreachable, 286 whose only gate is a
-`[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 88 pref-off excluded before
+`python3 tools/audit_rules.py` on that inventory: 937 types considered, 793 not gated off at
+interface level (144 gated), 56 interfaces with at least one missing member. Across those 793:
+5623 members reachable, 135 missing (133 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+five work orders are empty), 9 word-only, 0 parsed-but-unreachable, 283 whose only gate is a
+`[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 78 pref-off excluded before
 queuing.
 
-All 56 queue blocks carry a NOTE, so the 143 are an adjudicated refusal rather than a to-do
-list: `FuzzingFunctions` (namespace compiled out of this build), the WebAuthn response classes
+All 56 queue blocks carry a NOTE, so the 135 are an adjudicated refusal rather than a to-do
+list: `FuzzingFunctions` (compiled in, but `crash`/`killGPUProcess`/`signalIPCReady`/
+`memoryPressure`/`synthesizeKeyboardEvents` are refused), the WebAuthn response classes
 (`AuthenticatorResponse` and its two subclasses, `PublicKeyCredential` - a real credential needs
 an authenticator), the report bodies (`CSPViolationReportBody`, `DeprecationReportBody`,
 `IntegrityViolationReportBody`) plus `FetchObserver`, the permission/UI surfaces (`Clipboard`,
@@ -135,30 +149,30 @@ an authenticator), the report bodies (`CSPViolationReportBody`, `DeprecationRepo
 the `WebTransport` family, and the WebGL extension objects. Each NOTE states the reason *as
 evaluated in the page*, not as read from the IDL.
 
-`python3 tools/probe_apis.py` probed all 976 queued candidates on the same build with Grizzly's
-prefs (the default bucket is `all` = `needs_probe` + `missing`): 188 `present` (176 prototype,
-7 instance, 4 static, 1 `getExtension(webgl2)`), 788 `not-exposed`, and 53 interfaces the page has
+`python3 tools/probe_apis.py` probed all 962 queued candidates on the same build with Grizzly's
+prefs (the default bucket is `all` = `needs_probe` + `missing`): 191 `present` (174 prototype,
+5 namespace, 4 static, 8 instance), 771 `not-exposed`, and 53 interfaces the page has
 no receiver for at all (`unprobeable`, kept separate so a WebGL extension object or a worker-only
 interface is not reported as a browser denial). Present is exposure, not callability *or*
 obtainability: `'Geolocation' in window` is true while `navigator.geolocation` is undefined here,
-so its members probe `present:prototype` and there is still no receiver. Of the 188, 17 are
+so its members probe `present:prototype` and there is still no receiver. Of the 191, 17 are
 emitted in reachable rule text; the rest are the refused interfaces above or members the generator
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
-because the template already consumed that adapter).
+because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9671 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9766 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-about 37 s with `51 row(s), 26 group(s); 3 systematic; creators 0 | roots 25 | cascades 0 |
-async/no-line 1`. The three systematic rows are all `<RTCDataChannel>.send()`: a channel from
+about 53 s with `32 row(s), 17 group(s); 3 systematic; creators 0 | roots 17 | cascades 0 |
+async/no-line 0`. Two systematic rows are `<RTCDataChannel>.send()`: a channel from
 `createDataChannel` stays "connecting" until a real peer negotiates SCTP, and send() throws
-InvalidStateError unless readyState is "open". The other rows are validation on random receivers
-or arguments (appendChild of a Document or an Attribute, selectSubString past the text, a
-MediaSource duration while closed) and one intermittent `console console.error` with no line.
+InvalidStateError unless readyState is "open". The third is `<TimeRanges>.end()` on an empty
+range. The other rows are validation on random receivers or arguments (appendChild of a Document
+or an Attribute, selectSubString past the text, a MediaSource duration while closed).
 `creators 0` is the fastest check for the dead-text class described below; run it after any
 creator or argument-override change. When the thrown object has no stack (a DOMException raised
 through a promise), the collector records its own stack so the rule line is still named, and
@@ -169,8 +183,24 @@ and the scanned report for `fuzzall is not defined`: both mean the first inline 
 defines `fuzzall`) did not parse or execute, so every generated line on that page was dead while
 the report could still say `0 systematic`.
 
-Two sweeps closed most of this session's work and both are worth remembering as defect shapes,
+These sweeps closed most of this session's work and are worth remembering as defect shapes,
 not as line counts:
+
+- Hand-written Wasm bytecodes are code, and three of the six "valid" module sources carried
+  section-size typos (memory section declared 5 bytes and carried 4; type section 5 vs 6;
+  a 4-character export name declared as 3). `new WebAssembly.Module` threw CompileError,
+  the module variable was never created, and `new WebAssembly.Instance(<module>)` cascaded
+  off it - the scan's creators section named four rows at once. Every byte array is now
+  compiled once through `tools/check_reads.py`; a module source that has not been verified
+  that way is a dead creator. `structuredClone` of a `WebAssembly.Table`/`.Global` throws
+  DataCloneError on every draw, so those two statements are not emitted at all.
+- `StaticRange` validates its init dictionary (both containers share a root, offsets are
+  valid boundary points), so `new StaticRange(<StaticRangeInit>)` with a random `<Node>`
+  pair threw InvalidNodeTypeError on every draw; `CONSTRUCTOR_ARG_OVERRIDES` now builds the
+  range on `document.body` at offset 0.
+- `PerformanceResourceTiming.renderBlockingStatus` was the one new audit gap after a regen;
+  the existing `stateful.txt` XHR scenario reads the resource entry, so it now reads that
+  member too and the queue went back to 56 blocks, all with NOTEs.
 
 - `document.createEvent("X")` accepts only a legacy whitelist. 51 of the 71 names the grammar
   asked for threw `NotSupportedError`, so those variables were never created and every statement
@@ -412,17 +442,17 @@ compile here and what the fix was:
 1. `GPU*` -> `rules/webgpu.txt`; `WebGL*`, `EXT_*`, `OES_*`, `OVR_*`, `WEBGL_*`, `ANGLE_*`,
    `MOZ_debug` -> `rules/webgl.txt`; `CanvasRenderingContext2D`, `OffscreenCanvas*`, `Path2D`,
    `ImageData`, `ImageBitmap`, ... -> `rules/canvas.txt`.
-2. `SVG*` -> `svg.txt`; `MML*` -> `mathml.txt`; CSS-ish -> `css.txt`; `*Element` ->
-   `tagattributes.txt`.
+2. CSS-ish -> `css.txt`; `SVG*`/`MML*` markup and per-element attribute values ->
+   `html.txt` (which also owns the markup-only grammars' value symbols).
 3. everything else -> `webapis.txt`.
 
-Route by what the destination grammar can *say*, not by the interface name. `svg.txt` is
-included by `html.txt`, whose entry point emits markup, so it has no statement slot and no
-`<SVGPathElement>` variable - those are produced in `jshelpers.txt:2605` and consumed by
-`js.txt`. SVG DOM methods (`getPathData`, `getPathSegmentAtLength`, ...) belong in the
-`#SVGPathElement` block of `js.txt` with the rest of that receiver's calls. The audit
-routes a work order by name, so its file header is advice about where the name *might*
-go; check that the grammar you write into owns the receiver.
+Route by what the destination grammar can *say*, not by the interface name. `html.txt`
+is the markup grammar, so it has no statement slot and no `<SVGPathElement>` variable.
+SVG/MathML DOM methods (`getPathData`, `getPathSegmentAtLength`, ...) and every
+`*Element` attribute *read* (`el.accessKeyLabel`) are JS statements and belong in the
+`webapis.txt` block for that receiver. The audit routes a work order by name, so its
+file header is advice about where the name *might* go; check that the grammar you write
+into owns the receiver.
 
 The graphics grammars are separate `Grammar` objects on purpose. Do not merge them
 into `rules/`: one object would pool every `<line>` together, so 40k DOM lines would
@@ -486,8 +516,15 @@ declarations would fight over one object.
   in that set: `<hex>` is a *single* hex digit, so a colour is six of them and there is no
   `<hexdigit>`; and `#` is a comment marker cut from every rule line before parsing
   (`_remove_comments`, grammar.py:776), so `filter: url(#foo)` silently became the rule
-  text `'filter: url('`. Write `<hash>` instead - seven rules across `common.txt`,
-  `css.txt` and `mathmlattrvalues.txt` were truncated that way.
+  text `'filter: url('`. Write `<hash>` instead - rules in `common.txt` and `css.txt`
+  were truncated that way before the emitter learned to refuse a `#`.
+- `min=` / `max=` are read only by the built-in integer tags (`<int>`, `<int8>` ...
+  `<uint32>`; `grammar.py:165`). `<fuzzint min=0 max=5>` is a *user symbol* from
+  `common.txt`, so the attributes are parsed and ignored and the value comes from the
+  whole `fuzzint` pool (-2^31 .. 2^31-1, including -1). Five wasm rules carried bounds
+  that never applied and threw RangeError in every case that drew them; the scan
+  (`3 systematic` rows) is what surfaced it. Use `<int min=... max=...>` when a bound
+  matters.
 - `<hash>` belongs *inside a string literal*. In expression position it generates a bare
   `#`, which is a SyntaxError that takes the whole `<script>` with it. `check_rules.py`
   now fails on any `#` outside a string literal in a generated script body
@@ -506,19 +543,14 @@ declarations would fight over one object.
   field, but the audit matches `.name`, `["name"]` and `name(` only, so the row stays in
   `missing`. Read the property back too (`<OfflineAudioCompletionEvent>.renderedBuffer`) or
   leave a NOTE; never delete the dictionary write to make a number look better.
-- `<DOMString>` is shared between two grammars that want opposite things. `js.txt` pulls in
-  `cssproperties.txt` through `jshelpers.txt:2239`, and that file also defines
-  `<DOMString> = foo|bar|baz|a` - CSS identifiers, and undeclared identifiers in JS. With 4 of
-  the symbol's 9 creators in the js grammar bare, almost half of every `<DOMString>` in a
-  generated statement threw ReferenceError (measured: 64 in one instrumented case). They carry
-  `p=0.02` now: the js grammar draws them 8% of the time (0 in the case re-run afterwards), and
-  the css grammar is untouched because those four are its *only* `<DOMString>` rules, so
-  normalisation puts them back at a uniform 25% each. `wasm.txt:278-279`
-  (`<wasmexportidentifier>`) is a second bare source.
-- The audit routes an `*Element` name to `tagattributes.txt` by interface name, which is right
-  for an attribute *value* and wrong for an attribute *read*. `el.accessKeyLabel` and
-  `el.scrollLeftMax` are JS statements and belong in `webapis.txt`; check that the grammar you
-  write into owns the receiver.
+- `<DOMString>` is shared by every grammar, and `common.txt` is its only source now.
+  Every rule there is a *quoted* string. A bare identifier added to that symbol (a CSS
+  keyword, an `!important` word) would be an undeclared name in every generated JS
+  statement - keep grammar-specific bare words in that grammar's own symbols.
+- The audit routes an `*Element` name by interface name, which is right for an attribute
+  *value* and wrong for an attribute *read*. `el.accessKeyLabel` and `el.scrollLeftMax`
+  are JS statements and belong in `webapis.txt`; check that the grammar you write into
+  owns the receiver.
 - A refusal is worth recording in the tool. When a member turns out unreachable, add the reason
   - as it was evaluated, not as the IDL reads it - to `NOTES` in `tools/audit_rules.py`, so the
   queue block says why. An unadjudicated `missing` row is just an invitation for the next session
@@ -532,13 +564,29 @@ declarations would fight over one object.
 - Members behind a `[Pref]` that is off in `StaticPrefList.yaml` *and* not turned on by
   Grizzly's `browser-fuzzing.yml`. Only one of the two being on is enough.
 - Anything `[Func]`-gated that `probe_apis.py` has not confirmed present.
-- `FuzzingFunctions.crash` / `FuzzingFunctions.killGPUProcess` / `memoryPressure` - they end
-  the session rather than fuzzing it. The rest of that namespace is normally fair game, but
-  this checkout is an ASan Nightly-milestone build without `--enable-fuzzing` (`MOZ_DEBUG` is
-  off; `MOZ_DIAGNOSTIC_ASSERT_ENABLED` comes from `NIGHTLY_BUILD`), so the *whole* namespace
-  is compiled out: `grep -c FuzzingFunctions libxul.so` is 0 where the control string
-  `structuredClone` is 19, and `probe_apis.py` finds no global. On a build that does
-  configure fuzzing, re-probe before adding any of it back.
+- `FuzzingFunctions.crash` / `killGPUProcess` / `signalIPCReady` / `memoryPressure` /
+  `synthesizeKeyboardEvents`. The namespace exists now: the build was reconfigured with
+  `--enable-fuzzing` on 2026-10-24, `grep -c FuzzingFunctions libxul.so` is 119 where
+  `structuredClone` is 22, and `probe_apis.py` reports 5 members `present:namespace`.
+  The rest of the namespace is emitted (`garbageCollect`, `cycleCollect`,
+  `garbageCollectCompacting`, `enableAccessibility`, `dump`, `procId`, `remoteType`) -
+  `check_reads.py` confirms all of them run in content. Two are refused because they were
+  measured, not guessed:
+  - `synthesizeKeyboardEvents` is a *content-process kill* on this harness:
+    `BrowserParent::RecvRequestNativeKeyBindings` opens with
+    `NS_ENSURE_TRUE(xpc::IsInAutomation(), IPC_FAIL(this, "Unexpected event"))`, and
+    `IsInAutomation()` requires `MOZ_DISABLE_NONLOCAL_CONNECTIONS` plus the
+    `security.turn_off_all_security_so_that_viruses_can_take_over_this_computer` pref.
+    Grizzly sets neither (`ffpuppet` and `prefpicker/templates/browser-fuzzing.yml`), so a
+    `"Tab"` press in either headless or headful mode ends with `IPDL protocol error:
+    Handler returned error code!` and `Exiting due to channel error`. `check_reads.py`
+    hangs exactly here - a page that kills its own content process never posts a report.
+    A fuzz-only API reachable from content should not take the process down; this one does.
+  - `memoryPressure` only fires a `heap-minimize` observer notification, but the project
+    rule is that GC/CC belongs to `freememory()` at the end of the case, not to a random
+    statement in the middle of one; it stays out of `webapis.txt`.
+  `spinEventLoopFor` is emitted with a fixed `1` ms argument - the IDL takes `unsigned
+  long`, so a generated `<fuzzuint>` could spin the event loop for 49 days.
 - A call whose only effect is to ask the user something - `Navigator.mozGetUserMedia` is
   `present` on the prototype and still must not be emitted, because a camera/microphone
   prompt is a window the harness cannot answer.

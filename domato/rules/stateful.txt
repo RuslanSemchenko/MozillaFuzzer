@@ -56,7 +56,7 @@ var fzmo1 = document.createElement("div"); (document.body || document.documentEl
 
 # --- Resource / paint / LCP / event timing ------------------------------------
 
-var fzxhr1 = new XMLHttpRequest(); fzxhr1.open("GET", location.href, false); fzxhr1.send(); setTimeout(function () { try { var fzrt1 = performance.getEntriesByType("resource")[0]; if (fzrt1) { fzrt1.initiatorType; fzrt1.nextHopProtocol; fzrt1.workerStart; fzrt1.transferSize; fzrt1.encodedBodySize; fzrt1.decodedBodySize; fzrt1.responseStatus; fzrt1.serverTiming; fzrt1.deliveryType; fzrt1.finalResponseHeadersStart; fzrt1.firstInterimResponseStart; } } catch (e) { } }, 100);
+var fzxhr1 = new XMLHttpRequest(); fzxhr1.open("GET", location.href, false); fzxhr1.send(); setTimeout(function () { try { var fzrt1 = performance.getEntriesByType("resource")[0]; if (fzrt1) { fzrt1.initiatorType; fzrt1.nextHopProtocol; fzrt1.workerStart; fzrt1.transferSize; fzrt1.encodedBodySize; fzrt1.decodedBodySize; fzrt1.responseStatus; fzrt1.serverTiming; fzrt1.deliveryType; fzrt1.finalResponseHeadersStart; fzrt1.firstInterimResponseStart; fzrt1.renderBlockingStatus; } } catch (e) { } }, 100);
 setTimeout(function () { try { var fzpaint1 = performance.getEntriesByType("paint"); if (fzpaint1.length) { fzpaint1[0].paintTime; fzpaint1[0].presentationTime; fzpaint1[0].startTime; fzpaint1[0].duration; } } catch (e) { } }, 100);
 new PerformanceObserver(function (list) { try { var fzlcp1 = list.getEntries()[0]; fzlcp1.renderTime; fzlcp1.loadTime; fzlcp1.paintTime; fzlcp1.presentationTime; fzlcp1.size; fzlcp1.url; fzlcp1.element; } catch (e) { } }).observe({ type: "largest-contentful-paint", buffered: true });
 new PerformanceObserver(function (list) { try { var fzevt1 = list.getEntries()[0]; fzevt1.processingStart; fzevt1.processingEnd; fzevt1.interactionId; fzevt1.target; } catch (e) { } }).observe({ type: "event", buffered: true });
@@ -170,5 +170,17 @@ var fzbch9 = new BroadcastChannel("fuzz"); fzbch9.onmessage = function (e) { try
 # --- HTMLInputElement.valueAsDate: only a date/time input accepts it ----------
 
 var fzdate1 = document.createElement("input"); fzdate1.type = "date"; fzdate1.valueAsDate = new Date(0); fzdate1.valueAsDate; fzdate1.value = "1970-01-01"; fzdate1.valueAsDate; fzdate1.type = "time"; fzdate1.valueAsDate = new Date(0); fzdate1.valueAsDate;
+
+# --- Detached Frame: calls on an unparented BrowsingContext and Document -------
+
+var fzifr1 = document.createElement("iframe"); fzifr1.src = "about:blank"; (document.body || document.documentElement)?.appendChild(fzifr1); try { var fzwin1 = fzifr1.contentWindow; var fzdoc1 = fzifr1.contentDocument; fzifr1.remove(); if (fzwin1 && fzdoc1) { fzwin1.document; fzwin1.location.href; fzdoc1.body; fzdoc1.createElement("div"); fzdoc1.write("fuzz"); fzdoc1.close(); } } catch (e) { }
+
+# --- Web Worker + Transferable ArrayBuffer and MessageChannel -----------------
+
+var fzwk1_code = "onmessage = function(e) { try { var buf = e.data; if (buf) { postMessage(buf, [buf]); } } catch(x) {} }"; var fzwk1_blob = new Blob([fzwk1_code], { type: "application/javascript" }); var fzwk1_url = URL.createObjectURL(fzwk1_blob); var fzwk1 = new Worker(fzwk1_url); var fzmc1 = new MessageChannel(); fzwk1.onmessage = function(e) { try { e.data.byteLength; } catch(x) {} }; fzwk1.onerror = function(e) { }; var fzab1 = new ArrayBuffer(64); fzwk1.postMessage(fzab1, [fzab1]); fzwk1.postMessage({ port: fzmc1.port2 }, [fzmc1.port2]); fzmc1.port1.postMessage("ping"); fzwk1.terminate(); URL.revokeObjectURL(fzwk1_url);
+
+# --- WebAssembly: module compilation, memory grow, tables, exports -------------
+
+var fzwm1_bytes = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x05,0x01,0x60,0x00,0x01,0x7f,0x03,0x02,0x01,0x00,0x07,0x05,0x01,0x01,0x66,0x00,0x00,0x0a,0x06,0x01,0x04,0x00,0x41,0x2a,0x0b]); if (typeof WebAssembly !== "undefined") { WebAssembly.validate(fzwm1_bytes); var fzwm1 = new WebAssembly.Module(fzwm1_bytes); WebAssembly.Module.exports(fzwm1); WebAssembly.Module.imports(fzwm1); WebAssembly.Module.customSections(fzwm1, "name"); var fzwi1 = new WebAssembly.Instance(fzwm1); if (fzwi1.exports.f) { fzwi1.exports.f(); } var fzwmem1 = new WebAssembly.Memory({ initial: 1, maximum: 2 }); fzwmem1.grow(1); fzwmem1.buffer.byteLength; var fzwtbl1 = new WebAssembly.Table({ element: "anyfunc", initial: 1, maximum: 5 }); fzwtbl1.length; fzwtbl1.grow(1); var fzwg1 = new WebAssembly.Global({ value: "i32", mutable: true }, 10); fzwg1.value = 20; var fzwtg1 = new WebAssembly.Tag({ parameters: ["i32"] }); var fzwex1 = new WebAssembly.Exception(fzwtg1, [42]); fzwex1.is(fzwtg1); WebAssembly.instantiate(fzwm1_bytes).then(function(res) { try { res.instance.exports.f(); } catch(x) {} }).catch(function(e) {}); }
 
 !end lines
