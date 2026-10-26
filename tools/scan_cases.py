@@ -97,9 +97,11 @@ try {
   var __fz_console_error = console.error;
   console.error = function () {
     try {
-      var parts = [];
-      for (var i = 0; i < arguments.length; i++) { parts.push(String(arguments[i])); }
-      if (window.__fz.length < 5000) {
+      // A generated console.error() with no arguments is an API call under
+      // fuzz, not a page error; a real report always carries a message.
+      if (arguments.length && window.__fz.length < 5000) {
+        var parts = [];
+        for (var i = 0; i < arguments.length; i++) { parts.push(String(arguments[i])); }
         window.__fz.push({kind: "console", name: "console.error",
                           message: parts.join(" "), stack: ""});
       }
