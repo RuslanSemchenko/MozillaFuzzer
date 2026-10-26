@@ -120,20 +120,20 @@ confirms) are what produce a claim.
 
 ## Current state (last verified run)
 
-Every figure below is from the command written next to it, run on 2026-10-25 with the
+Every figure below is from the command written next to it, run on 2026-10-26 with the
 rules files in this tree. Re-run everything - they go stale the moment a rules file changes.
 
 `python3 tools/extract_idl.py --source /home/ruslan/firefox` -> 847 files, 2362 types
 (1101 interfaces), 10932 members.
 
 `python3 tools/audit_rules.py` on that inventory: 937 types considered, 793 not gated off at
-interface level (144 gated), 56 interfaces with at least one missing member. Across those 793:
-5623 members reachable, 135 missing (133 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
-five work orders are empty), 9 word-only, 0 parsed-but-unreachable, 283 whose only gate is a
+interface level (144 gated), 50 interfaces with at least one missing member. Across those 793:
+5642 members reachable, 119 missing (117 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+five work orders are empty), 7 word-only, 0 parsed-but-unreachable, 282 whose only gate is a
 `[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 78 pref-off excluded before
 queuing.
 
-All 56 queue blocks carry a NOTE, so the 135 are an adjudicated refusal rather than a to-do
+All 50 queue blocks carry a NOTE, so the 119 are an adjudicated refusal rather than a to-do
 list: `FuzzingFunctions` (compiled in, but `crash`/`killGPUProcess`/`signalIPCReady`/
 `memoryPressure`/`synthesizeKeyboardEvents` are refused), the WebAuthn response classes
 (`AuthenticatorResponse` and its two subclasses, `PublicKeyCredential` - a real credential needs
@@ -160,23 +160,25 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9766 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9808 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-about 53 s with `32 row(s), 17 group(s); 3 systematic; creators 0 | roots 17 | cascades 0 |
-async/no-line 0`. Two systematic rows are `<RTCDataChannel>.send()`: a channel from
+about 41 s with `26 row(s), 14 group(s); 2 systematic; creators 0 | roots 14 | cascades 0 |
+async/no-line 0`. Both systematic rows are `<RTCDataChannel>.send()`: a channel from
 `createDataChannel` stays "connecting" until a real peer negotiates SCTP, and send() throws
-InvalidStateError unless readyState is "open". The third is `<TimeRanges>.end()` on an empty
-range. The other rows are validation on random receivers or arguments (appendChild of a Document
-or an Attribute, selectSubString past the text, a MediaSource duration while closed).
+InvalidStateError unless readyState is "open". The other rows are validation on random receivers
+or arguments (appendChild of a Document or an Attribute, selectSubString past the text, a
+MediaSource duration while closed, a TimeRanges boundary on an empty range).
 `creators 0` is the fastest check for the dead-text class described below; run it after any
 creator or argument-override change. When the thrown object has no stack (a DOMException raised
 through a promise), the collector records its own stack so the rule line is still named, and
-`__fz_err` frames are skipped when mapping.
+`__fz_err` frames are skipped when mapping. The page hook records only `console.error` calls
+that carry an argument, so the generated `console.error()` coverage line does not become a
+false systematic row.
 
 A scan is only valid if the page actually ran. Check `grep SyntaxError results/scan/firefox.log`
 and the scanned report for `fuzzall is not defined`: both mean the first inline script (which
@@ -275,9 +277,11 @@ the audit still reads the member name out of the dead text that depended on it:
   sender (`mDtmf` is created only for an audio conduit); `XSLTProcessor.transformToDocument/Fragment`
   throws `NS_ERROR_NOT_INITIALIZED` on the zero-argument constructor or after `reset()`;
   `CSSStyleSheet.cssRules` and its legacy alias `.rules` throw "still-loading style sheet" after an
-  imported sheet is inserted. Those creators now build their own receiver (a fresh
-  `RTCPeerConnection`, an audio transceiver, an imported stylesheet) or are refused as creators
-  while the call stays in the statement pool.
+  imported sheet is inserted. `HTMLCanvasElement.transferControlToOffscreen` throws
+  InvalidStateError once the canvas has a rendering context, and a pooled canvas always has
+  one. Those creators now build their own receiver (a fresh
+  `RTCPeerConnection`, an audio transceiver, an imported stylesheet, a fresh canvas) or are
+  refused as creators while the call stays in the statement pool.
 - `IDBFactory.open(name, 0)` is a `TypeError` ("0 (Zero) is not a valid database version"), so
   the version overload got a fixed `"fuzzdb", 1`.
 - `Location.search = ...` navigates the harness page (`GET /case0.html?fuzz`) and the case never
