@@ -2,6 +2,8 @@
 
 A specialized DOM & WebIDL fuzzing environment tailored for **Mozilla Firefox**, integrating Mozilla's [Grizzly](https://github.com/MozillaSecurity/grizzly) orchestration framework with an adapted [Domato](https://github.com/googleprojectzero/domato) grammar generation engine.
 
+> **For rules work (WebIDL coverage, audits, probes):** see [`AGENTS.md`](AGENTS.md) — it contains the full, enforced workflow and gotchas for this repo.
+
 ## Overview
 
 - **`grz_domato/`**: In-process Grizzly adapter (`DomatoAdapter`) driving test case generation with isolated line budgets for DOM/JS, Canvas 2D, WebGL 1/2, and WebGPU.
@@ -23,21 +25,36 @@ A specialized DOM & WebIDL fuzzing environment tailored for **Mozilla Firefox**,
 - **`fuzz.sh`**: Linux runner with stress profile support (`--stress`, `--chaos`, `--zeal`, `--asan`).
 - **`replay.sh` / `reduce.sh`**: Turnkey scripts for reproducing and minimizing crashes with Grizzly.
 
-## Installation
+## Quick Start
 
-Install `grz-domato` in editable mode:
+1. **Clone/setup deps**
+   ```bash
+   pip install -e .
+   ```
 
+2. **Configure paths** (copy example and edit)
+   ```bash
+   cp .env.example .env
+   # set FIREFOX_SRC and FIREFOX_BIN
+   ```
+
+3. **Check environment**
+   ```bash
+   make doctor
+   # or: python3 tools/doctor.py
+   ```
+
+4. **Start fuzzing**
+   ```bash
+   ./fuzz.sh        # headful/default
+   ./fuzz.sh headless
+   ./fuzz.sh --stress
+   ```
+
+Verify adapter:
 ```bash
-pip install -e .
+grizzly --list-adapters  # should include "domato"
 ```
-
-Verify that the Grizzly adapter is recognized:
-
-```bash
-grizzly --list-adapters
-```
-
-You should see `domato` listed among available adapters.
 
 ## Usage
 
@@ -94,22 +111,20 @@ Minimize a crash testcase down to a concise reproducer:
 
 ### 4. Updating Grammar Rules After Firefox Upgrades
 
-When pulling or building a new Firefox revision:
+When pulling or building a new Firefox revision (see [`AGENTS.md`](AGENTS.md) for the full disciplined loop):
 
 ```bash
 # 1. Extract updated WebIDL inventory
-python3 tools/extract_idl.py --source /path/to/firefox
+make extract  # or: python3 tools/extract_idl.py --source $FIREFOX_SRC
 
 # 2. Inspect new APIs added in this revision
 python3 tools/diff_inventory.py
 
-# 3. Check and probe API exposure
-python3 tools/audit_rules.py
-python3 tools/probe_apis.py
-
-# 4. Regenerate rules and verify
-python3 tools/gen_webidl_rules.py
-python3 tools/check_rules.py --samples 25
+# 3. Audit, probe and verify
+make audit      # python3 tools/audit_rules.py --show-blocked
+make probe      # python3 tools/probe_apis.py
+make check-rules
+make wgsl        # if WGSL changed
 ```
 
 ## License

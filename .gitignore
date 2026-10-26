@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 *.so
 
+# Local environment (paths, not secrets)
+.env
+
 # Packaging and distribution
 build/
 dist/
