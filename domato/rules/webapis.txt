@@ -2624,7 +2624,7 @@ var fzmo = document.createElement("canvas"); fzmo.mozOpaque = false;
 <HTMLCanvasElement>.toBlob(function() { });
 <HTMLCanvasElement>.toDataURL();
 <HTMLCanvasElement>.toDataURL(<DOMString>, <anyvalue>);
-<HTMLCanvasElement>.transferControlToOffscreen();
+var fuzzocc = document.createElement("canvas"); var fuzzocs = fuzzocc.transferControlToOffscreen(); fuzzocs.getContext("2d").fillRect(0, 0, 1, 1);
 <HTMLCanvasElement>.width;
 <HTMLCanvasElement>.width = <fuzzuint>;
 <HTMLCollection>.length;

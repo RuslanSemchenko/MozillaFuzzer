@@ -1576,6 +1576,14 @@ STATEMENT_OVERRIDES = {
         "var fzidc = {r}; fzidc.completed.catch(function (e) { });"
         " fzidc.tracks.ready.catch(function (e) { }); fzidc.close();"
     ),
+    # transferControlToOffscreen throws InvalidStateError once the canvas has a
+    # rendering context, and a pooled canvas always has one by then; transfer
+    # a fresh canvas in the same line and render on the transferred one
+    ("HTMLCanvasElement", "transferControlToOffscreen"): (
+        'var fuzzocc = document.createElement("canvas");'
+        ' var fuzzocs = fuzzocc.transferControlToOffscreen();'
+        ' fuzzocs.getContext("2d").fillRect(0, 0, 1, 1);'
+    ),
     # these throw InvalidStateError on a non-HTML document; the global
     # document in the harness page is always HTML
     ("Document", "queryCommandEnabled"): 'document.queryCommandEnabled("fuzz");',
