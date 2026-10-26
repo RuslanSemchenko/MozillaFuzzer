@@ -280,24 +280,50 @@ def collect(pages: list[str], firefox: Path, profile: Path, case_timeout: int, l
     )
     deadline = time.monotonic() + case_timeout * len(pages) + 30
     last_activity = time.monotonic()
-    seen = 0
-    status = ""
+    cursor = 0
+    stalls: list[str] = []
+
+    def launch(index: int) -> subprocess.Popen:
+        page_url = f"http://127.0.0.1:{httpd.server_address[1]}/case{index}.html"
+        return subprocess.Popen(
+            [str(firefox), "--no-remote", "--profile", str(profile), page_url],
+            stdout=subprocess.DEVNULL,
+            stderr=log,
+        )
+
     try:
-        while len(results) < len(pages) and time.monotonic() < deadline:
+        while cursor < len(pages) and time.monotonic() < deadline:
             if proc.poll() is not None:
-                status = f"browser exited with status {proc.returncode}"
-                break
-            if time.monotonic() - last_activity > case_timeout:
-                status = f"case {len(results)} never reported (timeout {case_timeout}s)"
+                stalls.append(f"browser exited with status {proc.returncode} at case {cursor}")
                 break
             with lock:
-                fresh = {index: rows for index, rows in results.items() if index >= seen}
-                seen = max(results) + 1 if results else 0
-            for index, rows in sorted(fresh.items()):
-                print(f"  case {index + 1}/{len(pages)}: {len(rows)} error row(s)", flush=True)
-            if fresh:
+                rows = results.get(cursor)
+            if rows is not None:
+                print(f"  case {cursor + 1}/{len(pages)}: {len(rows)} error row(s)", flush=True)
                 last_activity = time.monotonic()
+                cursor += 1
+                continue
+            if time.monotonic() - last_activity > case_timeout:
+                # A page that hangs in generated JS never reaches its report timer, and
+                # without a restart the remaining cases would never be scanned.
+                stalls.append(f"case {cursor} never reported (timeout {case_timeout}s)")
+                print(
+                    f"  case {cursor + 1}/{len(pages)} timed out - restarting at the next case",
+                    flush=True,
+                )
+                proc.kill()
+                proc.wait()
+                cursor += 1
+                if cursor >= len(pages):
+                    break
+                proc = launch(cursor)
+                deadline += case_timeout
+                last_activity = time.monotonic()
+                continue
             time.sleep(0.2)
+        else:
+            if cursor < len(pages) and time.monotonic() >= deadline:
+                stalls.append(f"deadline reached at case {cursor}")
     finally:
         proc.terminate()
         try:
@@ -310,7 +336,7 @@ def collect(pages: list[str], firefox: Path, profile: Path, case_timeout: int, l
         sample = sorted(set(unexpected))[:10]
         print(f"unexpected request(s) - page navigated or fetched elsewhere: {', '.join(sample)}", file=sys.stderr)
     with lock:
-        return dict(results), status
+        return dict(results), "; ".join(stalls)
 
 
 def read_cases(adapter, samples: int, seed: int | None, outdir: Path) -> tuple[list[str], list[str]]:
