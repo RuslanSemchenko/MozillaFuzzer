@@ -497,14 +497,18 @@ MEMBER_ARG_OVERRIDES = {
     ),
     # a fresh Selection has no ranges, so any literal index is IndexSizeError;
     # the index expression seeds the selection first. documentElement can be
-    # removed by the case itself, so only seed when a root is still there.
+    # removed by the case itself; a Document is a legal Range container, so
+    # select its contents when no root is left (evaluated)
     ("Selection", "getRangeAt"): (
         "(function () { var r = document.createRange();"
-        " var root = document.documentElement || document.body;"
-        " if (root) { r.selectNodeContents(root);"
-        " document.getSelection().addRange(r); }"
+        " var root = document.documentElement || document.body || document;"
+        " r.selectNodeContents(root);"
+        " document.getSelection().addRange(r);"
         " return 0; })()"
     ),
+    # the character index must lie inside the text, and a pooled text element
+    # may have none; zero is valid even on an empty one (evaluated)
+    ("SVGTextContentElement", "selectSubString"): "0, 0",
     # an arbitrary <Node> is not a stylesheet (compile error), and the import
     # refuses a second sheet on one processor ("We don't support importing
     # multiple stylesheets yet", NOT_IMPLEMENTED): the statement override below
@@ -1007,11 +1011,13 @@ STATEMENT_OVERRIDES = {
         "var fuzzwb = device.createBuffer({ size: 16, usage: GPUBufferUsage.COPY_DST });"
         " {r}.writeBuffer(fuzzwb, 0, new Float32Array(4));"
     ),
-    # stop() before start() is InvalidStateError; bind the receiver once and
-    # start it in the same line (a second start is still refused, so only the
-    # first stop line in a case gets through)
+    # stop() before start() is InvalidStateError, and a pooled source may have
+    # been started by an earlier draw of this same line (lines are drawn with
+    # replacement); start and stop a fresh source in one statement
     ("AudioScheduledSourceNode", "stop"): (
-        "var fuzzsrc = {r}; fuzzsrc.start(); fuzzsrc.stop();"
+        "var fzsac3 = new AudioContext(); var fzsrcs = fzsac3.createBufferSource();"
+        " fzsrcs.buffer = fzsac3.createBuffer(1, 1, 8000);"
+        " fzsrcs.start(0); fzsrcs.stop(); fzsac3.close();"
     ),
     # deleting at index 0 from a fresh row/table/section throws IndexSizeError;
     # insert the element in the same line so there is something to delete
@@ -1210,6 +1216,12 @@ STATEMENT_OVERRIDES = {
         'var fuzzrec = new MediaRecorder(document.createElement("canvas").captureStream(5));'
         " fuzzrec.start(); fuzzrec.resume(); fuzzrec.pause(); fuzzrec.resume(); fuzzrec.stop();"
     ),
+    # start() rejects a second call on a pooled recorder that an earlier draw
+    # already started
+    ("MediaRecorder", "start"): (
+        'var fuzzrec4 = new MediaRecorder(document.createElement("canvas").captureStream(5));'
+        " fuzzrec4.start(0); fuzzrec4.stop();"
+    ),
     # pause() throws unless the recorder is recording (evaluated)
     ("MediaRecorder", "pause"): (
         'var fuzzrec2 = new MediaRecorder(document.createElement("canvas").captureStream(5));'
@@ -1405,6 +1417,7 @@ STATEMENT_OVERRIDES = {
     ("SVGTextContentElement", "getStartPositionOfChar"): SVG_TEXT_LAYOUT + " fztxt.getStartPositionOfChar(0);",
     ("SVGTextContentElement", "getEndPositionOfChar"): SVG_TEXT_LAYOUT + " fztxt.getEndPositionOfChar(0);",
     ("SVGTextContentElement", "getRotationOfChar"): SVG_TEXT_LAYOUT + " fztxt.getRotationOfChar(0);",
+    ("SVGTextContentElement", "getSubStringLength"): SVG_TEXT_LAYOUT + " fztxt.getSubStringLength(0, 1);",
     # consolidate() mutates the list, and the only pooled SVGTransformList is
     # an animated value ("Animated values cannot be set"); a fresh baseVal
     # list is writable (evaluated)
@@ -1439,8 +1452,19 @@ STATEMENT_OVERRIDES = {
         'var fzse2 = document.createElement("div");'
         ' fzse2.setAttributeNodeNS(document.createAttributeNS("urn:x", "p:b"));'
     ),
+    # a pooled Attr is already owned, so inserting it throws InUseAttributeError;
+    # build an element and an unused attribute in the same statement
+    ("NamedNodeMap", "setNamedItem"): (
+        'var fznnm1 = document.createElement("div");'
+        ' fznnm1.attributes.setNamedItem(document.createAttribute("data-fuzz"));'
+    ),
+    ("NamedNodeMap", "setNamedItemNS"): (
+        'var fznnm2 = document.createElement("div");'
+        ' fznnm2.attributes.setNamedItemNS(document.createAttributeNS("urn:x", "p:b"));'
+    ),
     # the pooled frame may have been closed by a VideoFrame.close() line
     ("VideoFrame", "allocationSize"): FRESH_VIDEO_FRAME + " fzvf.allocationSize();",
+    ("VideoFrame", "clone"): FRESH_VIDEO_FRAME + " fzvf.clone(); fzvf.close();",
     ("VideoFrame", "copyTo"): (
         FRESH_VIDEO_FRAME
         + " var fzvsz = fzvf.allocationSize();"
@@ -1469,6 +1493,13 @@ STATEMENT_OVERRIDES = {
         ' fzaec.encode(new AudioData({ format: "f32", sampleRate: 48000, numberOfFrames: 4,'
         " numberOfChannels: 1, timestamp: 0, data: new Float32Array(4) }));"
         " fzaec.flush().catch(function(e) { }); fzaec.close();"
+    ),
+    # a pooled encoder may have been closed by an earlier line, after which
+    # configure() throws "The codec is no longer usable"
+    ("AudioEncoder", "configure"): (
+        "var fzaec2 = new AudioEncoder({ output: function() { }, error: function() { } });"
+        ' fzaec2.configure({ codec: "opus", sampleRate: 48000, numberOfChannels: 1 });'
+        " fzaec2.close();"
     ),
     ("VideoEncoder", "encode"): (
         FRESH_VIDEO_FRAME
@@ -1565,6 +1596,13 @@ STATEMENT_OVERRIDES = {
         'var fzce = document.createElement("div");'
         " " + ATTACH_ROOT + ".appendChild(fzce);"
         ' var fzca = fzce.animate([{ opacity: 0 }], 100); fzca.commitStyles(); fzca.cancel();'
+    ),
+    # reverse() throws "no associated timeline" on the no-arg constructor's
+    # animation (`new Animation(null, null)`); give it document.timeline
+    ("Animation", "reverse"): (
+        "var fzrv = new Animation(new KeyframeEffect(null,"
+        " [{ opacity: 0 }, { opacity: 1 }], 100), document.timeline);"
+        " fzrv.reverse(); fzrv.cancel();"
     ),
     # offsets past the text node throw IndexSizeError; a fresh text at 0 works
     ("Range", "isPointInRange"): (

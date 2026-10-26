@@ -129,7 +129,7 @@ var fzssu1 = new SpeechSynthesisUtterance("fuzz"); var fzsse1 = new SpeechSynthe
 window.reportError(new Error("fuzz"));
 var fzxml1 = document.implementation.createDocument(null, "root"); fzxml1.createCDATASection("fuzz");
 document.execCommand("bold");
-var fzvt1 = document.startViewTransition(function () { }); fzvt1.updateCallbackDone.catch(function (e) { }); fzvt1.skipTransition();
+var fzvt1 = document.startViewTransition(function () { }); fzvt1.updateCallbackDone.catch(function (e) { }); fzvt1.ready.catch(function (e) { }); fzvt1.finished.catch(function (e) { }); fzvt1.skipTransition();
 navigator.credentials.preventSilentAccess().catch(function (e) { });
 var fzssu2 = new SpeechSynthesisUtterance("fuzz"); fzssu2.onerror = function (e) { }; speechSynthesis.speak(fzssu2); speechSynthesis.cancel();
 navigator.requestMediaKeySystemAccess("org.w3.clearkey", [{ initDataTypes: ["cenc"] }]).then(function (a) { a.keySystem; }).catch(function (e) { });

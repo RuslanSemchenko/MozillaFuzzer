@@ -167,13 +167,14 @@ treat one figure as a delta against another). `python3 tools/check_wgsl.py` exit
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-about 46 s with `31 row(s), 20 group(s); 2 systematic; creators 0 | roots 20 | cascades 0 |
-async/no-line 0`. Both systematic rows are `<RTCDataChannel>.send()`: a channel from
+84 s with `27 row(s), 16 group(s); 3 systematic; creators 0 | roots 16 | cascades 0 |
+async/no-line 0`. Two systematic rows are `<RTCDataChannel>.send()`: a channel from
 `createDataChannel` stays "connecting" until a real peer negotiates SCTP, and send() throws
-InvalidStateError unless readyState is "open". The other rows are validation on random receivers
-or arguments (appendChild of a Document or an Attribute, selectSubString past the text, a
-MediaSource duration while closed, a TimeRanges boundary on an empty range, a pooled VideoFrame
-that an earlier line already closed). The `unexpected request(s)` line is mark-up fetches
+InvalidStateError unless readyState is "open". The third varies with the draw and is either
+another `<RTCDataChannel>.send()` or `<TimeRanges>.start/end` on an empty range (the accepted
+class below). The other rows are validation on random receivers
+or arguments (appendChild of a Document or an Attribute, a MediaSource duration while closed,
+a pooled IDBRequest read before it finishes). The `unexpected request(s)` line is mark-up fetches
 (`<img src>` drawn from the URL pools, including a bare `?` that resolves to `caseN.html?`) and
 is not a navigation: a case that really navigated never posts its report.
 `creators 0` is the fastest check for the dead-text class described below; run it after any
@@ -206,6 +207,23 @@ not as line counts:
 - `PerformanceResourceTiming.renderBlockingStatus` was the one new audit gap after a regen;
   the existing `stateful.txt` XHR scenario reads the resource entry, so it now reads that
   member too and the queue went back to 56 blocks, all with NOTEs.
+- The pooled-state sweep after that produced five more shapes. `VideoFrame.clone()` on a frame
+  an earlier `close()` line closed throws "No media resource in the VideoFrame now" (close()
+  itself is idempotent, clone is not), so clone builds a fresh frame. `Animation.reverse()`
+  throws "Can't reverse an animation with no associated timeline" on the no-arg
+  `new Animation(null, null)` creator, so the statement builds an animation on
+  `document.timeline`. `NamedNodeMap.setNamedItem/NS` with a pooled `Attr` throws
+  InUseAttributeError ("Attribute already in use"), so the statement creates the attribute
+  and inserts it in the same line. `Selection.getRangeAt` seeding failed when the case had
+  removed both `documentElement` and `body`; a `Document` is a legal Range container, so the
+  fallback now selects `document` itself. `ViewTransition.skipTransition()` rejects `ready`
+  and `finished` with AbortError - both need a `catch` or the scan reports an unhandled
+  rejection. Same family: `MediaRecorder.start()` a second time on the pooled recorder,
+  `AudioEncoder.configure()` after a pooled encoder was closed, and
+  `AudioScheduledSourceNode.stop()` on a source an earlier draw already started; each now
+  builds a fresh receiver. `SVGTextContentElement.getSubStringLength` needs both laid-out
+  text and an in-range index and now uses the same rendered-`<text>` override as the
+  char-position members with `(0, 1)`.
 
 - `document.createEvent("X")` accepts only a legacy whitelist. 51 of the 71 names the grammar
   asked for threw `NotSupportedError`, so those variables were never created and every statement
