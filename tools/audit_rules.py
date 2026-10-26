@@ -118,14 +118,12 @@ NOTES = {
         "illegal constructor, and its receiver only exists when window.open() is blocked - "
         "AGENTS.md refuses opening windows because the harness cannot close them"
     ),
-    "CSPViolationReportBody": (
-        "a ReportBody only arrives inside a ReportingObserver callback for a real violation, and "
-        "`new Report(...)` is not exposed to content (ReferenceError), so no receiver is "
-        "constructible"
-    ),
     "IntegrityViolationReportBody": (
-        "same as CSPViolationReportBody: report bodies are browser-created, and the constructor "
-        "test in the page showed Report is undefined in content"
+        "IntegrityPolicyService creates the body only for a policy that names report endpoints, "
+        "which needs an Integrity-Policy response header; content cannot set one, so no receiver "
+        "is constructible. blockedURL/documentURL are counted from the CSPViolationReportBody "
+        "observer line by name collision, not from a real integrity report; reportOnly stays "
+        "missing"
     ),
     "FetchObserver": (
         "created internally per fetch; there is no content constructor to make one"
