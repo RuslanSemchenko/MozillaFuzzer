@@ -820,6 +820,12 @@ ATTRIBUTE_VALUE_OVERRIDES = {
     ("HTMLMediaElement", "defaultPlaybackRate"): "<float min=0.5 max=2>",
     # size==0 throws IndexSizeError; every other value is accepted
     ("HTMLInputElement", "size"): "1",
+    # both length setters pad the select with blank <option> children, and the
+    # next innerText/appendChild then removes them one at a time, each removal
+    # rescanning the options list - a generated 65535 hung a scan case before
+    # its report timer ever fired
+    ("HTMLOptionsCollection", "length"): "3",
+    ("HTMLSelectElement", "length"): "3",
     # only a body/frameset may be assigned; the alternative loses the body
     # that every generated markup variable was read from
     ("Document", "body"): None,
@@ -1773,10 +1779,12 @@ CONSTRUCTOR_ARG_OVERRIDES = {
     "PerformanceObserver": "function() { }",
     # StaticRange validates its init: both containers must share a root and the
     # offsets must be valid boundary points, so a random <Node> pair throws
-    # InvalidNodeTypeError and the variable is never created
+    # InvalidNodeTypeError and the variable is never created. A generated line
+    # can remove the body and documentElement, so the document itself is the
+    # fallback container - it is a Node, and offset 0 is valid even childless.
     "StaticRange": (
-        '{ startContainer: (document.body || document.documentElement), startOffset: 0,'
-        ' endContainer: (document.body || document.documentElement), endOffset: 0 }'
+        '{ startContainer: (document.body || document.documentElement || document), startOffset: 0,'
+        ' endContainer: (document.body || document.documentElement || document), endOffset: 0 }'
     ),
     # <EventHandler> is a null on* read, which the required callback rejects
     "ReportingObserver": "function() { }",

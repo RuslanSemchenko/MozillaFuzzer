@@ -977,7 +977,7 @@
 <new SpeechSynthesis p=2.0> = <Window>.speechSynthesis;
 <new SpeechSynthesisUtterance> = new SpeechSynthesisUtterance();
 <new SpeechSynthesisUtterance> = new SpeechSynthesisUtterance(<DOMString>);
-<new StaticRange> = new StaticRange({ startContainer: (document.body || document.documentElement), startOffset: 0, endContainer: (document.body || document.documentElement), endOffset: 0 });
+<new StaticRange> = new StaticRange({ startContainer: (document.body || document.documentElement || document), startOffset: 0, endContainer: (document.body || document.documentElement || document), endOffset: 0 });
 <new StereoPannerNode> = new StereoPannerNode(<AudioContext>);
 <new Storage p=8.0> = window.localStorage;
 <new StorageEvent> = new StorageEvent("fuzz", <StorageEventInit>);
@@ -3448,7 +3448,7 @@ var fzni = document.createElement("input"); fzni.type = "number"; fzni.valueAsNu
 <HTMLOptionsCollection>.add(<HTMLOptionElement>);
 <HTMLOptionsCollection>.add(<HTMLOptionElement>, <opt_HTMLElement_or_long_86ff168a>);
 <HTMLOptionsCollection>.length;
-<HTMLOptionsCollection>.length = <fuzzuint>;
+<HTMLOptionsCollection>.length = 3;
 <HTMLOptionsCollection>.remove(0);
 <HTMLOptionsCollection>.selectedIndex;
 <HTMLOptionsCollection>.selectedIndex = <fuzzint>;
@@ -3530,7 +3530,7 @@ HTMLScriptElement.supports(<DOMString>);
 <HTMLSelectElement>.form;
 <HTMLSelectElement>.labels;
 <HTMLSelectElement>.length;
-<HTMLSelectElement>.length = <fuzzuint>;
+<HTMLSelectElement>.length = 3;
 <HTMLSelectElement>.multiple;
 <HTMLSelectElement>.multiple = <boolean>;
 <HTMLSelectElement>.name;
