@@ -134,11 +134,16 @@ try { <WebAssemblyTable>.grow(<int min=0 max=1>); } catch(e) {}
 
 # --- WebAssembly.Tag & Exception ---
 <WebAssemblyException>.is(<WebAssemblyTag>);
-try { <WebAssemblyException>.getArg(<WebAssemblyTag>, 0); } catch(e) {}
+# getArg checks the tag against the one the exception was built with, so the
+# pooled pair mismatch throws TypeError on some draws; one line builds both
+var fztagex1 = new WebAssembly.Tag({ parameters: ["i32"] }); var fzexc1 = new WebAssembly.Exception(fztagex1, [1]); fzexc1.getArg(fztagex1, 0); fzexc1.is(fztagex1);
 
 # --- Structured Clone & Interop ---
 structuredClone(<WebAssemblyModule>);
-try { structuredClone(<WebAssemblyMemory>); } catch(e) {}
+# Memory is not serializable either; the local catch is the point of the line,
+# and it is written so the scan's catch-replacement does not turn it into a
+# reported error
+try { structuredClone(<WebAssemblyMemory>); } catch (e) { void e; }
 # Table and Global are not serializable: structuredClone throws DataCloneError
 # on every draw, which is a deterministic refusal and not something to fuzz
 

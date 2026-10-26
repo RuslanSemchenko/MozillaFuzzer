@@ -127,13 +127,13 @@ rules files in this tree. Re-run everything - they go stale the moment a rules f
 (1101 interfaces), 10932 members.
 
 `python3 tools/audit_rules.py` on that inventory: 937 types considered, 793 not gated off at
-interface level (144 gated), 50 interfaces with at least one missing member. Across those 793:
-5642 members reachable, 119 missing (117 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
-five work orders are empty), 7 word-only, 0 parsed-but-unreachable, 282 whose only gate is a
+interface level (144 gated), 51 interfaces with at least one missing member. Across those 793:
+5642 members reachable, 121 missing (119 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+five work orders are empty), 5 word-only, 0 parsed-but-unreachable, 282 whose only gate is a
 `[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 78 pref-off excluded before
 queuing.
 
-All 50 queue blocks carry a NOTE, so the 119 are an adjudicated refusal rather than a to-do
+All 51 queue blocks carry a NOTE, so the 121 are an adjudicated refusal rather than a to-do
 list: `FuzzingFunctions` (compiled in, but `crash`/`killGPUProcess`/`signalIPCReady`/
 `memoryPressure`/`synthesizeKeyboardEvents` are refused), the WebAuthn response classes
 (`AuthenticatorResponse` and its two subclasses, `PublicKeyCredential` - a real credential needs
@@ -146,8 +146,8 @@ an authenticator), the report bodies (`CSPViolationReportBody`, `DeprecationRepo
 `PaintRequest`, `IntlUtils`, `PermissionsPolicy`, `Node`, `Directory` and
 `FileSystemDirectoryEntry`/`FileSystemDirectoryReader`, `CookieStoreManager`,
 `LegacyMozTCPSocket`, `RTCIdentityProviderRegistrar`),
-the `WebTransport` family, and the WebGL extension objects. Each NOTE states the reason *as
-evaluated in the page*, not as read from the IDL.
+the `WebSocket` and `WebTransport` network surfaces, and the WebGL extension objects. Each
+NOTE states the reason *as evaluated in the page*, not as read from the IDL.
 
 `python3 tools/probe_apis.py` probed all 962 queued candidates on the same build with Grizzly's
 prefs (the default bucket is `all` = `needs_probe` + `missing`): 191 `present` (174 prototype,
@@ -160,19 +160,22 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9808 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9809 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-about 41 s with `26 row(s), 14 group(s); 2 systematic; creators 0 | roots 14 | cascades 0 |
+about 46 s with `31 row(s), 20 group(s); 2 systematic; creators 0 | roots 20 | cascades 0 |
 async/no-line 0`. Both systematic rows are `<RTCDataChannel>.send()`: a channel from
 `createDataChannel` stays "connecting" until a real peer negotiates SCTP, and send() throws
 InvalidStateError unless readyState is "open". The other rows are validation on random receivers
 or arguments (appendChild of a Document or an Attribute, selectSubString past the text, a
-MediaSource duration while closed, a TimeRanges boundary on an empty range).
+MediaSource duration while closed, a TimeRanges boundary on an empty range, a pooled VideoFrame
+that an earlier line already closed). The `unexpected request(s)` line is mark-up fetches
+(`<img src>` drawn from the URL pools, including a bare `?` that resolves to `caseN.html?`) and
+is not a navigation: a case that really navigated never posts its report.
 `creators 0` is the fastest check for the dead-text class described below; run it after any
 creator or argument-override change. When the thrown object has no stack (a DOMException raised
 through a promise), the collector records its own stack so the rule line is still named, and

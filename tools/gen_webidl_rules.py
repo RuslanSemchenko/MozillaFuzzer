@@ -485,6 +485,16 @@ MEMBER_ARG_OVERRIDES = {
     # the name-only overload, which always resolves
     ("Performance", "mark"): '"fuzzmark"',
     ("Performance", "measure"): '"fuzzmeasure"',
+    # challenge and user.id are base64url strings; a generated value usually
+    # does not decode (EncodingError), so pass a minimal valid dictionary
+    # (evaluated; the parsed options read back)
+    ("PublicKeyCredential", "parseCreationOptionsFromJSON"): (
+        '{ rp: { name: "fuzz" }, user: { id: "AQ", name: "fuzz", displayName: "fuzz" },'
+        ' challenge: "AQ", pubKeyCredParams: [{ type: "public-key", alg: -7 }] }'
+    ),
+    ("PublicKeyCredential", "parseRequestOptionsFromJSON"): (
+        '{ challenge: "AQ", rpId: location.hostname, allowCredentials: [] }'
+    ),
     # a fresh Selection has no ranges, so any literal index is IndexSizeError;
     # the index expression seeds the selection first. documentElement can be
     # removed by the case itself, so only seed when a root is still there.
@@ -495,14 +505,10 @@ MEMBER_ARG_OVERRIDES = {
         " document.getSelection().addRange(r); }"
         " return 0; })()"
     ),
-    # an arbitrary <Node> is not a stylesheet (compile error); a parsed XSLT
-    # document imports on a processor that has none yet
-    ("XSLTProcessor", "importStylesheet"): (
-        'new DOMParser().parseFromString('
-        '"<lt>xsl:stylesheet xmlns:xsl=\\"http://www.w3.org/1999/XSL/Transform\\"'
-        ' version=\\"1.0\\"<gt><lt>xsl:template match=\\"/\\"<gt><lt>out/<gt>'
-        '<lt>/xsl:template<gt><lt>/xsl:stylesheet<gt>", "application/xml")'
-    ),
+    # an arbitrary <Node> is not a stylesheet (compile error), and the import
+    # refuses a second sheet on one processor ("We don't support importing
+    # multiple stylesheets yet", NOT_IMPLEMENTED): the statement override below
+    # imports into a fresh processor instead
     # factories whose generated argument was a guaranteed throw
     ("DOMImplementation", "createHTMLDocument"): "",
     ("DOMImplementation", "createDocument"): 'null, "html"',
@@ -795,8 +801,9 @@ ATTRIBUTE_VALUE_OVERRIDES = {
     # a resolved current time cannot be set back to null (TypeError); a number
     # is valid on both idle and document-timeline animations
     ("Animation", "currentTime"): "100",
-    # "stopped" is rejected by the setter; the four current directions are not
-    ("RTCRtpTransceiver", "direction"): '"sendrecv"',
+    # a parsed keyword needs a non-empty value: the setter throws TypeError on
+    # "" and a generated <DOMString> is empty often enough to matter
+    ("CSSKeywordValue", "value"): '"fuzz"',
     # the setter accepts milliseconds in [0, 4000] or null; a random float is
     # rejected with RangeError
     ("RTCRtpReceiver", "jitterBufferTarget"): "100",
@@ -812,8 +819,6 @@ ATTRIBUTE_VALUE_OVERRIDES = {
     # only a body/frameset may be assigned; the alternative loses the body
     # that every generated markup variable was read from
     ("Document", "body"): None,
-    # a valid same-origin value is accepted where an arbitrary one is not
-    ("Document", "domain"): "document.location.hostname",
     # only the three constants are valid; anything else throws SyntaxError
     ("SVGSVGElement", "zoomAndPan"): "2",
     # same for an animated enumeration: the only supplier is
@@ -963,6 +968,17 @@ SVG_ANIMATION = (
     " fzsvg3.appendChild(fzanim3);" + ATTACH_ROOT + ".appendChild(fzsvg3);"
 )
 
+# A parsed XSLT stylesheet that imports and transforms on a fresh processor.
+# A processor refuses a second import, and a reset or never-seeded processor
+# throws NS_ERROR_NOT_INITIALIZED/NOT_IMPLEMENTED, so these statements build
+# their own. Escaping is Domato's (<lt>/<gt>) plus Python's.
+XSLT_STYLESHEET_DOC = (
+    "new DOMParser().parseFromString("
+    '"<lt>xsl:stylesheet xmlns:xsl=\\"http://www.w3.org/1999/XSL/Transform\\"'
+    ' version=\\"1.0\\"<gt><lt>xsl:template match=\\"/\\"<gt><lt>out/<gt>'
+    '<lt>/xsl:template<gt><lt>/xsl:stylesheet<gt>", "application/xml")'
+)
+
 # Whole-statement replacements for members whose useful call needs more than
 # a fixed argument list. {r} is the generated receiver. They also replace an
 # attribute's bare read line when the member is an attribute.
@@ -1070,6 +1086,14 @@ STATEMENT_OVERRIDES = {
         ' fuzzsheet1.addRule("div", "color: red", 0);'
     ),
     ("CSSStyleSheet", "cssRules"): "new CSSStyleSheet().cssRules;",
+    # a sheet from document.styleSheets can be non-modifiable, and the legacy
+    # rules alias and both replace entry points then throw; a constructed
+    # sheet is always modifiable (evaluated)
+    ("CSSStyleSheet", "rules"): "new CSSStyleSheet().rules;",
+    ("CSSStyleSheet", "replaceSync"): 'new CSSStyleSheet().replaceSync("div { color: red; }");',
+    ("CSSStyleSheet", "replace"): (
+        'new CSSStyleSheet().replace("div { color: red; }").catch(function (e) { });'
+    ),
     # deleteRule at an index past the end throws; insert the rule in the same
     # line so the delete has a target
     ("CSSStyleSheet", "deleteRule"): (
@@ -1166,6 +1190,14 @@ STATEMENT_OVERRIDES = {
     ("RTCPeerConnection", "removeTrack"): (
         'var fuzzpc = {r}; var fuzzsender = fuzzpc.addTransceiver("audio").sender;'
         " fuzzpc.removeTrack(fuzzsender);"
+    ),
+    # a pooled transceiver that an earlier generated stop() line left
+    # stopping/stopped refuses every direction value; a fresh transceiver
+    # accepts the four current directions (evaluated)
+    ("RTCRtpTransceiver", "direction"): (
+        'var fzrtcdir = new RTCPeerConnection();'
+        ' var fzrtctr = fzrtcdir.addTransceiver("audio");'
+        ' fzrtctr.direction = "sendrecv"; fzrtctr.direction; fzrtcdir.close();'
     ),
     # a close() on a pooled connection makes every later member throw "Peer
     # connection is closed"; close a throwaway connection instead (evaluated)
@@ -1597,6 +1629,28 @@ STATEMENT_OVERRIDES = {
         ' var fuzzocs = fuzzocc.transferControlToOffscreen();'
         ' fuzzocs.getContext("2d").fillRect(0, 0, 1, 1);'
     ),
+    # an arbitrary <Node> is not a stylesheet (compile error), and a processor
+    # refuses a second import ("We don't support importing multiple
+    # stylesheets yet", NOT_IMPLEMENTED); the creator's processor already
+    # imported one, so import into a fresh processor (evaluated)
+    ("XSLTProcessor", "importStylesheet"): (
+        "new XSLTProcessor().importStylesheet(" + XSLT_STYLESHEET_DOC + ");"
+    ),
+    # reset() by an earlier line leaves the pooled processor uninitialized
+    # (NS_ERROR_NOT_INITIALIZED); a fresh processor seeds and transforms in the
+    # same statement (evaluated, result document/fragment read back)
+    ("XSLTProcessor", "transformToDocument"): (
+        "var fzxtd = new XSLTProcessor();"
+        " fzxtd.importStylesheet(" + XSLT_STYLESHEET_DOC + ");"
+        ' fzxtd.transformToDocument(new DOMParser().parseFromString('
+        '"<lt>root/<gt>", "application/xml"));'
+    ),
+    ("XSLTProcessor", "transformToFragment"): (
+        "var fzxtf = new XSLTProcessor();"
+        " fzxtf.importStylesheet(" + XSLT_STYLESHEET_DOC + ");"
+        ' fzxtf.transformToFragment(new DOMParser().parseFromString('
+        '"<lt>root/<gt>", "application/xml"), document);'
+    ),
     # these throw InvalidStateError on a non-HTML document; the global
     # document in the harness page is always HTML
     ("Document", "queryCommandEnabled"): 'document.queryCommandEnabled("fuzz");',
@@ -1604,6 +1658,12 @@ STATEMENT_OVERRIDES = {
     ("Document", "queryCommandState"): 'document.queryCommandState("fuzz");',
     ("Document", "queryCommandSupported"): 'document.queryCommandSupported("fuzz");',
     ("Document", "queryCommandValue"): 'document.queryCommandValue("fuzz");',
+    # a generated <Document> may be a foreign document, where every domain
+    # value throws SecurityError; the global document accepts its own host
+    # (evaluated)
+    ("Document", "domain"): (
+        "document.domain = document.location.hostname; document.domain;"
+    ),
 }
 
 # A few constructors are the only way to get commonly used objects and are

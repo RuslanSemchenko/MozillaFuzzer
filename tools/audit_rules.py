@@ -285,6 +285,14 @@ NOTES = {
     "WebTransportError": (
         "only delivered as a WebTransport stream/read rejection, which needs a connection"
     ),
+    "WebSocket": (
+        "extensions is the only missing member: a socket has no receiver without constructing "
+        "one, and DENY_CREATORS refuses the constructor because its only accepted schemes are "
+        "ws/wss - any generated host leaves server_map, and 'ws://' + location.host opens an "
+        "upgrade request the harness never answers, so the case stalls instead of reporting. "
+        "extensions also stays \"\" until the handshake completes, so even a reachable socket "
+        "would read an empty string without a server that does the upgrade"
+    ),
     "DeprecationReportBody": (
         "report bodies are browser-created; `new Report(...)` is undefined in content (evaluated) "
         "and no deprecation is reported in the harness"
