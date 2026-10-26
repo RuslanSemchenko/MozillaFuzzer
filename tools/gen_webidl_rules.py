@@ -1080,6 +1080,19 @@ STATEMENT_OVERRIDES = {
         'var fuzzsheet2 = new CSSStyleSheet();'
         ' fuzzsheet2.insertRule("div { color: red; }", 0); fuzzsheet2.removeRule(0);'
     ),
+    # an adopted sheet must have been constructed by the receiver's document,
+    # and a pooled Document comes from DOMParser/XSLT; adopt in the global
+    # document and in a shadow root that belongs to it (evaluated)
+    ("Document", "adoptedStyleSheets"): (
+        "document.adoptedStyleSheets = [new CSSStyleSheet()];"
+        " document.adoptedStyleSheets.length;"
+    ),
+    ("ShadowRoot", "adoptedStyleSheets"): (
+        'var fzadhost = document.createElement("div");'
+        ' var fzadroot = fzadhost.attachShadow({ mode: "open" });'
+        " fzadroot.adoptedStyleSheets = [new CSSStyleSheet()];"
+        " fzadroot.adoptedStyleSheets.length;"
+    ),
     # attachShadow only accepts a valid shadow host; a plain div always is one
     ("Element", "attachShadow"): (
         'var fuzzhost = document.createElement("div"); fuzzhost.attachShadow({ mode: "open" });'
