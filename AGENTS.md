@@ -235,6 +235,13 @@ not as line counts:
   creator whose result the harness might test for truthiness has the same trap; the scan's
   cascade section is how you find out.
 
+- Typing came from the tag name alone: `<a>`, `<font>`, `<image>` and `<title>` exist in both
+  the HTML and SVG tables, and the SVG entry won, so an `<a>` emitted as body markup registered
+  a variable declared `SVGAElement` while the object was an `HTMLAnchorElement` - the scan's
+  creators section named `svgvar00001.getBBox is not a function` and the creator never existed.
+  `add_html_ids` now decides from the surrounding markup: inside an unclosed `<svg>`/`<math>`
+  the foreign type wins, otherwise HTML does.
+
 A third sweep was a deletion. 202 rule lines across `js.txt` and `webapis.txt` were built on
 interfaces this build does not expose at all - every `XR*` name (`navigator.xr` is undefined and
 `'XRSession' in window` is false), the whole `TCPSocket`/`TCPServerSocket`/`*SocketEvent` family

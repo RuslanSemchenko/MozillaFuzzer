@@ -61,9 +61,33 @@ for tag, tagtype in _SVG_TYPES.items():
 for tag, tagtype in _MATHML_TYPES.items():
     _ALL_TAG_TYPES[tag] = (tagtype, 'mathmlvar', 'mathmlvarctr')
 
-def add_html_ids(matchobj, ctx):
+# `<a>`, `<font>`, `<image>` and `<title>` exist in both the HTML and SVG tables,
+# and the SVG entry used to win everywhere. An `<a>` generated as body markup is
+# an HTMLAnchorElement, but the variable was typed SVGAElement, so every
+# SVG-only read (getBBox) threw and the variable never existed. The surrounding
+# markup decides: inside an unclosed `<svg>`/`<math>` the SVG/MathML type wins,
+# otherwise HTML does; the old table keeps SVG priority only for tags with no
+# HTML meaning.
+
+def _in_foreign_content(source, start, open_tag, close_tag):
+    before = source[:start]
+    return before.count(open_tag) > before.count(close_tag)
+
+def _tag_info(tagname):
+    if tagname in _HTML_TYPES:
+        return (_HTML_TYPES[tagname], 'htmlvar', 'htmlvarctr')
+    return _ALL_TAG_TYPES.get(tagname)
+
+def add_html_ids(matchobj, ctx, source=None):
     tagname = matchobj.group(0)[1:-1]
-    tag_info = _ALL_TAG_TYPES.get(tagname)
+    tag_info = None
+    if source is not None:
+        if _in_foreign_content(source, matchobj.start(), '<svg', '</svg>') and tagname in _SVG_TYPES:
+            tag_info = (_SVG_TYPES[tagname], 'svgvar', 'svgvarctr')
+        elif _in_foreign_content(source, matchobj.start(), '<math', '</math>') and tagname in _MATHML_TYPES:
+            tag_info = (_MATHML_TYPES[tagname], 'mathmlvar', 'mathmlvarctr')
+    if tag_info is None:
+        tag_info = _tag_info(tagname)
     if tag_info is not None:
         tagtype, prefix, ctr_key = tag_info
         ctx[ctr_key] += 1
@@ -142,7 +166,7 @@ def generate_new_sample(template, htmlgrammar, cssgrammar, jsgrammar):
     }
     html = re.sub(
         r'<[a-zA-Z0-9_-]+ ',
-        lambda match: add_html_ids(match, htmlctx),
+        lambda match: add_html_ids(match, htmlctx, html),
         html
     )
     generate_html_elements(htmlctx, _N_ADDITIONAL_HTMLVARS)
