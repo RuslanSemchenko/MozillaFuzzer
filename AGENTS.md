@@ -171,8 +171,9 @@ it is compute-only, which is the corpus being honest rather than a gap).
 async/no-line 0`. The systematic groups are the accepted classes below: several
 `<RTCDataChannel>.send()` shapes (a channel from `createDataChannel` stays "connecting" until a
 real peer negotiates SCTP, and send() throws InvalidStateError unless readyState is "open") and
-`<TimeRanges>.start/end` IndexSizeError on an empty range. A 64-case run of the same command
-reported 64/64 in 242 s with the same classes and no stalls after the navigation guard. The
+`<TimeRanges>.start/end` IndexSizeError on an empty range. A 64-case run of the same command on
+the final tree reported 64/64 in 242 s with `121 row(s), 52 group(s)`, the same classes and no
+stalls. The
 other rows are validation on random
 receivers or arguments (appendChild of an Attribute or an ancestor, `insertDTMF` on an
 unnegotiated sender, a pooled IDBRequest read before it finishes, `SVGMatrix.inverse` on a
