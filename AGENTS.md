@@ -127,17 +127,17 @@ rules files in this tree. Re-run everything - they go stale the moment a rules f
 (1101 interfaces), 10932 members.
 
 `python3 tools/audit_rules.py` on that inventory: 937 types considered, 793 not gated off at
-interface level (144 gated), 51 interfaces with at least one missing member. Across those 793:
-5650 members reachable, 121 missing (119 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+interface level (144 gated), 50 interfaces with at least one missing member. Across those 793:
+5654 members reachable, 117 missing (115 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
 five work orders are empty), 5 word-only, 0 parsed-but-unreachable, 274 whose only gate is a
 `[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 78 pref-off excluded before
 queuing.
 
-All 51 queue blocks carry a NOTE, so the 121 are an adjudicated refusal rather than a to-do
+All 50 queue blocks carry a NOTE, so the 117 are an adjudicated refusal rather than a to-do
 list: `FuzzingFunctions` (compiled in, but `crash`/`killGPUProcess`/`signalIPCReady`/
 `memoryPressure`/`synthesizeKeyboardEvents` are refused), the WebAuthn response classes
 (`AuthenticatorResponse` and its two subclasses, `PublicKeyCredential` - a real credential needs
-an authenticator), the report bodies (`CSPViolationReportBody`, `DeprecationReportBody`,
+an authenticator), the deprecation/integrity report bodies (`DeprecationReportBody`,
 `IntegrityViolationReportBody`) plus `FetchObserver`, the permission/UI surfaces (`Clipboard`,
 `Geolocation`, `MIDIAccess`, `Serial`, `GetUserMediaRequest`, `HTMLInputElement`/`HTMLSelectElement`
 `showPicker`, the `Window` and `Navigator` dialogs), the no-receiver types (`Gamepad*`,
@@ -160,21 +160,23 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9776 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9788 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-50 s with `20 row(s), 14 group(s); 3 systematic; creators 0 | roots 14 | cascades 0 |
-async/no-line 0`. The systematic groups are the accepted classes below: two
+50 s with `30 row(s), 16 group(s); 6 systematic; creators 0 | roots 16 | cascades 0 |
+async/no-line 0`. The systematic groups are the accepted classes below: several
 `<RTCDataChannel>.send()` shapes (a channel from `createDataChannel` stays "connecting" until a
-real peer negotiates SCTP, and send() throws InvalidStateError unless readyState is "open") and a
-`<TimeRanges>.end(0)` IndexSizeError on an empty range. The other rows are validation on random
+real peer negotiates SCTP, and send() throws InvalidStateError unless readyState is "open") and
+`<TimeRanges>.start/end` IndexSizeError on an empty range. A 64-case run of the same command
+reported 64/64 in 242 s with the same classes and no stalls after the navigation guard. The
+other rows are validation on random
 receivers or arguments (appendChild of an Attribute or an ancestor, `insertDTMF` on an
-unnegotiated sender, a pooled IDBRequest read before it finishes). The `unexpected request(s)`
-line is mark-up fetches
+unnegotiated sender, a pooled IDBRequest read before it finishes, `SVGMatrix.inverse` on a
+singular generated matrix). The `unexpected request(s)` line is mark-up fetches
 (`<img src>` drawn from the URL pools, including a bare `?` that resolves to `caseN.html?`) and
 is not a navigation: a case that really navigated never posts its report.
 `creators 0` is the fastest check for the dead-text class described below; run it after any
@@ -211,6 +213,16 @@ not as line counts:
   call `close()`. That moved six members from `needs probe` to `reachable`. When the probe says
   `present` and the queue has no missing row, check whether the member name is merely shared
   with another interface before believing it is covered.
+- A `ReportBody` is still reachable: `ReportingObserver` is exposed, and a script-inserted
+  `<meta http-equiv="Content-Security-Policy" content="img-src 'none'; report-to fuzzgroup">`
+  yields a real `csp-violation` report whose `CSPViolationReportBody` reads `blockedURL`,
+  `documentURL` and the rest. Two conditions are easy to miss: Gecko creates the body only when
+  the policy names a report group (`nsCSPContext::SendReportsToEndpoints` returns early on an
+  empty `report-to`), and `HTMLMetaElement::BindToTree` applies the policy only when the meta is
+  inside the document's `<head>`, so the line checks `document.head.isConnected` first.
+  `img-src 'none'` keeps the violation off the network - the blocked image never reaches the
+  server. `IntegrityViolationReportBody` is not reachable the same way: its policy needs an
+  `Integrity-Policy` response header, which content cannot set.
 - `Navigation.transition` and `NavigationPrecommitController.addHandler` have no receiver
   outside an intercepted navigation: `Navigation.cpp` creates `mTransition` only when the
   event's interception state is not `None`, and builds the precommit controller only when the
