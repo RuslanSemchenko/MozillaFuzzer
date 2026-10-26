@@ -128,8 +128,8 @@ rules files in this tree. Re-run everything - they go stale the moment a rules f
 
 `python3 tools/audit_rules.py` on that inventory: 937 types considered, 793 not gated off at
 interface level (144 gated), 51 interfaces with at least one missing member. Across those 793:
-5642 members reachable, 121 missing (119 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
-five work orders are empty), 5 word-only, 0 parsed-but-unreachable, 282 whose only gate is a
+5650 members reachable, 121 missing (119 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+five work orders are empty), 5 word-only, 0 parsed-but-unreachable, 274 whose only gate is a
 `[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 78 pref-off excluded before
 queuing.
 
@@ -160,21 +160,21 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9809 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9776 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-84 s with `27 row(s), 16 group(s); 3 systematic; creators 0 | roots 16 | cascades 0 |
-async/no-line 0`. Two systematic rows are `<RTCDataChannel>.send()`: a channel from
-`createDataChannel` stays "connecting" until a real peer negotiates SCTP, and send() throws
-InvalidStateError unless readyState is "open". The third varies with the draw and is either
-another `<RTCDataChannel>.send()` or `<TimeRanges>.start/end` on an empty range (the accepted
-class below). The other rows are validation on random receivers
-or arguments (appendChild of a Document or an Attribute, a MediaSource duration while closed,
-a pooled IDBRequest read before it finishes). The `unexpected request(s)` line is mark-up fetches
+50 s with `20 row(s), 14 group(s); 3 systematic; creators 0 | roots 14 | cascades 0 |
+async/no-line 0`. The systematic groups are the accepted classes below: two
+`<RTCDataChannel>.send()` shapes (a channel from `createDataChannel` stays "connecting" until a
+real peer negotiates SCTP, and send() throws InvalidStateError unless readyState is "open") and a
+`<TimeRanges>.end(0)` IndexSizeError on an empty range. The other rows are validation on random
+receivers or arguments (appendChild of an Attribute or an ancestor, `insertDTMF` on an
+unnegotiated sender, a pooled IDBRequest read before it finishes). The `unexpected request(s)`
+line is mark-up fetches
 (`<img src>` drawn from the URL pools, including a bare `?` that resolves to `caseN.html?`) and
 is not a navigation: a case that really navigated never posts its report.
 `creators 0` is the fastest check for the dead-text class described below; run it after any
@@ -192,6 +192,40 @@ the report could still say `0 systematic`.
 These sweeps closed most of this session's work and are worth remembering as defect shapes,
 not as line counts:
 
+- A generated `options.length = 65535` (the alias `select.length` is the same setter) pads the
+  select with that many blank `<option>` children. The next `innerText` write removes them one
+  at a time, and each removal rescans the options list
+  (`HTMLSelectElement::RunSelectednessSettingAlgorithm` -> `ContentList::PopulateSelf`), so the
+  page spins on the main thread and never reaches its report timer. `<fuzzuint>` includes
+  65535, so both length setters now have an `ATTRIBUTE_VALUE_OVERRIDES` value of 3. A gdb
+  backtrace of the content process (`gdb -p <content pid> -ex "thread 1" -ex bt`) is what named
+  the loop; the scan stalled at that case, and `scan_cases.py` now records the stalled case,
+  kills the browser and restarts it at the next case, so one hang cannot hide every case after
+  it. The stalled page is saved as `caseN.html` in the scan output and replays with `--input`.
+- The audit matches member *names* anywhere in reachable text, so an interface whose members
+  collide with common names (`Notification.body`, `.title`, `.tag`, `.dir`, `.lang`) looks
+  covered while nothing ever creates the object. `Notification` surfaced it: the constructor
+  never asks for permission, `NotificationParent::RecvShow` rejects the show with a TypeError
+  when permission is "default", and no window is shown, so one `stateful.txt` line can
+  construct it with `silent: true`, read the fifteen instance members, assign the handlers and
+  call `close()`. That moved six members from `needs probe` to `reachable`. When the probe says
+  `present` and the queue has no missing row, check whether the member name is merely shared
+  with another interface before believing it is covered.
+- `Navigation.transition` and `NavigationPrecommitController.addHandler` have no receiver
+  outside an intercepted navigation: `Navigation.cpp` creates `mTransition` only when the
+  event's interception state is not `None`, and builds the precommit controller only when the
+  event carries precommit handlers. The stateful navigation line now calls
+  `e.intercept({ handler, precommitHandler })` from inside its own `onnavigate` handler and
+  reads the transition from the precommit callback. A probe page confirmed canIntercept is true
+  for the fragment navigation, `transition` is non-null there, `addHandler` runs, and both
+  result promises resolve to the `#fuzznav` URL. `navigate()` returns a dictionary, not a
+  promise - the old `.catch` on the result was dead code, and the committed/finished promises
+  now carry the catches. The intercept is guarded by `e.destination.sameDocument`: a
+  same-origin *cross-document* navigation is interceptable too, and the unguarded version
+  swallowed the harness's own `location = "/caseN.html"`, so a 16-case scan timed out on
+  exactly the case after every page that contained the line. A two-page probe confirms the
+  guarded page loads the next document while the unguarded control never does, and the
+  fragment navigation still reaches the precommit handler (`transition` non-null).
 - Hand-written Wasm bytecodes are code, and three of the six "valid" module sources carried
   section-size typos (memory section declared 5 bytes and carried 4; type section 5 vs 6;
   a 4-character export name declared as 3). `new WebAssembly.Module` threw CompileError,
@@ -203,7 +237,11 @@ not as line counts:
 - `StaticRange` validates its init dictionary (both containers share a root, offsets are
   valid boundary points), so `new StaticRange(<StaticRangeInit>)` with a random `<Node>`
   pair threw InvalidNodeTypeError on every draw; `CONSTRUCTOR_ARG_OVERRIDES` now builds the
-  range on `document.body` at offset 0.
+  range on `document.body` at offset 0. A later scan still caught the creator throwing in one
+  case: a generated line had removed both the body and the documentElement, so the override's
+  expression was `undefined`. The fallback is the `document` itself, which is a Node and a
+  legal range container even when it has no children (verified with `check_reads.py` on a
+  childless document).
 - `PerformanceResourceTiming.renderBlockingStatus` was the one new audit gap after a regen;
   the existing `stateful.txt` XHR scenario reads the resource entry, so it now reads that
   member too and the queue went back to 56 blocks, all with NOTEs.
