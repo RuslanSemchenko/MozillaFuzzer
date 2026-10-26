@@ -62,6 +62,13 @@ var fzmo1 = document.createElement("div"); (document.body || document.documentEl
 # img-src 'none' is the cheapest violation that needs no network fetch.
 var fzcspo1 = new ReportingObserver(function (fzcspl1) { try { for (var fzcsps1 = 0; fzcsps1 < fzcspl1.length; fzcsps1++) { var fzcspb1 = fzcspl1[fzcsps1].body; fzcspl1[fzcsps1].type; fzcspl1[fzcsps1].url; fzcspb1.blockedURL; fzcspb1.documentURL; fzcspb1.referrer; fzcspb1.effectiveDirective; fzcspb1.originalPolicy; fzcspb1.sourceFile; fzcspb1.sample; fzcspb1.disposition; fzcspb1.statusCode; fzcspb1.lineNumber; fzcspb1.columnNumber; } } catch (e) { } }, { types: ["csp-violation"] }); fzcspo1.observe(); var fzcsph1 = document.head; if (fzcsph1 && fzcsph1.isConnected) { var fzcspm1 = document.createElement("meta"); fzcspm1.httpEquiv = "Content-Security-Policy"; fzcspm1.content = "img-src 'none'; report-to fuzzgroup"; fzcsph1.appendChild(fzcspm1); var fzcspi1 = new Image(); fzcspi1.onerror = function () { }; fzcspi1.src = "/fuzz-csp.png"; }
 
+# --- ReportingObserver: a deprecation report needs a deprecated binding ------
+# Any [Deprecated] member calls nsContentUtils::ReportDeprecation on the main
+# thread too (Document::WarnOnceAndReportAbout), so an exposed deprecated call
+# yields a real DeprecationReportBody. anticipatedRemoval is null here because
+# the binding passes no removal date, but the member exists on the instance.
+var fzdpo1 = new ReportingObserver(function (fzdpl1) { try { for (var fzdps1 = 0; fzdps1 < fzdpl1.length; fzdps1++) { var fzdpb1 = fzdpl1[fzdps1].body; fzdpl1[fzdps1].type; fzdpl1[fzdps1].url; fzdpb1.id; fzdpb1.anticipatedRemoval; fzdpb1.message; fzdpb1.sourceFile; fzdpb1.lineNumber; fzdpb1.columnNumber; } } catch (e) { } }, { types: ["deprecation"] }); fzdpo1.observe(); try { var fzdpm1 = new MouseEvent("click"); fzdpm1.initMouseEvent("click", false, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); } catch (e) { }
+
 # --- Resource / paint / LCP / event timing ------------------------------------
 
 var fzxhr1 = new XMLHttpRequest(); fzxhr1.open("GET", location.href, false); fzxhr1.send(); setTimeout(function () { try { var fzrt1 = performance.getEntriesByType("resource")[0]; if (fzrt1) { fzrt1.initiatorType; fzrt1.nextHopProtocol; fzrt1.workerStart; fzrt1.transferSize; fzrt1.encodedBodySize; fzrt1.decodedBodySize; fzrt1.responseStatus; fzrt1.serverTiming; fzrt1.deliveryType; fzrt1.finalResponseHeadersStart; fzrt1.firstInterimResponseStart; fzrt1.renderBlockingStatus; } } catch (e) { } }, 100);

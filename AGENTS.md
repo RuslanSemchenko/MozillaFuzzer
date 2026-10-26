@@ -127,18 +127,18 @@ rules files in this tree. Re-run everything - they go stale the moment a rules f
 (1101 interfaces), 10932 members.
 
 `python3 tools/audit_rules.py` on that inventory: 937 types considered, 793 not gated off at
-interface level (144 gated), 50 interfaces with at least one missing member. Across those 793:
-5654 members reachable, 117 missing (115 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
+interface level (144 gated), 49 interfaces with at least one missing member. Across those 793:
+5655 members reachable, 116 missing (114 -> `webapis.txt`, 2 -> `rules/webgl.txt`; the other
 five work orders are empty), 5 word-only, 0 parsed-but-unreachable, 274 whose only gate is a
 `[Func]`/trial the audit cannot evaluate, and 423 chrome-only / 78 pref-off excluded before
 queuing.
 
-All 50 queue blocks carry a NOTE, so the 117 are an adjudicated refusal rather than a to-do
+All 49 queue blocks carry a NOTE, so the 116 are an adjudicated refusal rather than a to-do
 list: `FuzzingFunctions` (compiled in, but `crash`/`killGPUProcess`/`signalIPCReady`/
 `memoryPressure`/`synthesizeKeyboardEvents` are refused), the WebAuthn response classes
 (`AuthenticatorResponse` and its two subclasses, `PublicKeyCredential` - a real credential needs
-an authenticator), the deprecation/integrity report bodies (`DeprecationReportBody`,
-`IntegrityViolationReportBody`) plus `FetchObserver`, the permission/UI surfaces (`Clipboard`,
+an authenticator), the integrity report body (`IntegrityViolationReportBody`, which needs an
+`Integrity-Policy` response header) plus `FetchObserver`, the permission/UI surfaces (`Clipboard`,
 `Geolocation`, `MIDIAccess`, `Serial`, `GetUserMediaRequest`, `HTMLInputElement`/`HTMLSelectElement`
 `showPicker`, the `Window` and `Navigator` dialogs), the no-receiver types (`Gamepad*`,
 `SpeechSynthesisVoice`, `Element` pointer capture, `History`), the legacy classes
@@ -160,7 +160,7 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9788 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9794 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
@@ -222,7 +222,11 @@ not as line counts:
   inside the document's `<head>`, so the line checks `document.head.isConnected` first.
   `img-src 'none'` keeps the violation off the network - the blocked image never reaches the
   server. `IntegrityViolationReportBody` is not reachable the same way: its policy needs an
-  `Integrity-Policy` response header, which content cannot set.
+  `Integrity-Policy` response header, which content cannot set. The same observer also reaches
+  `DeprecationReportBody`: any `[Deprecated]` member calls `nsContentUtils::ReportDeprecation`
+  even on the main thread (`Document::WarnOnceAndReportAbout`), so `initMouseEvent()` yields a
+  real body whose `id`/`message`/`sourceFile`/`lineNumber` read and whose `anticipatedRemoval`
+  exists but is null (the binding passes no removal date).
 - `Navigation.transition` and `NavigationPrecommitController.addHandler` have no receiver
   outside an intercepted navigation: `Navigation.cpp` creates `mTransition` only when the
   event's interception state is not `None`, and builds the precommit controller only when the

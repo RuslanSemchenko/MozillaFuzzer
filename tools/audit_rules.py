@@ -291,10 +291,6 @@ NOTES = {
         "extensions also stays \"\" until the handshake completes, so even a reachable socket "
         "would read an empty string without a server that does the upgrade"
     ),
-    "DeprecationReportBody": (
-        "report bodies are browser-created; `new Report(...)` is undefined in content (evaluated) "
-        "and no deprecation is reported in the harness"
-    ),
     "Directory": (
         "legacy FileSystem API: the only content producer is a directory picker or the "
         "[ChromeOnly] constructor, and the API's entry point (window.requestFileSystem / "
