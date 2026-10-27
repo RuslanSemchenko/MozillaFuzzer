@@ -18,6 +18,7 @@
 # Examples:
 #   ./fuzz.sh                                     # auto-detected build, 360000s
 #   ./fuzz.sh headless                            # no window, crashes still hunted
+#   ./fuzz.sh "" 36000 headless                   # 10h headless run (browser slot empty)
 #   ./fuzz.sh --stress                            # run with Chaos Mode + GC Zeal
 #   ./fuzz.sh --chaos --smoke-test                # quick sanity run under chaos mode
 #   ./fuzz.sh "" 7200 --relaunch 200 --rr         # 2h run with rr recording
@@ -101,6 +102,7 @@ if [[ -z $BROWSER ]]; then
     exit 1
 elif [[ ! -x $BROWSER ]]; then
     echo "Not an executable: $BROWSER" >&2
+    echo "First positional is the browser; runtime comes after it: ./fuzz.sh \"\" 36000 headless" >&2
     exit 1
 fi
 RUNTIME="${pos[1]:-$RUNTIME_DEFAULT}"
