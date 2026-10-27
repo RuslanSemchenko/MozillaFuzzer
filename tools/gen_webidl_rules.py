@@ -1025,6 +1025,14 @@ STATEMENT_OVERRIDES = {
         " fzsrcs.buffer = fzsac3.createBuffer(1, 1, 8000);"
         " fzsrcs.start(0); fzsrcs.stop(); fzsac3.close();"
     ),
+    # a ConvolverNode accepts only a buffer whose sampleRate equals its own
+    # context's: the pooled <AudioBuffer> is built at 44100 and the live
+    # AudioContext runs at 48000, so every assignment threw NotSupportedError.
+    # Bind the receiver once - two placeholders may resolve to two nodes whose
+    # contexts differ - and derive the buffer from that same node's context.
+    ("ConvolverNode", "buffer"): (
+        "var fzcnv = {r}; fzcnv.buffer = fzcnv.context.createBuffer(1, 1, fzcnv.context.sampleRate);"
+    ),
     # deleting at index 0 from a fresh row/table/section throws IndexSizeError;
     # insert the element in the same line so there is something to delete
     ("HTMLTableRowElement", "deleteCell"): (
