@@ -16,7 +16,7 @@
 # --relaunch, --time-limit) are forwarded to Grizzly untouched.
 #
 # Examples:
-#   ./fuzz.sh                                     # FIREFOX_BIN / .env, 360000s
+#   ./fuzz.sh                                     # auto-detected build, 360000s
 #   ./fuzz.sh headless                            # no window, crashes still hunted
 #   ./fuzz.sh --stress                            # run with Chaos Mode + GC Zeal
 #   ./fuzz.sh --chaos --smoke-test                # quick sanity run under chaos mode
@@ -82,10 +82,25 @@ for arg in "$@"; do
     esac
 done
 
+# Browser resolution, first match wins: explicit argument, FIREFOX_BIN
+# (from the environment or .env), then a build under $FIREFOX_SRC/obj-*/dist/bin.
+# The glob is the same one tools/fx_paths.py and the Makefile use, so a fresh
+# clone with no .env still starts.
 BROWSER="${pos[0]:-}"
 [[ -n $BROWSER ]] || BROWSER="${FIREFOX_BIN:-}"
 if [[ -z $BROWSER ]]; then
-    echo "Firefox binary not set. Pass it as the first argument, set FIREFOX_BIN, or copy .env.example -> .env" >&2
+    SRC="${FIREFOX_SRC:-$HOME/firefox}"
+    for cand in "$SRC"/obj-*/dist/bin/firefox; do
+        [[ -x $cand ]] || continue
+        BROWSER="$cand"
+        break
+    done
+fi
+if [[ -z $BROWSER ]]; then
+    echo "Firefox binary not set. Pass it as the first argument, set FIREFOX_BIN, or build under \$FIREFOX_SRC/obj-*/dist/bin/firefox" >&2
+    exit 1
+elif [[ ! -x $BROWSER ]]; then
+    echo "Not an executable: $BROWSER" >&2
     exit 1
 fi
 RUNTIME="${pos[1]:-$RUNTIME_DEFAULT}"

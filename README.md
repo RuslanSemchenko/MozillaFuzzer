@@ -32,10 +32,11 @@ A specialized DOM & WebIDL fuzzing environment tailored for **Mozilla Firefox**,
    pip install -e .
    ```
 
-2. **Configure paths** (copy example and edit)
+2. **Configure paths** (optional — copy example and edit)
    ```bash
    cp .env.example .env
    # set FIREFOX_SRC and FIREFOX_BIN (no machine-specific defaults in the repo)
+   # a build under $FIREFOX_SRC/obj-*/dist/bin/firefox is found without .env
    ```
 
 3. **Check environment**
