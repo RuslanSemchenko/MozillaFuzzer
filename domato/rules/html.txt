@@ -13,22 +13,23 @@
 #   no fetch and no navigation) and is here only so HTMLIFrameElement
 #   receivers exist.
 #
-#   The MathML root used to branch near the recursion limit and fill the whole
-#   body with mrow/mfrac: with uniform <element> weights the page was 90%
-#   MathML by tag count. Two knobs keep it readable - the <element> weights
-#   below (HTML 0.8 / SVG 0.1 / MathML 0.05 / text 0.05) and the leaf weights
-#   in the <mathmlelement> block, which make a math tree terminate. The body
-#   still carries every receiver type; it just no longer reads as a formula.
+#   MathML used to dominate the page: uniform <element> weights + a recursive
+#   mrow/mfrac/msqrt tree (E[children] ~1.05) made ~90% of tags MathML, so a
+#   case looked like a wall of formulas and starved HTML/canvas/SVG receivers.
+#   Fixes stacked here: HTML-heavy <element> weights, a rare MathML root, and
+#   shallow math (operators wrap terminals only — no nested roots/fractions).
+#   Canvas is also up-weighted so the body shows the surface the Canvas 2D
+#   block is fuzzing (the template appends its own canvas too).
 
 !include common.txt
 
 <bodyelements> = <newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline>
 <bodyelements> = <newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline>
 
-<element p=0.8> = <htmlelement>
+<element p=0.85> = <htmlelement>
 <element p=0.1> = <svgroot>
-<element p=0.05> = <mathmlroot>
-<element p=0.05> = <textsafe>
+<element p=0.02> = <mathmlroot>
+<element p=0.03> = <textsafe>
 
 <innerelements nonrecursive=true p=0.45> = <textsafe>
 <innerelements nonrecursive=true p=0.2> = <space>
@@ -118,7 +119,7 @@
 <htmlelement> = <lt>bdo <attributes><gt><innerelements><lt>/bdo<gt>
 <htmlelement> = <lt>blockquote <attributes><gt><innerelements><lt>/blockquote<gt>
 <htmlelement> = <lt>button <attributes><gt><innerelements><lt>/button<gt>
-<htmlelement> = <lt>canvas <attributes><gt><innerelements><lt>/canvas<gt>
+<htmlelement p=0.08> = <lt>canvas <attributes><gt><innerelements><lt>/canvas<gt>
 <htmlelement> = <lt>caption <attributes><gt><innerelements><lt>/caption<gt>
 <htmlelement> = <lt>center <attributes><gt><innerelements><lt>/center<gt>
 <htmlelement> = <lt>cite <attributes><gt><innerelements><lt>/cite<gt>
@@ -236,31 +237,32 @@
 <svgelement> = <lt>view <attributes><gt>
 <svgelement> = <lt>foreignObject <attributes><gt><innerelements><lt>/foreignObject<gt>
 
+# Shallow MathML only. Operators wrap <mathmlterminal> leaves — never another
+# mfrac/msqrt/mroot — so a picked <math> root stays a small formula, not a
+# page-filling tree. Receivers for MathMLElement still exist; nesting depth
+# no longer eats the HTML/SVG/canvas mix.
 <mathmlroot> = <lt>math <attributes><gt><mathmlelements><lt>/math<gt>
 <mathmlelements> = <newline><mathmlelement><newline>
 <mathmlelements> = <newline><mathmlelement><newline><mathmlelement><newline>
 
-# Leaves carry an explicit p so a math tree terminates instead of branching
-# near the recursion limit (E[children] was ~1.05, so a single <math> root
-# could fill the whole body with mrow/mfrac): six leaves at 0.1 each leave
-# 0.4 of the picks for the fourteen recursive tags, E[children] = 0.6.
-<mathmlelement> = <lt>mrow <attributes><gt><mathmlelements><lt>/mrow<gt>
-<mathmlelement> = <lt>mfrac <attributes><gt><mathmlelements><lt>/mfrac<gt>
-<mathmlelement> = <lt>msqrt <attributes><gt><mathmlelements><lt>/msqrt<gt>
-<mathmlelement> = <lt>mroot <attributes><gt><mathmlelements><lt>/mroot<gt>
-<mathmlelement> = <lt>msup <attributes><gt><mathmlelements><lt>/msup<gt>
-<mathmlelement> = <lt>msub <attributes><gt><mathmlelements><lt>/msub<gt>
-<mathmlelement> = <lt>msubsup <attributes><gt><mathmlelements><lt>/msubsup<gt>
-<mathmlelement> = <lt>munder <attributes><gt><mathmlelements><lt>/munder<gt>
-<mathmlelement> = <lt>mover <attributes><gt><mathmlelements><lt>/mover<gt>
-<mathmlelement> = <lt>munderover <attributes><gt><mathmlelements><lt>/munderover<gt>
-<mathmlelement> = <lt>mtable <attributes><gt><mathmlelements><lt>/mtable<gt>
-<mathmlelement> = <lt>mtr <attributes><gt><mathmlelements><lt>/mtr<gt>
-<mathmlelement> = <lt>mtd <attributes><gt><mathmlelements><lt>/mtd<gt>
-<mathmlelement p=0.1> = <lt>mspace <attributes><gt>
-<mathmlelement p=0.1> = <lt>mi <attributes><gt><textsafe><lt>/mi<gt>
-<mathmlelement p=0.1> = <lt>mn <attributes><gt><textsafe><lt>/mn<gt>
-<mathmlelement p=0.1> = <lt>mo <attributes><gt><textsafe><lt>/mo<gt>
-<mathmlelement p=0.1> = <lt>mtext <attributes><gt><textsafe><lt>/mtext<gt>
-<mathmlelement> = <lt>semantics <attributes><gt><mathmlelements><lt>/semantics<gt>
-<mathmlelement p=0.1> = <lt>annotation <attributes><gt><textsafe><lt>/annotation<gt>
+<mathmlterminal> = <lt>mspace <attributes><gt>
+<mathmlterminal> = <lt>mi <attributes><gt><textsafe><lt>/mi<gt>
+<mathmlterminal> = <lt>mn <attributes><gt><textsafe><lt>/mn<gt>
+<mathmlterminal> = <lt>mo <attributes><gt><textsafe><lt>/mo<gt>
+<mathmlterminal> = <lt>mtext <attributes><gt><textsafe><lt>/mtext<gt>
+<mathmlterminal> = <lt>annotation <attributes><gt><textsafe><lt>/annotation<gt>
+
+# Terminals dominate (p=0.72); the twelve operators share the remaining 0.28.
+<mathmlelement p=0.72> = <mathmlterminal>
+<mathmlelement> = <lt>mrow <attributes><gt><mathmlterminal><mathmlterminal><lt>/mrow<gt>
+<mathmlelement> = <lt>mfrac <attributes><gt><mathmlterminal><mathmlterminal><lt>/mfrac<gt>
+<mathmlelement> = <lt>msqrt <attributes><gt><mathmlterminal><lt>/msqrt<gt>
+<mathmlelement> = <lt>mroot <attributes><gt><mathmlterminal><mathmlterminal><lt>/mroot<gt>
+<mathmlelement> = <lt>msup <attributes><gt><mathmlterminal><mathmlterminal><lt>/msup<gt>
+<mathmlelement> = <lt>msub <attributes><gt><mathmlterminal><mathmlterminal><lt>/msub<gt>
+<mathmlelement> = <lt>msubsup <attributes><gt><mathmlterminal><mathmlterminal><mathmlterminal><lt>/msubsup<gt>
+<mathmlelement> = <lt>munder <attributes><gt><mathmlterminal><mathmlterminal><lt>/munder<gt>
+<mathmlelement> = <lt>mover <attributes><gt><mathmlterminal><mathmlterminal><lt>/mover<gt>
+<mathmlelement> = <lt>munderover <attributes><gt><mathmlterminal><mathmlterminal><mathmlterminal><lt>/munderover<gt>
+<mathmlelement> = <lt>mtable <attributes><gt><lt>mtr <attributes><gt><lt>mtd <attributes><gt><mathmlterminal><lt>/mtd<gt><lt>/mtr<gt><lt>/mtable<gt>
+<mathmlelement> = <lt>semantics <attributes><gt><mathmlterminal><lt>/semantics<gt>
