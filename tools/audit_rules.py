@@ -23,9 +23,11 @@ import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 ROOT = Path(__file__).resolve().parent.parent
 
+from fx_paths import default_firefox_src  # noqa: E402
 from grz_domato import DOMATO_DIR, _load_domato, _parse_grammar  # noqa: E402
 
 ENTRY_POINTS = {
@@ -653,7 +655,7 @@ def write_work_orders(report: list[dict], probe_path: Path, out_dir: Path) -> li
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", default="/home/ruslan/firefox", help="Firefox checkout (StaticPrefList.yaml)")
+    parser.add_argument("--source", default=default_firefox_src(), help="Firefox checkout (StaticPrefList.yaml)")
     parser.add_argument("--inventory", default="results/audit/idl_inventory.json")
     parser.add_argument("--out", default="results/audit/coverage.json")
     parser.add_argument("--queue", default="results/audit/QUEUE.md")

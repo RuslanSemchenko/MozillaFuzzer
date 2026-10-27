@@ -36,9 +36,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-FIREFOX = Path(
-    "/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox"
-)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fx_paths import require_firefox_bin  # noqa: E402
 # IDL names that are WebGL extension object bags rather than page globals. This is the
 # set of extension interfaces declared in WebGLRenderingContext.webidl: ANGLE_*, EXT_*,
 # OES_*, OVR_*, WEBGL_*, WEBKIT_WEBGL_* and the Firefox-only MOZ_debug. Missing one puts
@@ -317,7 +316,7 @@ def main() -> int:
     parser.add_argument("--only", nargs="*", default=None, help="limit to these interfaces")
     parser.add_argument("--variant", default="default", help="prefpicker variant to probe under")
     parser.add_argument("--timeout", type=int, default=120)
-    parser.add_argument("--firefox", type=Path, default=FIREFOX)
+    parser.add_argument("--firefox", type=Path, default=None)
     parser.add_argument("--page", default=None, help="write the probe page here instead of running it")
     args = parser.parse_args()
 
@@ -372,13 +371,14 @@ def main() -> int:
         Path(args.page).write_text(build_page(targets), encoding="utf-8")
         print(f"page -> {args.page}")
         return 0
-    if not args.firefox.exists():
-        print(f"no firefox at {args.firefox} - pass --firefox <path>", file=sys.stderr)
+    firefox = args.firefox or require_firefox_bin()
+    if not firefox.exists():
+        print(f"no firefox at {firefox} - pass --firefox <path>", file=sys.stderr)
         return 1
 
     profile = ROOT / "results" / "probe_prof"
     write_prefs(profile, args.variant)
-    data = collect(targets, args.firefox, profile, args.timeout)
+    data = collect(targets, firefox, profile, args.timeout)
     if data is None:
         return 1
 

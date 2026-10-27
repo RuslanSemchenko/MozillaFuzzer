@@ -51,7 +51,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-FIREFOX = Path("/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fx_paths import require_firefox_bin  # noqa: E402
 
 # Injected at the top of <head>: the collector the replaced catches call, plus global hooks.
 # The collectors themselves use `catch (x)` with a space so instrument() cannot match them.
@@ -499,7 +500,7 @@ def main() -> int:
     parser.add_argument("--samples", type=int, default=5, help="cases to generate (default: 5)")
     parser.add_argument("--input", type=Path, nargs="+", help="scan existing HTML file(s)/dir(s) instead of generating")
     parser.add_argument("--seed", type=int, help="seed Domato's RNG for a reproducible batch")
-    parser.add_argument("--firefox", type=Path, default=FIREFOX)
+    parser.add_argument("--firefox", type=Path, default=None)
     parser.add_argument("--profile", type=Path, default=ROOT / "results" / "scan_prof")
     parser.add_argument("--outdir", type=Path, default=ROOT / "results" / "scan", help="where raw and instrumented cases are written")
     parser.add_argument("--variant", default="fuzzing", help="Grizzly prefs template variant")
@@ -512,6 +513,8 @@ def main() -> int:
     parser.add_argument("--report-only", type=Path, help="re-print a previous --dump without starting Firefox")
     parser.add_argument("--strict", action="store_true", help="exit 1 if any caught/uncaught/rejection row was reported")
     args = parser.parse_args()
+    if args.report_only is None:
+        args.firefox = args.firefox or require_firefox_bin()
 
     if args.report_only is not None:
         payload = json.loads(args.report_only.read_text(encoding="utf-8"))

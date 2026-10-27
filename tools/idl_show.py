@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import argparse
-import os
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fx_paths import default_firefox_src  # noqa: E402
 
 def find_idl(src: Path, name: str):
     # try exact
@@ -73,7 +75,7 @@ def extract_block(text: str, name: str):
 def main():
     p = argparse.ArgumentParser(description="Show WebIDL for an interface")
     p.add_argument("name")
-    p.add_argument("--source", default=os.environ.get("FIREFOX_SRC", "/home/ruslan/firefox"))
+    p.add_argument("--source", default=default_firefox_src())
     args = p.parse_args()
 
     src = Path(args.source).expanduser().resolve()

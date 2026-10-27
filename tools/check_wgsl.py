@@ -22,7 +22,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FIREFOX = Path("/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fx_paths import require_firefox_bin  # noqa: E402
+
 WGSL_DIR = ROOT / "domato" / "rules" / "wgsl"
 PROFILE = ROOT / "results" / "wgsl_check_prof"
 
@@ -180,9 +182,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--timeout", type=int, default=150)
     parser.add_argument("--variant", default="default")
-    parser.add_argument("--firefox", type=Path, default=FIREFOX)
+    parser.add_argument("--firefox", type=Path, default=None)
     parser.add_argument("--out", default="results/audit/wgsl_check.json")
     args = parser.parse_args()
+    firefox = args.firefox or require_firefox_bin()
 
     sources = []
     for path in sorted(WGSL_DIR.glob("*.wgsl")):
@@ -192,7 +195,7 @@ def main() -> int:
         return 1
 
     write_prefs(PROFILE, args.variant)
-    data = collect(sources, args.firefox, PROFILE, args.timeout)
+    data = collect(sources, firefox, PROFILE, args.timeout)
     if data is None:
         return 1
 

@@ -3,8 +3,14 @@
 PY ?= python3
 ROOT := $(shell pwd)
 
-FIREFOX_SRC ?= /home/ruslan/firefox
-FIREFOX_BIN ?= $(shell find $(FIREFOX_SRC) -name firefox -path "*/dist/bin/firefox" 2>/dev/null | head -n1)
+# Load local paths if present (see .env.example). Missing file is fine.
+ifneq (,$(wildcard $(ROOT)/.env))
+include $(ROOT)/.env
+export
+endif
+
+FIREFOX_SRC ?= $(HOME)/firefox
+FIREFOX_BIN ?= $(shell find "$(FIREFOX_SRC)" -name firefox -path "*/dist/bin/firefox" 2>/dev/null | head -n1)
 
 export FIREFOX_SRC
 export FIREFOX_BIN
@@ -25,6 +31,7 @@ help:
 	@echo ""
 	@echo "Override: make audit FIREFOX_SRC=/path/to/firefox"
 	@echo "          make probe FIREFOX_BIN=/path/to/firefox"
+	@echo "Or copy .env.example -> .env and set FIREFOX_SRC / FIREFOX_BIN there."
 
 doctor:
 	$(PY) tools/doctor.py --source $(FIREFOX_SRC) $(if $(FIREFOX_BIN),--firefox $(FIREFOX_BIN),)
@@ -40,7 +47,7 @@ audit:
 	$(PY) tools/audit_rules.py --source $(FIREFOX_SRC) --show-blocked
 
 probe:
-	$(if $(FIREFOX_BIN),,$(error FIREFOX_BIN not set or not found. Set FIREFOX_BIN=...))
+	$(if $(FIREFOX_BIN),,$(error FIREFOX_BIN not set or not found. Set FIREFOX_BIN=... or .env))
 	$(PY) tools/probe_apis.py --firefox $(FIREFOX_BIN)
 
 check-rules:
@@ -50,7 +57,7 @@ wgsl:
 	$(PY) tools/check_wgsl.py
 
 scan:
-	$(if $(FIREFOX_BIN),,$(error FIREFOX_BIN not set or not found. Set FIREFOX_BIN=...))
+	$(if $(FIREFOX_BIN),,$(error FIREFOX_BIN not set or not found. Set FIREFOX_BIN=... or .env))
 	MOZ_HEADLESS=1 $(PY) tools/scan_cases.py --samples 16 --case-timeout 45 $(if $(FIREFOX_BIN),--firefox $(FIREFOX_BIN),)
 
 clean:

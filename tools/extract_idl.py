@@ -13,7 +13,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fx_paths import default_firefox_src  # noqa: E402
 
 # declaration: an optional run of [attrs] blocks, then the kind, then the name
 _ATTR_BLOCK = r"(?:\[[^\]]*\]\s*)*"
@@ -391,7 +395,7 @@ def parse_file(path: Path) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", default="/home/ruslan/firefox", help="Firefox source root")
+    parser.add_argument("--source", default=default_firefox_src(), help="Firefox source root")
     parser.add_argument("--dir", action="append", default=None, help="IDL directory, relative to --source")
     parser.add_argument("--out", default="results/audit/idl_inventory.json")
     args = parser.parse_args()

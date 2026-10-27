@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Linux port of fuzz.bat with stress profile support.
+# Linux runner with stress profile support.
 #
 #   ./fuzz.sh [firefox-binary] [runtime-seconds] [fuzzing-flags...]
 #
@@ -16,14 +16,21 @@
 # --relaunch, --time-limit) are forwarded to Grizzly untouched.
 #
 # Examples:
-#   ./fuzz.sh                                     # default browser, 360000s
+#   ./fuzz.sh                                     # FIREFOX_BIN / .env, 360000s
 #   ./fuzz.sh headless                            # no window, crashes still hunted
 #   ./fuzz.sh --stress                            # run with Chaos Mode + GC Zeal
 #   ./fuzz.sh --chaos --smoke-test                # quick sanity run under chaos mode
 #   ./fuzz.sh "" 7200 --relaunch 200 --rr         # 2h run with rr recording
 set -euo pipefail
 
-DEFAULT_BROWSER="/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox"
+ROOT="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
+if [[ -f "$ROOT/.env" ]]; then
+    set -a
+    # shellcheck disable=SC1091
+    source "$ROOT/.env"
+    set +a
+fi
+
 RUNTIME_DEFAULT=360000
 
 pos=()
@@ -76,11 +83,15 @@ for arg in "$@"; do
 done
 
 BROWSER="${pos[0]:-}"
-[[ -n $BROWSER ]] || BROWSER="${FIREFOX_BIN:-$DEFAULT_BROWSER}"
+[[ -n $BROWSER ]] || BROWSER="${FIREFOX_BIN:-}"
+if [[ -z $BROWSER ]]; then
+    echo "Firefox binary not set. Pass it as the first argument, set FIREFOX_BIN, or copy .env.example -> .env" >&2
+    exit 1
+fi
 RUNTIME="${pos[1]:-$RUNTIME_DEFAULT}"
 [[ -z $display_mode ]] || extra+=(--display "$display_mode")
 
-OUT="$(dirname "$(readlink -f "$0")")/results"
+OUT="$ROOT/results"
 PYTHON="${PYTHON_BIN:-python3}"
 mkdir -p "$OUT"
 

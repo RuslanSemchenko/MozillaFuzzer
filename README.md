@@ -27,7 +27,7 @@ A specialized DOM & WebIDL fuzzing environment tailored for **Mozilla Firefox**,
 
 ## Quick Start
 
-1. **Clone/setup deps**
+1. **Clone/setup deps** (Python **3.14+**)
    ```bash
    pip install -e .
    ```
@@ -35,7 +35,7 @@ A specialized DOM & WebIDL fuzzing environment tailored for **Mozilla Firefox**,
 2. **Configure paths** (copy example and edit)
    ```bash
    cp .env.example .env
-   # set FIREFOX_SRC and FIREFOX_BIN
+   # set FIREFOX_SRC and FIREFOX_BIN (no machine-specific defaults in the repo)
    ```
 
 3. **Check environment**
@@ -126,6 +126,23 @@ make probe      # python3 tools/probe_apis.py
 make check-rules
 make wgsl        # if WGSL changed
 ```
+
+## Findings
+
+- **`SpeechRecognition.start()`** (Nightly / diagnostic-assert builds): installs
+  the speech model and crashes the content process at shutdown with
+  `MOZ_CRASH(MozPromise::ThenValue created from 'StartImpl' destroyed without
+  being either disconnected, resolved, or rejected)` (`MozillaPromise.h`).
+  Reproduced from a generated case; `start` / `install` are refused in
+  `DENY_MEMBERS`. This is `MOZ_DIAGNOSTIC_ASSERT` (live on Nightly), not ASan
+  memory corruption — Beta/Release compile the check out. Also a microphone
+  surface, so it stays denied.
+
+## CI
+
+GitHub Actions runs `tools/check_rules.py --samples 25` on Python 3.14 for every
+push/PR (no Firefox required). Browser-backed tools (`probe_apis`, `check_reads`,
+`check_wgsl`, `scan_cases`) stay local.
 
 ## License
 

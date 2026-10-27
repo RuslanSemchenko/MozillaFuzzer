@@ -42,7 +42,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-FIREFOX = Path("/home/ruslan/firefox/obj-x86_64-pc-linux-gnu/dist/bin/firefox")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fx_paths import require_firefox_bin  # noqa: E402
 
 PAGE = """<!doctype html><meta charset=utf-8><title>read check</title><body><script>
 const results = new Array(%TARGETS%.length);
@@ -142,7 +143,7 @@ def collect(expressions: dict[str, str], firefox: Path, profile: Path, timeout: 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("expressions", help="JSON object of name -> expression")
-    parser.add_argument("--firefox", type=Path, default=FIREFOX)
+    parser.add_argument("--firefox", type=Path, default=None)
     parser.add_argument("--profile", type=Path, default=ROOT / "results" / "readcheck_prof")
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--settle", type=int, default=5000, help="ms to wait for a returned promise")
@@ -155,6 +156,7 @@ def main() -> int:
     )
     parser.add_argument("--headless", action="store_true", help="run without a window (for crash isolation)")
     args = parser.parse_args()
+    firefox = args.firefox or require_firefox_bin()
 
     expressions = json.loads(Path(args.expressions).read_text(encoding="utf-8"))
 
@@ -164,7 +166,7 @@ def main() -> int:
     template = PrefPicker.load_template(PrefPicker.lookup_template("browser-fuzzing.yml"))
     template.create_prefsjs(args.profile / "prefs.js", variant=args.variant)
 
-    rows = collect(expressions, args.firefox, args.profile, args.timeout, args.settle, args.browser_log, args.headless)
+    rows = collect(expressions, firefox, args.profile, args.timeout, args.settle, args.browser_log, args.headless)
     if rows is None:
         return 1
     if args.dump:

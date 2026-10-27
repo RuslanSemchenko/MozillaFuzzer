@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
 TOOLS = ROOT / "tools"
 RULES = ROOT / "domato" / "rules"
 GRZ = ROOT / "grz_domato"
@@ -46,8 +47,14 @@ def warn(label: str, cond: bool, ok: str, w: str):
 
 def main():
     p = argparse.ArgumentParser(description="Check grz_domato environment")
-    p.add_argument("--source", default=os.environ.get("FIREFOX_SRC", "/home/ruslan/firefox"), help="Firefox source tree")
-    p.add_argument("--firefox", default=os.environ.get("FIREFOX_BIN"), help="Path to firefox binary")
+    from fx_paths import default_firefox_bin, default_firefox_src  # noqa: PLC0415
+
+    p.add_argument("--source", default=default_firefox_src(), help="Firefox source tree")
+    p.add_argument(
+        "--firefox",
+        default=str(default_firefox_bin()) if default_firefox_bin() else None,
+        help="Path to firefox binary",
+    )
     p.add_argument("--strict", action="store_true", help="Treat warnings as errors")
     args = p.parse_args()
 

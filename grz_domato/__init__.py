@@ -68,7 +68,8 @@ def _embed_shader(code: str) -> str:
 
 class DomatoAdapter(Adapter):
     """Generate test cases with Domato. Supports ``--input`` to point at a
-    directory of custom grammar rules (html.txt/css.txt/js.txt).
+    directory of custom grammar rules (html/css/js plus canvas/webgl/webgpu
+    and optional ``wgsl/`` shaders — same layout as ``domato/rules/``).
 
     Every case mixes the DOM/CSS/JS grammars with the Canvas 2D, WebGL and
     WebGPU grammars; each API runs in its own ``<script>`` block and its own
@@ -106,12 +107,13 @@ class DomatoAdapter(Adapter):
         ones: sharing one Grammar object would merge their <line> pools and
         dilute each API's code, and their !lineguard/!varformat directives would
         fight over the settings of the combined object."""
-        canvas = _parse_grammar(self._gen, DOMATO_DIR / "rules" / "canvas.txt")
-        webgl = _parse_grammar(self._gen, DOMATO_DIR / "rules" / "webgl.txt")
+        rules = self._rules_dir
+        canvas = _parse_grammar(self._gen, rules / "canvas.txt")
+        webgl = _parse_grammar(self._gen, rules / "webgl.txt")
         self._webgpu_tools = _load_by_path(
             "_domato_webgpu", DOMATO_DIR / "wgsl_grammar.py"
         )
-        shaders_dir = DOMATO_DIR / "rules" / "wgsl"
+        shaders_dir = rules / "wgsl"
         self._shader_sources = tuple(
             sorted(path.read_text(encoding="utf-8", errors="replace") for path in shaders_dir.glob("*.wgsl"))
         )
@@ -136,7 +138,7 @@ class DomatoAdapter(Adapter):
             + self._webgpu_tools.parse_bindings(shaders)
             + "\n"
         )
-        grammar = _parse_grammar(self._gen, DOMATO_DIR / "rules" / "webgpu.txt", extra)
+        grammar = _parse_grammar(self._gen, self._rules_dir / "webgpu.txt", extra)
         return grammar, shaders
 
     def generate(self, testcase: TestCase, server_map: ServerMap) -> None:
