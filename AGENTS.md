@@ -160,25 +160,29 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9794 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9793 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-50 s with `30 row(s), 16 group(s); 6 systematic; creators 0 | roots 16 | cascades 0 |
+45.6 s with `29 row(s), 19 group(s); 3 systematic; creators 0 | roots 19 | cascades 0 |
 async/no-line 0`. The systematic groups are the accepted classes below: several
 `<RTCDataChannel>.send()` shapes (a channel from `createDataChannel` stays "connecting" until a
 real peer negotiates SCTP, and send() throws InvalidStateError unless readyState is "open") and
 `<TimeRanges>.start/end` IndexSizeError on an empty range. A 64-case run of the same command on
-the final tree reported 64/64 in 242 s with `121 row(s), 52 group(s)`, the same classes and no
-stalls. The
+the final tree reported 64/64 in 241 s with `113 row(s), 52 group(s)` and no stalls; its nine
+systematic groups were the same two classes plus two single-shape rows:
+`ConvolverNode.buffer = <AudioBuffer>` (7/7 - the generated buffer's 44100 Hz does not match the
+context's 48000 Hz) and `document.appendChild(<element>)` (2/2 - a Document may hold one Element).
+The
 other rows are validation on random
 receivers or arguments (appendChild of an Attribute or an ancestor, `insertDTMF` on an
 unnegotiated sender, a pooled IDBRequest read before it finishes, `SVGMatrix.inverse` on a
-singular generated matrix). The `unexpected request(s)` line is mark-up fetches
-(`<img src>` drawn from the URL pools, including a bare `?` that resolves to `caseN.html?`) and
+singular generated matrix). The `unexpected request(s)` line is mark-up fetches for
+`img`/`iframe`/`media` `src` set from the generated `<DOMString>` pool (nine members are
+`.src = <DOMString>`, one per element; a bare `?` resolves to `caseN.html?`) and
 is not a navigation: a case that really navigated never posts its report.
 `creators 0` is the fastest check for the dead-text class described below; run it after any
 creator or argument-override change. When the thrown object has no stack (a DOMException raised
@@ -568,7 +572,14 @@ declarations would fight over one object.
 - `!extends Child Parent` is how inherited members become reachable; the audit folds
   WebIDL inheritance for you, but the grammar needs the declaration.
 - Weight rare-but-interesting *value* rules with `p=`; without it every rule for a symbol
-  is picked uniformly. It does nothing for a statement: `p=` is not read when a `<line>` is
+  is picked uniformly. The arithmetic matters (`_get_cdf`, grammar.py:583): rules with no
+  `p` share `(1 - p_sum) / nondef_count` when `p_sum <= 1`, but a `p_sum > 1` normalizes the
+  defined weights by `1 / p_sum` and leaves the undefined rules with probability **0**. A
+  `<htmlelement p=2>` written as "twice as likely" therefore produced 137 iframes and no other
+  HTML tag; the correct shape is a share of at most 1 (`p=0.05` on the iframe rule = 4.5% of
+  `<htmlelement>` picks, the other 85 rules at 0.0112 each). Several defined rules that sum to
+  exactly 1 (`<element>`'s four buckets) keep their stated shares.
+  It does nothing for a statement: `p=` is not read when a `<line>` is
   chosen. What *does* move a statement's frequency is its receiver: 90% of lines are drawn from
   `context['interesting_lines']` - the rules that reference a typed variable of a type already in
   context (`_interesting_line_prob = 0.9`, grammar.py:297) - and only the other 10% come from
@@ -597,6 +608,19 @@ declarations would fight over one object.
   `grz_domato/__init__.py`), so a bigger grammar means each API appears *less often*
   per case. That is the trade you are making, and it is why one domain per commit
   matters.
+- The *look* of a generated page is decided by markup-value weights, not by the line
+  budgets. `<element>` used to split evenly between HTML, SVG, MathML and text; the math
+  subtree branches with E[children] = 1.5 x (14/20 recursive) = 1.05, so one `<math>` root
+  expands until the recursion limit and 25 generated cases measured 90% MathML tags. Two
+  knobs fixed it: `<element>` buckets summing to 1 (HTML 0.8 / SVG 0.1 / MathML 0.05 / text
+  0.05) and `p=0.1` on the six terminal math tag rules (recursive share 0.4, E[children] 0.6).
+  Measured after: ~60% HTML / 30% SVG / 10% MathML tags, worst case 41% math. Same class:
+  `animation: fuzz 1s infinite` is a no-op with no `@keyframes fuzz` in the sheet, so
+  `css.txt` now emits the keyframes (`<rules> = <keyframes>`, plus a `div, span { animation:
+  ... }` pairing); a variant using `*` with an opacity-0 first keyframe left the screenshot
+  blank, so the low end is 0.2. A bare `<iframe>` (no src, about:blank) supplies the
+  HTMLIFrameElement receivers and the visible frame; it is safe because it neither fetches
+  nor navigates.
 - Text is not a value: `<string>`, `<fuzzint>`, `<float min= max=>`, `<hex>` are
   built-in tags; inventing a tag name produces `No creators for type X` and the branch
   dies. `check_rules.py` fails on this precisely because Domato only prints it. Two traps
@@ -612,6 +636,11 @@ declarations would fight over one object.
   that never applied and threw RangeError in every case that drew them; the scan
   (`3 systematic` rows) is what surfaced it. Use `<int min=... max=...>` when a bound
   matters.
+- `<htmlsafestring>` reads `min`/`max` as *character codes* and `minlength`/`maxlength` as
+  the text length (`_generate_string`, grammar.py:218; the length defaults to 0..20). Rules
+  that wrote only `min=32 max=126` produced at most twenty characters, and `min=16 max=96`
+  produced control bytes. Write `<htmlsafestring min=32 max=126 minlength=24 maxlength=96>`
+  when the point is a long run of text.
 - `<hash>` belongs *inside a string literal*. In expression position it generates a bare
   `#`, which is a SyntaxError that takes the whole `<script>` with it. `check_rules.py`
   now fails on any `#` outside a string literal in a generated script body

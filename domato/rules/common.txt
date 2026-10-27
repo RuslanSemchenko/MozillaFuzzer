@@ -21,6 +21,10 @@
 <textsafe> = false
 <textsafe> = null
 <textsafe> = undefined
+# The escaped built-in is the one random-text source that cannot break markup,
+# and long runs of it are what makes a generated page exercise shaping and
+# line breaking instead of rendering a dozen short tokens.
+<textsafe p=0.35> = <htmlsafestring min=32 max=126 minlength=24 maxlength=96>
 
 # Text that is safe inside a double-quoted HTML attribute: no quote, no '<',
 # no '&' entity start, no '#' (the parser cuts comments at '#').

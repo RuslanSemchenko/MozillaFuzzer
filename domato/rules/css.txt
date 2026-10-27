@@ -12,6 +12,15 @@
 <rules> = <rule><newline><rule>
 <rules> = <rule><newline><rule><newline><rule>
 <rules> = <rule><newline><rule><newline><rule><newline><rule>
+<rules> = <keyframes>
+<rules> = <keyframes><newline>div, span { animation: fuzz 1s infinite }
+
+# The animation shorthand above and in <declaration> names `fuzz`, so a sheet
+# that carries both actually animates instead of resolving to no keyframes.
+# Keep the low-opacity end at 0.2: `* { animation: ... }` from 0 made the
+# whole page invisible for one second out of every two on the screenshot.
+<keyframes> = @keyframes fuzz { from { opacity: 0.2; transform: translateX(0) } to { opacity: 1; transform: translateX(10px) } }
+<keyframes> = @keyframes fuzz { 0% { background-color: red } 50% { transform: rotate(45deg) } 100% { background-color: blue; opacity: 0.5 } }
 
 <rule> = <selector> { <declarations> }
 <rule> = <selector> { <declarations> }

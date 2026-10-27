@@ -9,17 +9,26 @@
 #     base, title, head, html, body, plaintext, xmp, noembed, noframes,
 #     noscript, img/audio/video/source/track with a src.
 #   An element without src loads nothing; media elements are here only so
-#   HTMLMediaElement receivers exist.
+#   HTMLMediaElement receivers exist. A bare iframe has no src (about:blank,
+#   no fetch and no navigation) and is here only so HTMLIFrameElement
+#   receivers exist.
+#
+#   The MathML root used to branch near the recursion limit and fill the whole
+#   body with mrow/mfrac: with uniform <element> weights the page was 90%
+#   MathML by tag count. Two knobs keep it readable - the <element> weights
+#   below (HTML 0.8 / SVG 0.1 / MathML 0.05 / text 0.05) and the leaf weights
+#   in the <mathmlelement> block, which make a math tree terminate. The body
+#   still carries every receiver type; it just no longer reads as a formula.
 
 !include common.txt
 
 <bodyelements> = <newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline>
 <bodyelements> = <newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline><element><newline>
 
-<element> = <htmlelement>
-<element> = <svgroot>
-<element> = <mathmlroot>
-<element> = <textsafe>
+<element p=0.8> = <htmlelement>
+<element p=0.1> = <svgroot>
+<element p=0.05> = <mathmlroot>
+<element p=0.05> = <textsafe>
 
 <innerelements nonrecursive=true p=0.45> = <textsafe>
 <innerelements nonrecursive=true p=0.2> = <space>
@@ -140,6 +149,7 @@
 <htmlelement> = <lt>h6 <attributes><gt><innerelements><lt>/h6<gt>
 <htmlelement> = <lt>header <attributes><gt><innerelements><lt>/header<gt>
 <htmlelement> = <lt>i <attributes><gt><innerelements><lt>/i<gt>
+<htmlelement p=0.05> = <lt>iframe <attributes><gt><lt>/iframe<gt>
 <htmlelement> = <lt>ins <attributes><gt><innerelements><lt>/ins<gt>
 <htmlelement> = <lt>kbd <attributes><gt><innerelements><lt>/kbd<gt>
 <htmlelement> = <lt>label <attributes><gt><innerelements><lt>/label<gt>
@@ -230,6 +240,10 @@
 <mathmlelements> = <newline><mathmlelement><newline>
 <mathmlelements> = <newline><mathmlelement><newline><mathmlelement><newline>
 
+# Leaves carry an explicit p so a math tree terminates instead of branching
+# near the recursion limit (E[children] was ~1.05, so a single <math> root
+# could fill the whole body with mrow/mfrac): six leaves at 0.1 each leave
+# 0.4 of the picks for the fourteen recursive tags, E[children] = 0.6.
 <mathmlelement> = <lt>mrow <attributes><gt><mathmlelements><lt>/mrow<gt>
 <mathmlelement> = <lt>mfrac <attributes><gt><mathmlelements><lt>/mfrac<gt>
 <mathmlelement> = <lt>msqrt <attributes><gt><mathmlelements><lt>/msqrt<gt>
@@ -243,10 +257,10 @@
 <mathmlelement> = <lt>mtable <attributes><gt><mathmlelements><lt>/mtable<gt>
 <mathmlelement> = <lt>mtr <attributes><gt><mathmlelements><lt>/mtr<gt>
 <mathmlelement> = <lt>mtd <attributes><gt><mathmlelements><lt>/mtd<gt>
-<mathmlelement> = <lt>mspace <attributes><gt>
-<mathmlelement> = <lt>mi <attributes><gt><textsafe><lt>/mi<gt>
-<mathmlelement> = <lt>mn <attributes><gt><textsafe><lt>/mn<gt>
-<mathmlelement> = <lt>mo <attributes><gt><textsafe><lt>/mo<gt>
-<mathmlelement> = <lt>mtext <attributes><gt><textsafe><lt>/mtext<gt>
+<mathmlelement p=0.1> = <lt>mspace <attributes><gt>
+<mathmlelement p=0.1> = <lt>mi <attributes><gt><textsafe><lt>/mi<gt>
+<mathmlelement p=0.1> = <lt>mn <attributes><gt><textsafe><lt>/mn<gt>
+<mathmlelement p=0.1> = <lt>mo <attributes><gt><textsafe><lt>/mo<gt>
+<mathmlelement p=0.1> = <lt>mtext <attributes><gt><textsafe><lt>/mtext<gt>
 <mathmlelement> = <lt>semantics <attributes><gt><mathmlelements><lt>/semantics<gt>
-<mathmlelement> = <lt>annotation <attributes><gt><textsafe><lt>/annotation<gt>
+<mathmlelement p=0.1> = <lt>annotation <attributes><gt><textsafe><lt>/annotation<gt>
