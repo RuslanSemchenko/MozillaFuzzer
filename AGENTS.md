@@ -120,7 +120,7 @@ confirms) are what produce a claim.
 
 ## Current state (last verified run)
 
-Every figure below is from the command written next to it, run on 2026-10-26 with the
+Every figure below is from the command written next to it, run on 2026-10-27 with the
 rules files in this tree. Re-run everything - they go stale the moment a rules file changes.
 
 `python3 tools/extract_idl.py --source /home/ruslan/firefox` -> 847 files, 2362 types
@@ -160,23 +160,25 @@ emitted in reachable rule text; the rest are the refused interfaces above or mem
 refuses by name in `DENY_MEMBERS` with the reason next to them (e.g. `GPUAdapter.requestDevice`,
 because the template already consumed that adapter; the five `FuzzingFunctions` members above).
 
-`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9793 rules - the count moves a
+`python3 tools/check_rules.py --samples 25` exits 0 (6 grammars, 9795 rules - the count moves a
 few dozen per run because the WebGPU grammar is rebuilt from a random 10-shader sample, so never
 treat one figure as a delta against another). `python3 tools/check_wgsl.py` exits 0 (13 modules,
 0 compile or pipeline failures - `domato-example.wgsl` reads `skipped (no vertex stage)` because
 it is compute-only, which is the corpus being honest rather than a gap).
 
 `MOZ_HEADLESS=1 python3 tools/scan_cases.py --samples 16 --case-timeout 45` reports 16/16 cases in
-45.6 s with `29 row(s), 19 group(s); 3 systematic; creators 0 | roots 19 | cascades 0 |
+45.7 s with `27 row(s), 13 group(s); 3 systematic; creators 0 | roots 13 | cascades 0 |
 async/no-line 0`. The systematic groups are the accepted classes below: several
 `<RTCDataChannel>.send()` shapes (a channel from `createDataChannel` stays "connecting" until a
 real peer negotiates SCTP, and send() throws InvalidStateError unless readyState is "open") and
 `<TimeRanges>.start/end` IndexSizeError on an empty range. A 64-case run of the same command on
-the final tree reported 64/64 in 241 s with `113 row(s), 52 group(s)` and no stalls; its nine
-systematic groups were the same two classes plus two single-shape rows:
-`ConvolverNode.buffer = <AudioBuffer>` (7/7 - the generated buffer's 44100 Hz does not match the
-context's 48000 Hz) and `document.appendChild(<element>)` (2/2 - a Document may hold one Element).
-The
+the final tree reported 64/64 in 252 s with `97 row(s), 35 group(s)` and no stalls; its six
+systematic groups were the same two classes plus the deliberate
+`window.reportError(new Error("fuzz"))` line in `stateful.txt` and
+`document.appendChild(<element>)` (2/2 - a Document may hold one Element). The
+`ConvolverNode.buffer = <AudioBuffer>` row (7/7 in the previous run - a pooled 44100 Hz buffer
+against a 48000 Hz context) is gone after the statement override that derives the buffer from the
+node's own context. The
 other rows are validation on random
 receivers or arguments (appendChild of an Attribute or an ancestor, `insertDTMF` on an
 unnegotiated sender, a pooled IDBRequest read before it finishes, `SVGMatrix.inverse` on a
