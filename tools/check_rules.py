@@ -206,7 +206,7 @@ def js_hazards(html: str) -> list[str]:
         (r'""[A-Za-z0-9]', "doubled quotes around a value tag"),
     )
     problems = []
-    for script in re.finditer(r"<script[^>]*>(.*?)</script>", html, re.I | re.S):
+    for script in re.finditer(r"<script[^>]*>(.*?)</script\s*>", html, re.I | re.S):
         body = script.group(1)
         code = strip_js_literals(body)
         for pattern, label in code_hazards:
