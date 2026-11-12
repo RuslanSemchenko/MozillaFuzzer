@@ -27,6 +27,14 @@ if [[ $# -lt 1 ]]; then
     exit 1
 fi
 if [[ -z $BROWSER ]]; then
+    SRC="${FIREFOX_SRC:-$HOME/firefox}"
+    for cand in "$SRC"/obj-*/dist/bin/firefox; do
+        [[ -x $cand ]] || continue
+        BROWSER="$cand"
+        break
+    done
+fi
+if [[ -z $BROWSER ]]; then
     echo "Firefox binary not set. Set FIREFOX_BIN or copy .env.example -> .env" >&2
     exit 1
 fi

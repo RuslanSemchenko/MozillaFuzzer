@@ -32,7 +32,7 @@ if [[ -f "$ROOT/.env" ]]; then
     set +a
 fi
 
-RUNTIME_DEFAULT=360000
+RUNTIME_DEFAULT=36000
 
 pos=()
 extra=()
