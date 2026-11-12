@@ -128,6 +128,53 @@ make check-rules
 make wgsl        # if WGSL changed
 ```
 
+## Model Context Protocol (MCP) Server
+
+MozillaFuzzer provides a built-in MCP server (`tools/mcp_server.py`) adhering to the [Model Context Protocol](https://modelcontextprotocol.io/) (JSON-RPC 2.0 over `stdio`). This allows AI assistants (Cursor, Claude Desktop, Antigravity, VS Code) to directly interact with the fuzzing pipeline:
+
+```bash
+make mcp        # Start the MCP server
+make mcp-test   # Run JSON-RPC protocol self-tests
+```
+
+### Configuration
+
+- **Cursor**: Automatically configured via [`.cursor/mcp.json`](.cursor/mcp.json).
+- **Claude Desktop / Claude Code**: Point to `tools/mcp_server.py`:
+  ```json
+  {
+    "mcpServers": {
+      "mozillafuzzer": {
+        "command": "python3",
+        "args": ["/path/to/MozillaFuzzer/tools/mcp_server.py"]
+      }
+    }
+  }
+  ```
+
+### Exposed Capabilities
+
+- **Tools**:
+  - `doctor`: Run environment diagnostics (`doctor.py`).
+  - `check_rules`: Parse grammars, resolve symbols, generate samples, and check for code hazards.
+  - `generate_case`: Generate a full testcase and return HTML preview or save to disk.
+  - `check_wgsl`: Validate WGSL shaders via WebGPU pipeline compiler.
+  - `audit_rules`: Audit Domato rules against Firefox WebIDL inventory and `StaticPrefList.yaml`.
+  - `get_queue`: Search and filter the rules work queue (`QUEUE.md`).
+  - `show_idl`: Inspect WebIDL interfaces and signatures from `dom/webidl`.
+  - `wpt_grep`: Search Web Platform Tests for real-world JS usage of an API.
+  - `check_reads`: Evaluate JS expressions inside Firefox content process.
+  - `scan_cases`: Run generated cases in headless Firefox to catch syntax and runtime errors.
+  - `fuzz_status`: Inspect recent crashes and reproducers in `results/`.
+- **Resources**:
+  - `fuzzer://queue`: Read current work queue (`QUEUE.md`).
+  - `fuzzer://agents`: Read rule authoring guidelines (`AGENTS.md`).
+  - `fuzzer://coverage`: Inspect detailed coverage JSON (`coverage.json`).
+  - `fuzzer://readme`: Read project documentation.
+- **Prompts**:
+  - `implement-queue-item`: Guided workflow to implement rules for a missing interface.
+  - `diagnose-scan-failure`: Guided workflow to analyze and triage runtime errors from `scan_cases`.
+
 ## Findings
 
 - **`SpeechRecognition.start()`** (Nightly / diagnostic-assert builds): installs

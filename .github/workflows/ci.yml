@@ -23,3 +23,6 @@ jobs:
 
       - name: Parse, resolve, generate (25 samples)
         run: python tools/check_rules.py --samples 25
+
+      - name: Validate MCP server protocol
+        run: python tools/mcp_server.py --test

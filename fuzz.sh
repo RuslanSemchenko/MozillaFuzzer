@@ -16,7 +16,7 @@
 # --relaunch, --time-limit) are forwarded to Grizzly untouched.
 #
 # Examples:
-#   ./fuzz.sh                                     # auto-detected build, 360000s
+#   ./fuzz.sh                                     # auto-detected build, 36000s
 #   ./fuzz.sh headless                            # no window, crashes still hunted
 #   ./fuzz.sh "" 36000 headless                   # 10h headless run (browser slot empty)
 #   ./fuzz.sh --stress                            # run with Chaos Mode + GC Zeal
@@ -109,7 +109,11 @@ RUNTIME="${pos[1]:-$RUNTIME_DEFAULT}"
 [[ -z $display_mode ]] || extra+=(--display "$display_mode")
 
 OUT="$ROOT/results"
-PYTHON="${PYTHON_BIN:-python3}"
+if [[ -z "${PYTHON_BIN:-}" && -x "$ROOT/.venv/bin/python" ]]; then
+    PYTHON="$ROOT/.venv/bin/python"
+else
+    PYTHON="${PYTHON_BIN:-python3}"
+fi
 mkdir -p "$OUT"
 
 echo "=================================================="

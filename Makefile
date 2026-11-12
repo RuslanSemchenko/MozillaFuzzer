@@ -15,7 +15,7 @@ FIREFOX_BIN ?= $(shell find "$(FIREFOX_SRC)" -name firefox -path "*/dist/bin/fir
 export FIREFOX_SRC
 export FIREFOX_BIN
 
-.PHONY: help doctor env audit probe check-rules wgsl scan extract readme clean
+.PHONY: help doctor env audit probe check-rules wgsl scan extract mcp mcp-test readme clean
 
 help:
 	@echo "grz_domato targets:"
@@ -27,6 +27,8 @@ help:
 	@echo "  make check-rules   - Run check_rules.py --samples 25"
 	@echo "  make wgsl          - Run check_wgsl.py"
 	@echo "  make scan          - Run scan_cases.py --samples 16 --case-timeout 45"
+	@echo "  make mcp           - Start Model Context Protocol (MCP) server for Cursor/Claude"
+	@echo "  make mcp-test      - Run MCP server self-test"
 	@echo "  make readme        - Open README.md"
 	@echo ""
 	@echo "Override: make audit FIREFOX_SRC=/path/to/firefox"
@@ -59,6 +61,12 @@ wgsl:
 scan:
 	$(if $(FIREFOX_BIN),,$(error FIREFOX_BIN not set or not found. Set FIREFOX_BIN=... or .env))
 	MOZ_HEADLESS=1 $(PY) tools/scan_cases.py --samples 16 --case-timeout 45 $(if $(FIREFOX_BIN),--firefox $(FIREFOX_BIN),)
+
+mcp:
+	$(PY) tools/mcp_server.py
+
+mcp-test:
+	$(PY) tools/mcp_server.py --test
 
 clean:
 	rm -rf results/audit/* results/scan/* results/probe/* 2>/dev/null || true

@@ -20,7 +20,11 @@ if [[ -f "$ROOT/.env" ]]; then
 fi
 
 BROWSER="${FIREFOX_BIN:-}"
-PYTHON="${PYTHON_BIN:-python3}"
+if [[ -z "${PYTHON_BIN:-}" && -x "$ROOT/.venv/bin/python" ]]; then
+    PYTHON="$ROOT/.venv/bin/python"
+else
+    PYTHON="${PYTHON_BIN:-python3}"
+fi
 
 if [[ $# -lt 1 ]]; then
     echo "Usage: $0 <testcase-or-dir> [extra-grizzly-flags...]"
@@ -35,7 +39,10 @@ if [[ -z $BROWSER ]]; then
     done
 fi
 if [[ -z $BROWSER ]]; then
-    echo "Firefox binary not set. Set FIREFOX_BIN or copy .env.example -> .env" >&2
+    echo "Firefox binary not set. Set FIREFOX_BIN or build under \$FIREFOX_SRC/obj-*/dist/bin/firefox" >&2
+    exit 1
+elif [[ ! -x $BROWSER ]]; then
+    echo "Not an executable: $BROWSER" >&2
     exit 1
 fi
 
