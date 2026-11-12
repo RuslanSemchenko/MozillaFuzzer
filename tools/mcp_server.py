@@ -806,6 +806,18 @@ def run_self_test() -> int:
             "method": "tools/call",
             "params": {"name": "get_queue", "arguments": {"top": 3}},
         },
+        {
+            "jsonrpc": "2.0",
+            "id": 9,
+            "method": "resources/read",
+            "params": {"uri": "fuzzer://agents"},
+        },
+        {
+            "jsonrpc": "2.0",
+            "id": 10,
+            "method": "prompts/get",
+            "params": {"name": "implement-queue-item", "arguments": {"interface_name": "TestInterface"}},
+        },
     ]
 
     for req in requests:
@@ -816,8 +828,8 @@ def run_self_test() -> int:
     server.run()
 
     responses = [json.loads(line) for line in test_out.getvalue().splitlines() if line.strip()]
-    print(f"Received {len(responses)} JSON-RPC responses (expected 8 - notifications have no response).")
-    assert len(responses) == 8, f"Expected 8 responses, got {len(responses)}"
+    print(f"Received {len(responses)} JSON-RPC responses (expected 10 - notifications have no response).")
+    assert len(responses) == 10, f"Expected 10 responses, got {len(responses)}"
 
     # Check initialize
     init_res = responses[0]
@@ -863,8 +875,23 @@ def run_self_test() -> int:
     # Check get_queue call
     q_res = responses[7]
     assert q_res["id"] == 8
-    assert "Queue Summary" in q_res["result"]["content"][0]["text"]
+    assert not q_res["result"]["isError"]
+    assert "queue" in q_res["result"]["content"][0]["text"].lower()
     print("  [OK] tools/call: get_queue")
+
+    # Check resources/read call
+    r_res = responses[8]
+    assert r_res["id"] == 9
+    assert not r_res.get("error")
+    assert "Domato" in r_res["result"]["contents"][0]["text"]
+    print("  [OK] resources/read: fuzzer://agents")
+
+    # Check prompts/get call
+    p_res = responses[9]
+    assert p_res["id"] == 10
+    assert not p_res.get("error")
+    assert "TestInterface" in p_res["result"]["messages"][0]["content"]["text"]
+    print("  [OK] prompts/get: implement-queue-item")
 
     print("\nAll MCP server self-tests PASSED successfully!")
     return 0
